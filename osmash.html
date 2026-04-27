@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>O'SMASH POS</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+html,body,#root{height:100%;overflow:hidden;}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#FFF8E8;}
+::-webkit-scrollbar{display:none;}
+input,textarea,select,button{font-family:inherit;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+
+const PRINT_SERVER = 'http://192.168.1.28:3000';
+const PIN_CODE = '1234';
+
+const B = {
+  blue:'#3B5DAF',blueD:'#2C4A8A',blueL:'#5B7FD0',
+  cream:'#FBF0C8',lavL:'#E0C8EE',lavD:'#A070C0',lav:'#C9A0DC',
+  pink:'#E84B8A',pinkD:'#C93570',
+  bg:'#FFF8E8',card:'#FFFFFF',side:'#FEF5D8',
+  txt:'#2A2040',txtL:'#7A7090',txtM:'#B0A8C0',
+  brd:'#E8DCC0',brdL:'#F0E8D0',
+  ok:'#34C770',no:'#E84B5A',
+};
+
+const CATS = [
+  {id:'burger',    name:'Burgers',    icon:'🍔', color:B.blue},
+  {id:'formule',   name:'Formules',   icon:'📦', color:B.lavD},
+  {id:'riz',       name:'Riz Crousty',icon:'🍚', color:'#E08030'},
+  {id:'sides',     name:'Sides',      icon:'🥡', color:'#D4A030'},
+  {id:'loaded',    name:'Loaded',     icon:'🔥', color:B.pinkD},
+  {id:'desserts',  name:'Desserts',   icon:'🍰', color:B.lav},
+  {id:'boissons',  name:'Boissons',   icon:'🥤', color:B.blueL},
+  {id:'milkshake', name:'Milkshakes', icon:'🥛', color:B.pink},
+  {id:'crepes',    name:'Crêpes',     icon:'🥞', color:'#D4A030'},
+  {id:'supplements',name:'Supp.',     icon:'➕', color:B.ok},
+];
+
+const BURGERS = [
+  {id:'b-orig', name:"O'Smash Original", price:6.5,  tag:'SIMPLE',       desc:'Double steak smashé, cheddar, oignon crispy, cornichon, sauce moutarde/ketchup/biggy'},
+  {id:'b-chik', name:"O'Smash Chicken",  price:6.5,  tag:'SIMPLE',       desc:'Double crispy chicken, cheddar, oignon, salade, tomate, sauce chicken'},
+  {id:'b-veg',  name:"O'Smash Veggy",    price:6.5,  tag:'SIMPLE 🌿',    desc:'Steak veggy smashé, cheddar, oignon, salade, tomate, cornichon, sauce smoke'},
+  {id:'b-smoke',name:"O'Smash Smoke",    price:8.5,  tag:'SIGNATURE',    desc:'Double steak, cheddar, oignon, salade, tomate, cornichon, bacon, sauce smoke'},
+  {id:'b-honey',name:"O'Smash Honey",    price:9.5,  tag:'SIGNATURE 🍯', desc:'Double steak, chèvre fondu, oignon crispy, salade, tomate, miel, sauce honey'},
+  {id:'b-fren', name:"O'Smash Frenchy",  price:9.9,  tag:'SIGNATURE 🧀', desc:'Double steak, cheddar, oignon crispy, raclette fondu, salade, tomate, sauce smoke'},
+  {id:'b-brit', name:"O'Smash British",  price:9.9,  tag:'SIGNATURE 🥚', desc:'Double steak, cheddar, oignon, salade, tomate, bacon, œuf, sauce smoke'},
+  {id:'b-spicy',name:"O'Smash Spicy",    price:9.5,  tag:'SIGNATURE 🌶️',desc:'Double steak, cheddar, salade, tomate, oignon crispy, bacon, jalapeños, sauce spicy', hasVersion:true},
+  {id:'b-truf', name:"O'Smash Truffe",   price:10.5, tag:'SIGNATURE 🍄', desc:'Double steak, cheddar, oignon crispy, raclette fondu, bacon, parmesan, sauce truffe', hasVersion:true},
+  {id:'b-wrap', name:'Wrap Chicken',     price:6.5,  tag:'WRAP 🌯',      desc:'Tortillas, crispy chicken, cheddar, salade, tomate, oignon, sauce au choix'},
+  {id:'b-wrapb',name:'Wrap BBQ',         price:6.5,  tag:'WRAP 🌯',      desc:'Tortillas, crispy chicken, cheddar, oignon crispy, salade, sauce BBQ'},
+];
+
+const FORMULES = [
+  {id:'f-etud', name:'Menu Étudiant',  price:8.0,  desc:'Smash simple OU Wrap OU Riz + frite + boisson', needsDrink:true, badge:'🎓'},
+  {id:'f-duo-s',name:'Duo Simple',     price:14.5, desc:'2 smash simple + frite + boisson', isDuo:true, duoType:'simple', badge:'👫'},
+  {id:'f-duo-g',name:'Duo Signature',  price:16.9, desc:'2 smash signature + frites + boisson', isDuo:true, duoType:'signature', badge:'👫⭐'},
+  {id:'f-menu', name:'Menu +3€',       price:3.0,  desc:'Frite + boisson sur tout burger', needsDrink:true, badge:'📦'},
+];
+
+const RIZ_ITEMS = [
+  {id:'r-riz', name:'Riz Crousty',           price:9.0,  desc:'Riz, sauce thaï, oignon crispy, persil, crispy chicken', badge:'🍚'},
+  {id:'r-rizb',name:'Riz Crousty + Boisson', price:10.0, needsDrink:true, badge:'🍚🥤'},
+];
+
+const SIDES_ITEMS = [
+  {id:'si-frit',name:'Frites Twister', price:3.0},
+  {id:'si-chil',name:'Chili Cheese x4',price:3.5},
+  {id:'si-nugg',name:'Nuggets x4',     price:3.5},
+  {id:'si-tend',name:'Tenders x2',     price:4.0},
+];
+
+const LOADED_ITEMS = [
+  {id:'lo-wing',name:'Wings x5 BBQ',     price:6.9, badge:'🍗'},
+  {id:'lo-cana',name:'Canadian Cheddar', price:7.9, badge:'🇨🇦'},
+  {id:'lo-spic',name:'Canadian Spicy',   price:7.9, badge:'🌶️'},
+];
+
+const DESSERTS_ITEMS = [
+  {id:'de-ore',name:'Tiramisu Oreo',              price:3.5},
+  {id:'de-spe',name:'Tiramisu Spéculoos',          price:3.5},
+  {id:'de-coo',name:'Tiramisu Cookies',            price:3.5},
+  {id:'de-gal',name:'Tiramisu Galettes Caramel',   price:3.5},
+  {id:'de-fra',name:'Tiramisu Fraises',            price:4.0, badge:'🍓'},
+  {id:'de-man',name:'Tiramisu Mangue Passion Coco',price:4.0, badge:'🥭'},
+  {id:'de-cb1',name:'Cakebowl Fraises Choco Blanc',price:9.9, badge:'🍰'},
+  {id:'de-cb2',name:'Cakebowl Framboise Pistache', price:9.9, badge:'🍰'},
+  {id:'de-cb3',name:'Cakebowl Mangue Passion Coco',price:9.9, badge:'🍰'},
+];
+
+const DRINKS = [
+  {id:'dr-coca',name:'Coca-Cola 33cl',            price:2.0},
+  {id:'dr-zero',name:'Coca Zero 33cl',            price:2.0},
+  {id:'dr-cher',name:'Coca Cherry 33cl',          price:2.0},
+  {id:'dr-fex', name:'Fanta Exotique 33cl',       price:2.0},
+  {id:'dr-for', name:'Fanta Orange 33cl',         price:2.0},
+  {id:'dr-itp', name:'Ice Tea Peach 33cl',        price:2.0},
+  {id:'dr-itm', name:'Ice Tea Menthe 33cl',       price:2.0},
+  {id:'dr-itr', name:'Ice Tea Framboise 33cl',    price:2.0},
+  {id:'dr-opc', name:'Oasis Pomme Cassis Framb.', price:2.0},
+  {id:'dr-off', name:'Oasis Fraise Framb.',       price:2.0},
+  {id:'dr-crp', name:'Cristalline Pêche 50cl',    price:2.0},
+  {id:'dr-crf', name:'Cristalline Fraise 50cl',   price:2.0},
+  {id:'dr-eau', name:'Eau 50cl',                  price:2.0},
+];
+
+const MILKSHAKES = [
+  {id:'mk-van',name:'Milkshake Vanille',    price:5.0},
+  {id:'mk-nut',name:'Milkshake Nutella',    price:5.5},
+  {id:'mk-spe',name:'Milkshake Spéculoos',  price:5.5},
+  {id:'mk-pis',name:'Milkshake Pistache',   price:5.5},
+  {id:'mk-elm',name:'Milkshake El Mordejeb',price:5.5},
+  {id:'mk-fra',name:'Milkshake Fraise',     price:5.5},
+  {id:'mk-car',name:'Milkshake Caramel',    price:5.5},
+];
+
+const CREPES_ITEMS = [
+  {id:'cr-van',name:'Crêpe Vanille',    price:5.0},
+  {id:'cr-nut',name:'Crêpe Nutella',    price:5.5},
+  {id:'cr-spe',name:'Crêpe Spéculoos',  price:5.5},
+  {id:'cr-pis',name:'Crêpe Pistache',   price:5.5},
+  {id:'cr-elm',name:'Crêpe El Mordejeb',price:5.5},
+  {id:'cr-fra',name:'Crêpe Fraise',     price:5.5},
+  {id:'cr-car',name:'Crêpe Caramel',    price:5.5},
+];
+
+const SUPPS = [
+  {id:'su-che',name:'Supp. Sauce Cheddar', price:1.0},
+  {id:'su-oig',name:'Supp. Oignon Crispy', price:0.5},
+  {id:'su-oeu',name:'Supp. Œuf',           price:1.0},
+  {id:'su-bac',name:'Supp. Bacon',         price:1.0},
+  {id:'su-chi',name:'Supp. Crispy Chicken',price:2.0},
+  {id:'su-ste',name:'Supp. Steak Smashé',  price:2.5},
+];
+
+const PRODUCT_MAP = {
+  burger:BURGERS,formule:FORMULES,riz:RIZ_ITEMS,sides:SIDES_ITEMS,
+  loaded:LOADED_ITEMS,desserts:DESSERTS_ITEMS,boissons:DRINKS,
+  milkshake:MILKSHAKES,crepes:CREPES_ITEMS,supplements:SUPPS,
+};
+
+const CUST_B = {
+  retraits:['Sans salade','Sans tomate','Sans oignon','Sans cornichon','Sans sauce','Sans fromage','Sans bacon'],
+  supps:[{l:'Supp. Cheddar',p:1},{l:'Supp. Oignon Crispy',p:0.5},{l:'Supp. Œuf',p:1},{l:'Supp. Bacon',p:1},{l:'Supp. Crispy Chicken',p:2},{l:'Supp. Steak Smashé',p:2.5}],
+  sauces:['Algérienne','Samouraï','Biggy','Smoke','Ketchup','Mayonnaise','BBQ','Blanche','Honey','Spicy','Chicken','Truffe'],
+  versions:['Version Bœuf','Version Chicken'],
+};
+
+const CUST_R = {
+  types:['Sucré','Spicy'],
+  retraits:['Sans sauce chili thaï','Sans oignons crispy','Sans persil','Sans sauce blanche'],
+};
+
+const TOPPINGS = [{l:'Oreo',p:0.5},{l:'Cacahuète',p:0.5},{l:'Éclats de pistache',p:0.5}];
+
+const uid = () => Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const fp  = p => `${p.toFixed(2).replace('.',',')}€`;
+const ft  = d => new Date(d).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+const fd  = d => new Date(d).toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit',year:'numeric'});
+const gon = () => { const n=new Date(); return `${String(n.getHours()).padStart(2,'0')}${String(n.getMinutes()).padStart(2,'0')}-${Math.floor(Math.random()*900+100)}`; };
+
+const LS = {
+  get:(k,fb)=>{ try{const v=localStorage.getItem(k);return v?JSON.parse(v):fb;}catch{return fb;} },
+  set:(k,d)=>{ try{localStorage.setItem(k,JSON.stringify(d));}catch(e){} },
+};
+
+async function sendPrint(order) {
+  try {
+    const r = await fetch(`${PRINT_SERVER}/print`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(order)});
+    return await r.json();
+  } catch(e) { return {success:false}; }
+}
+
+const btnS = (bg,col,ex={}) => ({padding:'12px 16px',borderRadius:12,border:'none',background:bg,color:col,fontSize:14,fontWeight:700,cursor:'pointer',fontFamily:'inherit',...ex});
+const inpS = (ex={}) => ({width:'100%',padding:10,borderRadius:10,background:B.bg,border:`1px solid ${B.brd}`,color:B.txt,fontSize:14,outline:'none',fontFamily:'inherit',...ex});
+
+function Modal({children,onClose}){
+  return <div style={{position:'fixed',inset:0,zIndex:1000,display:'flex',alignItems:'center',justifyContent:'center'}}>
+    <div onClick={onClose} style={{position:'absolute',inset:0,background:'rgba(42,32,64,0.55)',backdropFilter:'blur(4px)'}}/>
+    {children}
+  </div>;
+}
+
+function Chip({label,active,onClick,clr=B.pink}){
+  return <button onClick={onClick} style={{padding:'9px 11px',borderRadius:9,fontSize:12,fontWeight:active?700:500,cursor:'pointer',border:active?`2px solid ${clr}`:`1.5px solid ${B.brdL}`,background:active?`${clr}12`:B.card,color:active?clr:B.txtL,fontFamily:'inherit',whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{label}</button>;
+}
+
+function SecL({icon,title,color}){
+  return <div style={{display:'flex',alignItems:'center',gap:6,marginBottom:6,marginTop:2}}>
+    <span style={{color,fontSize:13,fontWeight:800}}>{icon}</span>
+    <span style={{fontSize:10,fontWeight:800,color,letterSpacing:1.2,textTransform:'uppercase'}}>{title}</span>
+    <div style={{flex:1,height:1,background:B.brd}}/>
+  </div>;
+}
+
+function Logo({size=20}){
+  return <div style={{display:'flex',alignItems:'center',gap:6}}>
+    <div style={{width:size+6,height:size+6,borderRadius:'50%',background:`linear-gradient(135deg,${B.blue},${B.blueD})`,border:`2px solid ${B.cream}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:size*0.5,flexShrink:0}}>🍔</div>
+    <div>
+      <div style={{fontSize:size,fontWeight:900,color:B.cream,fontStyle:'italic',lineHeight:1}}>o'Smash</div>
+      <div style={{fontSize:size*0.32,color:B.lavL,fontWeight:600,opacity:0.8}}>SMASH BURGER · CROUSTY BOX</div>
+    </div>
+  </div>;
+}
+
+function PinModal({onOk,onClose}){
+  const [pin,setPin]=React.useState('');
+  const [err,setErr]=React.useState(false);
+  const go=()=>{if(pin===PIN_CODE)onOk();else{setErr(true);setPin('');setTimeout(()=>setErr(false),1200);}};
+  const nums=['1','2','3','4','5','6','7','8','9','C','0','✓'];
+  return <Modal onClose={onClose}>
+    <div style={{position:'relative',background:B.card,borderRadius:22,width:'min(85vw,320px)',padding:24,border:`2px solid ${B.brd}`,textAlign:'center'}}>
+      <Logo size={18}/><div style={{fontSize:17,fontWeight:800,color:B.txt,marginTop:12,marginBottom:4}}>🔒 Code PIN</div>
+      <div style={{display:'flex',justifyContent:'center',gap:8,marginBottom:14}}>
+        {[0,1,2,3].map(i=><div key={i} style={{width:38,height:42,borderRadius:10,border:`2px solid ${err?B.no:pin.length>i?B.blue:B.brd}`,display:'flex',alignItems:'center',justifyContent:'center',fontSize:20,fontWeight:800,color:B.blue,background:pin.length>i?`${B.blue}10`:B.bg}}>{pin.length>i?'●':''}</div>)}
+      </div>
+      {err&&<div style={{color:B.no,fontSize:12,fontWeight:700,marginBottom:6}}>Code incorrect</div>}
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6,maxWidth:220,margin:'0 auto'}}>
+        {nums.map((n,i)=><button key={i} onClick={()=>{if(n==='C')setPin('');else if(n==='✓')go();else if(pin.length<4)setPin(p=>p+n);}} style={{height:46,borderRadius:10,border:`1px solid ${B.brd}`,background:n==='✓'?B.ok:n==='C'?`${B.no}15`:B.bg,color:n==='✓'?'#fff':n==='C'?B.no:B.txt,fontSize:n==='✓'||n==='C'?14:18,fontWeight:700,cursor:'pointer'}}>{n}</button>)}
+      </div>
+    </div>
+  </Modal>;
+}
+
+function BurgerCust({product,initial,onOk,onClose}){
+  const def={retraits:[],supplements:[],sauces:[],version:'',note:''};
+  const [s,setS]=React.useState(initial?{...def,...initial}:def);
+  const tog=(t,l)=>setS(p=>{const a=p[t];return{...p,[t]:a.includes(l)?a.filter(x=>x!==l):[...a,l]};});
+  const ext=s.supplements.reduce((sum,l)=>{const f=CUST_B.supps.find(x=>x.l===l);return sum+(f?f.p:0);},0);
+  return <Modal onClose={onClose}>
+    <div style={{position:'relative',background:B.card,borderRadius:20,width:'min(94vw,640px)',maxHeight:'88vh',overflow:'hidden',display:'flex',flexDirection:'column',border:`2px solid ${B.brd}`}}>
+      <div style={{padding:'14px 18px',borderBottom:`1px solid ${B.brdL}`,display:'flex',justifyContent:'space-between',alignItems:'center',background:`linear-gradient(135deg,${B.cream},${B.lavL})`}}>
+        <div><div style={{fontSize:17,fontWeight:800,color:B.txt}}>{product.name}</div><div style={{fontSize:11,color:B.txtL}}>Personnalisation</div></div>
+        <div style={{background:B.pink,color:'#fff',fontWeight:800,padding:'5px 14px',borderRadius:30,fontSize:14}}>{fp(product.price+ext)}</div>
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:'12px 18px',WebkitOverflowScrolling:'touch'}}>
+        <SecL icon="✕" title="RETRAITS" color={B.no}/>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:5,marginBottom:12}}>
+          {CUST_B.retraits.map((r,i)=><Chip key={i} label={r} active={s.retraits.includes(r)} onClick={()=>tog('retraits',r)} clr={B.no}/>)}
+        </div>
+        <SecL icon="+" title="SUPPLÉMENTS" color={B.ok}/>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:5,marginBottom:12}}>
+          {CUST_B.supps.map((x,i)=><Chip key={i} label={`${x.l} (+${fp(x.p)})`} active={s.supplements.includes(x.l)} onClick={()=>tog('supplements',x.l)} clr={B.ok}/>)}
+        </div>
+        <SecL icon="●" title="SAUCES" color={B.pink}/>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:5,marginBottom:12}}>
+          {CUST_B.sauces.map((x,i)=><Chip key={i} label={x} active={s.sauces.includes(x)} onClick={()=>tog('sauces',x)} clr={B.pink}/>)}
+        </div>
+        {product.hasVersion&&<><SecL icon="▸" title="VERSION" color={B.blue}/>
+          <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:5,marginBottom:12}}>
+            {CUST_B.versions.map((v,i)=><Chip key={i} label={v} active={s.version===v} onClick={()=>setS(p=>({...p,version:p.version===v?'':v}))} clr={B.blue}/>)}
+          </div></>}
+        <SecL icon="✎" title="REMARQUE" color={B.lavD}/>
+        <textarea value={s.note} onChange={e=>setS(p=>({...p,note:e.target.value}))} placeholder="Remarque…" style={{...inpS(),minHeight:40,resize:'vertical'}}/>
+      </div>
+      <div style={{padding:'12px 18px',borderTop:`1px solid ${B.brdL}`,display:'flex',gap:10,background:B.bg}}>
+        <button onClick={onClose} style={btnS('transparent',B.txtL,{flex:1,border:`1px solid ${B.brd}`})}>Annuler</button>
+        <button onClick={()=>onOk(s,ext)} style={btnS(B.pink,'#fff',{flex:2})}>Confirmer</button>
+      </div>
+    </div>
+  </Modal>;
+}
+
+function RizCust({product,initial,onOk,onClose}){
+  const def={type:'',retraits:[],note:''};
+  const [s,setS]=React.useState(initial?{...def,...initial}:def);
+  const togR=l=>setS(p=>({...p,retraits:p.retraits.includes(l)?p.retraits.filter(x=>x!==l):[...p.retraits,l]}));
+  return <Modal onClose={onClose}>
+    <div style={{position:'relative',background:B.card,borderRadius:20,width:'min(92vw,460px)',maxHeight:'80vh',overflow:'hidden',display:'flex',flexDirection:'column',border:`2px solid ${B.brd}`}}>
+      <div style={{padding:'14px 18px',borderBottom:`1px solid ${B.brdL}`,background:`linear-gradient(135deg,${B.cream},${B.lavL})`}}>
+        <div style={{fontSize:17,fontWeight:800,color:B.txt}}>{product.name}</div>
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:'14px 18px'}}>
+        <SecL icon="🍚" title="TYPE" color="#E08030"/>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:8,marginBottom:16}}>
+          {CUST_R.types.map(t=><button key={t} onClick={()=>setS(p=>({...p,type:t}))} style={{padding:16,borderRadius:14,border:s.type===t?'3px solid #E08030':`2px solid ${B.brdL}`,background:s.type===t?'#E0803012':B.card,cursor:'pointer',fontFamily:'inherit',fontSize:18,fontWeight:800,color:s.type===t?'#E08030':B.txtL,textAlign:'center'}}>{t==='Sucré'?'🍯':'🌶️'} {t}</button>)}
+        </div>
+        <SecL icon="✕" title="RETRAITS" color={B.no}/>
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:5,marginBottom:12}}>
+          {CUST_R.retraits.map((r,i)=><Chip key={i} label={r} active={s.retraits.includes(r)} onClick={()=>togR(r)} clr={B.no}/>)}
+        </div>
+        <SecL icon="✎" title="REMARQUE" color={B.lavD}/>
+        <textarea value={s.note} onChange={e=>setS(p=>({...p,note:e.target.value}))} placeholder="Remarque…" style={{...inpS(),minHeight:36,resize:'vertical'}}/>
+      </div>
+      <div style={{padding:'12px 18px',borderTop:`1px solid ${B.brdL}`,display:'flex',gap:10,background:B.bg}}>
+        <button onClick={onClose} style={btnS('transparent',B.txtL,{flex:1,border:`1px solid ${B.brd}`})}>Annuler</button>
+        <button onClick={()=>{if(!s.type)return;onOk(s,0);}} style={btnS('#E08030','#fff',{flex:2})}>Confirmer</button>
+      </div>
+    </div>
+  </Modal>;
+}
+
+function DrinkPick({onPick,onClose}){
+  return <Modal onClose={onClose}>
+    <div style={{position:'relative',background:B.card,borderRadius:20,width:'min(94vw,480px)',maxHeight:'80vh',overflow:'hidden',display:'flex',flexDirection:'column',border:`2px solid ${B.brd}`}}>
+      <div style={{padding:'14px 18px',borderBottom:`1px solid ${B.brdL}`,background:`linear-gradient(135deg,${B.cream},${B.lavL})`}}>
+        <div style={{fontSize:17,fontWeight:800,color:B.txt}}>🥤 Choisir une boisson</div>
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:10,display:'grid',gridTemplateColumns:'1fr 1fr',gap:5}}>
+        {DRINKS.map(d=><button key={d.id} onClick={()=>onPick(d.name)} style={{padding:12,borderRadius:11,border:`1.5px solid ${B.brdL}`,background:B.card,cursor:'pointer',textAlign:'left',fontFamily:'inherit',fontSize:12,fontWeight:600,color:B.txt}}>{d.name}</button>)}
+      </div>
+      <div style={{padding:10,borderTop:`1px solid ${B.brdL}`,background:B.bg}}>
+        <button onClick={onClose} style={btnS('transparent',B.txtL,{width:'100%',border:`1px solid ${B.brd}`})}>Annuler</button>
+      </div>
+    </div>
+  </Modal>;
+}
+
+function TopModal({product,isCrepe,initial,onOk,onClose}){
+  const def={toppings:[],glace:false,note:''};
+  const [s,setS]=React.useState(initial?{...def,...initial}:def);
+  const tog=l=>setS(p=>({...p,toppings:p.toppings.includes(l)?p.toppings.filter(x=>x!==l):[...p.toppings,l]}));
+  const ext=s.toppings.length*0.5+(s.glace?1:0);
+  return <Modal onClose={onClose}>
+    <div style={{position:'relative',background:B.card,borderRadius:20,width:'min(88vw,400px)',padding:22,border:`2px solid ${B.brd}`}}>
+      <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:14}}>
+        <div style={{fontSize:17,fontWeight:800,color:B.txt}}>{product.name}</div>
+        <div style={{background:B.pink,color:'#fff',fontWeight:800,padding:'5px 14px',borderRadius:30,fontSize:14}}>{fp(product.price+ext)}</div>
+      </div>
+      <SecL icon="+" title="TOPPINGS (+0,50€)" color={B.ok}/>
+      <div style={{display:'grid',gridTemplateColumns:'1fr 1fr 1fr',gap:6,marginBottom:12}}>
+        {TOPPINGS.map((t,i)=><Chip key={i} label={t.l} active={s.toppings.includes(t.l)} onClick={()=>tog(t.l)} clr={B.ok}/>)}
+      </div>
+      {isCrepe&&<div style={{marginBottom:12}}><Chip label="Supp. Glace (+1,00€)" active={s.glace} onClick={()=>setS(p=>({...p,glace:!p.glace}))} clr={B.lavD}/></div>}
+      <SecL icon="✎" title="REMARQUE" color={B.lavD}/>
+      <textarea value={s.note} onChange={e=>setS(p=>({...p,note:e.target.value}))} placeholder="Remarque…" style={{...inpS(),minHeight:36,resize:'vertical',marginBottom:12}}/>
+      <div style={{display:'flex',gap:10}}>
+        <button onClick={onClose} style={btnS('transparent',B.txtL,{flex:1,border:`1px solid ${B.brd}`})}>Annuler</button>
+        <button onClick={()=>onOk(s,ext)} style={btnS(B.pink,'#fff',{flex:2})}>Confirmer</button>
+      </div>
+    </div>
+  </Modal>;
+}
+
+function DuoBuild({formule,onAdd,onClose}){
+  const pool=formule.duoType==='simple'?BURGERS.filter(b=>b.tag.includes('SIMPLE')||b.tag.includes('WRAP')):BURGERS.filter(b=>b.tag.includes('SIGNATURE'));
+  const [step,setStep]=React.useState(0);
+  const [b1,setB1]=React.useState(null);
+  const [c1,setC1]=React.useState(null);
+  const [b2,setB2]=React.useState(null);
+  if(step===1&&b1)return<BurgerCust product={b1} onClose={()=>{setB1(null);setStep(0);}} onOk={(c)=>{setC1(c);setStep(2);}}/>;
+  if(step===3&&b2)return<BurgerCust product={b2} onClose={()=>{setB2(null);setStep(2);}} onOk={(c)=>{onAdd({name:formule.name,price:formule.price,cust:{burgers:[{name:b1.name,cust:c1},{name:b2.name,cust:c}]}});}}/>;
+  const picking=step<2?1:2;
+  return <Modal onClose={onClose}>
+    <div style={{position:'relative',background:B.card,borderRadius:20,width:'min(94vw,540px)',maxHeight:'85vh',overflow:'hidden',display:'flex',flexDirection:'column',border:`2px solid ${B.brd}`}}>
+      <div style={{padding:'14px 18px',borderBottom:`1px solid ${B.brdL}`,background:`linear-gradient(135deg,${B.cream},${B.lavL})`}}>
+        <div style={{fontSize:16,fontWeight:800,color:B.txt}}>{formule.name} — {fp(formule.price)}</div>
+        <div style={{fontSize:11,color:B.txtL}}>Burger {picking}/2{b1&&step>=2?` · 1er: ${b1.name}`:''}</div>
+      </div>
+      <div style={{flex:1,overflowY:'auto',padding:10,display:'grid',gridTemplateColumns:'1fr 1fr',gap:6}}>
+        {pool.map(b=><button key={b.id} onClick={()=>{if(picking===1){setB1(b);setStep(1);}else{setB2(b);setStep(3);}}} style={{padding:12,borderRadius:12,border:`1.5px solid ${B.brdL}`,background:B.card,cursor:'pointer',textAlign:'left',fontFamily:'inherit',display:'flex',flexDirection:'column',gap:3}}>
+          <div style={{fontSize:13,fontWeight:700,color:B.txt}}>{b.name}</div>
+          <div style={{fontSize:10,color:B.txtM}}>{b.tag}</div>
+        </button>)}
+      </div>
+      <div style={{padding:10,borderTop:`1px solid ${B.brdL}`,background:B.bg}}>
+        <button onClick={onClose} style={btnS('transparent',B.txtL,{width:'100%',border:`1px solid ${B.brd}`})}>Annuler</button>
+      </div>
+    </div>
+  </Modal>;
+}
+
+function StockView({stockOut,toggle}){
+  const groups=[{n:'Burgers',it:BURGERS},{n:'Formules',it:FORMULES},{n:'Riz',it:RIZ_ITEMS},{n:'Sides',it:SIDES_ITEMS},{n:'Loaded',it:LOADED_ITEMS},{n:'Desserts',it:DESSERTS_ITEMS},{n:'Boissons',it:DRINKS},{n:'Milkshakes',it:MILKSHAKES},{n:'Crêpes',it:CREPES_ITEMS}];
+  return <div style={{flex:1,overflow:'hidden',display:'flex',flexDirection:'column'}}>
+    <div style={{padding:'14px 18px',borderBottom:`1px solid ${B.brdL}`}}>
+      <div style={{fontSize:18,fontWeight:800,color:B.txt}}>📦 Stocks — {stockOut.length} en rupture</div>
+    </div>
+    <div style={{flex:1,overflowY:'auto',padding:14}}>
+      {groups.map(g=><div key={g.n} style={{marginBottom:14}}>
+        <div style={{fontSize:12,fontWeight:800,color:B.blue,marginBottom:5,textTransform:'uppercase',letterSpacing:1}}>{g.n}</div>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(170px,1fr))',gap:4}}>
+          {g.it.map(p=>{const out=stockOut.includes(p.id);return<button key={p.id} onClick={()=>toggle(p.id)} style={{padding:'8px 10px',borderRadius:9,border:`1.5px solid ${out?B.no:B.brdL}`,background:out?`${B.no}08`:B.card,cursor:'pointer',textAlign:'left',fontFamily:'inherit',display:'flex',justifyContent:'space-between',alignItems:'center',opacity:out?0.6:1}}>
+            <span style={{fontSize:11,fontWeight:600,color:out?B.no:B.txt}}>{out?'✕ ':''}{p.name}</span>
+            <span style={{fontSize:11,fontWeight:700,color:out?B.no:B.pink}}>{fp(p.price)}</span>
+          </button>;})}
+        </div>
+      </div>)}
+    </div>
+  </div>;
+}
+
+function Dash({orders}){
+  const today=fd(new Date());
+  const tO=orders.filter(o=>fd(o.date)===today&&o.status!=='annulée');
+  const rev=tO.reduce((s,o)=>s+o.total,0);
+  const cnt=pref=>tO.reduce((s,o)=>s+o.items.filter(i=>(i.pid||'').startsWith(pref)).reduce((a,i)=>a+i.qty,0),0);
+  const St=({l,v,c=B.blue})=><div style={{background:B.card,borderRadius:12,padding:14,border:`1px solid ${B.brdL}`,textAlign:'center'}}><div style={{fontSize:26,fontWeight:900,color:c}}>{v}</div><div style={{fontSize:10,color:B.txtL,marginTop:2,fontWeight:600}}>{l}</div></div>;
+  return <div style={{flex:1,overflow:'hidden',display:'flex',flexDirection:'column'}}>
+    <div style={{padding:'14px 18px',borderBottom:`1px solid ${B.brdL}`}}>
+      <div style={{fontSize:18,fontWeight:800,color:B.txt}}>📊 Dashboard — {today}</div>
+    </div>
+    <div style={{flex:1,overflowY:'auto',padding:16}}>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(110px,1fr))',gap:8,marginBottom:16}}>
+        <St l="Commandes" v={tO.length}/>
+        <St l="Burgers" v={cnt('b-')} c={B.blue}/>
+        <St l="Riz" v={cnt('r-')} c="#E08030"/>
+        <St l="Boissons" v={cnt('dr-')} c={B.blueL}/>
+        <St l="Milkshakes" v={cnt('mk-')} c={B.pink}/>
+        <St l="Crêpes" v={cnt('cr-')} c="#D4A030"/>
+        <St l="Desserts" v={cnt('de-')} c={B.lav}/>
+      </div>
+      <div style={{background:B.card,borderRadius:14,padding:16,border:`1px solid ${B.brdL}`,marginBottom:16}}>
+        <div style={{fontSize:13,color:B.txtL,fontWeight:600}}>Chiffre d'affaires</div>
+        <div style={{fontSize:34,fontWeight:900,color:B.pink}}>{fp(rev)}</div>
+      </div>
+      <div style={{fontSize:14,fontWeight:700,color:B.txt,marginBottom:8}}>Historique ({tO.length})</div>
+      {tO.map(o=><div key={o.id} style={{background:B.card,borderRadius:10,padding:10,border:`1px solid ${B.brdL}`,marginBottom:5,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+        <div>
+          <span style={{fontWeight:900,color:B.blue,fontFamily:'monospace',fontSize:13}}>#{o.num}</span>
+          <span style={{fontSize:11,color:B.txtM,marginLeft:8}}>{ft(o.date)}</span>
+          <div style={{fontSize:10,color:B.txtL,marginTop:2}}>{o.items.map(i=>`${i.qty}x ${i.name}`).join(', ')}</div>
+        </div>
+        <span style={{fontWeight:800,color:B.pink,fontSize:14}}>{fp(o.total)}</span>
+      </div>)}
+    </div>
+  </div>;
+}
+
+function App(){
+  const [view,setView]=React.useState('pos');
+  const [selCat,setSelCat]=React.useState('burger');
+  const [cart,setCart]=React.useState([]);
+  const [orders,setOrders]=React.useState(()=>LS.get('osm5-orders',[]));
+  const [stockOut,setStockOut]=React.useState(()=>LS.get('osm5-stock',[]));
+  const [now,setNow]=React.useState(new Date());
+  const [admin,setAdmin]=React.useState(false);
+  const [pinFor,setPinFor]=React.useState(null);
+  const [cartOpen,setCartOpen]=React.useState(false);
+  const [mob,setMob]=React.useState(window.innerWidth<768);
+  const [printStatus,setPrintStatus]=React.useState(null);
+  const [custM,setCustM]=React.useState(null);
+  const [drinkM,setDrinkM]=React.useState(null);
+  const [duoM,setDuoM]=React.useState(null);
+  const [confirmM,setConfirmM]=React.useState(false);
+  const [successM,setSuccessM]=React.useState(null);
+
+  React.useEffect(()=>{const ck=()=>setMob(window.innerWidth<768);window.addEventListener('resize',ck);return()=>window.removeEventListener('resize',ck);},[]);
+  React.useEffect(()=>{const t=setInterval(()=>setNow(new Date()),30000);return()=>clearInterval(t);},[]);
+  React.useEffect(()=>{LS.set('osm5-orders',orders);},[orders]);
+  React.useEffect(()=>{LS.set('osm5-stock',stockOut);},[stockOut]);
+
+  const toggleStock=id=>setStockOut(p=>p.includes(id)?p.filter(x=>x!==id):[...p,id]);
+  const addCart=(name,price,pid,cust=null)=>setCart(p=>[...p,{id:uid(),pid,name,unit:price,qty:1,total:price,cust}]);
+  const updQty=(cid,d)=>setCart(p=>p.map(i=>i.id!==cid?i:{...i,qty:Math.max(1,i.qty+d),total:i.unit*Math.max(1,i.qty+d)}));
+  const rmCart=cid=>setCart(p=>p.filter(i=>i.id!==cid));
+  const editCartCust=(cid,nc,ne,bp)=>setCart(p=>p.map(i=>{if(i.id!==cid)return i;const nu=bp+ne;return{...i,unit:nu,total:nu*i.qty,cust:nc};}));
+  const cartTotal=cart.reduce((s,i)=>s+i.total,0);
+
+  const placeOrder=async()=>{
+    const o={id:uid(),num:gon(),date:new Date().toISOString(),items:cart.map(c=>({...c})),total:cartTotal,status:'en cours'};
+    setOrders(p=>[o,...p]);setCart([]);setConfirmM(false);setSuccessM(o);
+    setPrintStatus('🖨 Impression...');
+    const r=await sendPrint(o);
+    setPrintStatus(r.success!==false?'✅ Imprimé !':'❌ Erreur impression');
+    setTimeout(()=>setPrintStatus(null),3000);
+  };
+
+  const handleProd=(p,cat)=>{
+    if(stockOut.includes(p.id))return;
+    if(cat==='burger')return setCustM({product:p,type:'burger'});
+    if(cat==='riz')return setCustM({product:p,type:'riz',needsDrink:!!p.needsDrink});
+    if(cat==='formule'){if(p.isDuo)return setDuoM(p);if(p.needsDrink)return setDrinkM({cb:d=>addCart(p.name+(d?` (${d})`:''),p.price,p.id,{drink:d})});return addCart(p.name,p.price,p.id);}
+    if(cat==='milkshake')return setCustM({product:p,type:'milk'});
+    if(cat==='crepes')return setCustM({product:p,type:'crepe'});
+    addCart(p.name,p.price,p.id);
+  };
+
+  const handleEditCart=item=>{
+    const b=BURGERS.find(x=>x.id===item.pid);if(b)return setCustM({product:b,type:'burger',editId:item.id,initial:item.cust});
+    const r=RIZ_ITEMS.find(x=>x.id===item.pid);if(r)return setCustM({product:r,type:'riz',editId:item.id,initial:item.cust});
+    const m=MILKSHAKES.find(x=>x.id===item.pid);if(m)return setCustM({product:m,type:'milk',editId:item.id,initial:item.cust});
+    const c=CREPES_ITEMS.find(x=>x.id===item.pid);if(c)return setCustM({product:c,type:'crepe',editId:item.id,initial:item.cust});
+  };
+
+  const navTo=v=>{if((v==='dashboard'||v==='stock')&&!admin){setPinFor(v);return;}setView(v);};
+  const catObj=CATS.find(c=>c.id===selCat);
+  const getProds=()=>PRODUCT_MAP[selCat]||[];
+
+  const PCard=({p,cat})=>{
+    const out=stockOut.includes(p.id);
+    return <button onClick={()=>!out&&handleProd(p,cat)}
+      onPointerDown={e=>{if(!out)e.currentTarget.style.transform='scale(0.96)';}}
+      onPointerUp={e=>{e.currentTarget.style.transform='scale(1)';}}
+      onPointerLeave={e=>{e.currentTarget.style.transform='scale(1)';}}
+      style={{padding:mob?10:12,borderRadius:12,border:`1.5px solid ${out?`${B.no}30`:B.brdL}`,background:out?'#f5f0f0':B.card,cursor:out?'not-allowed':'pointer',textAlign:'left',display:'flex',flexDirection:'column',gap:3,minHeight:mob?70:85,position:'relative',overflow:'hidden',fontFamily:'inherit',opacity:out?0.4:1}}>
+      {out&&<div style={{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',fontSize:44,color:`${B.no}40`,fontWeight:900}}>✕</div>}
+      {p.badge&&<div style={{position:'absolute',top:3,right:4,fontSize:12}}>{p.badge}</div>}
+      <div style={{fontSize:mob?11:13,fontWeight:700,color:B.txt,lineHeight:1.2,paddingRight:p.badge?18:0}}>{p.name}</div>
+      {p.tag&&<div style={{fontSize:9,fontWeight:700,color:catObj?.color||B.blue,opacity:0.7}}>{p.tag}</div>}
+      {p.desc&&!mob&&<div style={{fontSize:9,color:B.txtM,flex:1,lineHeight:1.2,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical'}}>{p.desc}</div>}
+      <div style={{fontSize:mob?13:14,fontWeight:800,color:catObj?.color||B.pink}}>{fp(p.price)}</div>
+    </button>;
+  };
+
+  const renderGrid=()=>{
+    const prods=getProds();
+    if(selCat==='burger'){
+      return <div style={{padding:'8px 10px'}}>
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:6}}>
+          {prods.slice(0,9).map(p=><PCard key={p.id} p={p} cat="burger"/>)}
+        </div>
+        {prods.length>9&&<div style={{display:'grid',gridTemplateColumns:'1fr repeat(2,1fr) 1fr',gap:6,marginTop:6}}>
+          <div/>{prods.slice(9,11).map(p=><PCard key={p.id} p={p} cat="burger"/>)}<div/>
+        </div>}
+      </div>;
+    }
+    return <div style={{padding:'8px 10px',display:'grid',gridTemplateColumns:`repeat(auto-fill,minmax(${mob?120:155}px,1fr))`,gap:6,alignContent:'start'}}>
+      {prods.map(p=><PCard key={p.id} p={p} cat={selCat}/>)}
+      {prods.length===0&&<div style={{gridColumn:'1/-1',textAlign:'center',padding:28,color:B.txtM}}>Aucun produit</div>}
+    </div>;
+  };
+
+  // Panier slide (mobile)
+  const CartSlide=()=><div style={{display:'flex',flexDirection:'column',height:'100%'}}>
+    <div style={{padding:'10px 12px',borderBottom:`1px solid ${B.brdL}`,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+      <span style={{fontSize:14,fontWeight:800,color:B.txt}}>🛒 Panier ({cart.length})</span>
+      <div style={{display:'flex',gap:6}}>
+        {cart.length>0&&<button onClick={()=>setCart([])} style={{padding:'3px 10px',borderRadius:6,border:`1px solid ${B.no}30`,background:'transparent',color:B.no,fontSize:10,fontWeight:700,cursor:'pointer'}}>Vider</button>}
+        <button onClick={()=>setCartOpen(false)} style={{padding:'3px 10px',borderRadius:6,border:`1px solid ${B.brd}`,background:'transparent',color:B.txtL,fontSize:10,fontWeight:700,cursor:'pointer'}}>✕ Fermer</button>
+      </div>
+    </div>
+    <div style={{flex:1,overflowY:'auto',padding:'6px 10px'}}>
+      {cart.map(item=><div key={item.id} style={{background:B.card,borderRadius:10,padding:10,marginBottom:6,border:`1px solid ${B.brdL}`}}>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'start',marginBottom:5}}>
+          <button onClick={()=>handleEditCart(item)} style={{flex:1,background:'none',border:'none',cursor:'pointer',textAlign:'left',padding:0}}>
+            <div style={{fontSize:13,fontWeight:700,color:B.txt}}>{item.name}</div>
+            {item.cust&&<div>
+              {item.cust.retraits?.map((r,j)=><div key={j} style={{color:B.no,fontSize:10}}>✕ {r}</div>)}
+              {item.cust.supplements?.map((s,j)=><div key={j} style={{color:B.ok,fontSize:10}}>+ {s}</div>)}
+              {item.cust.sauces?.map((s,j)=><div key={j} style={{color:B.pink,fontSize:10}}>● {s}</div>)}
+              {item.cust.version&&<div style={{color:B.blue,fontSize:10}}>▸ {item.cust.version}</div>}
+              {item.cust.type&&<div style={{color:'#E08030',fontSize:10}}>▸ {item.cust.type}</div>}
+              {item.cust.toppings?.map((t,j)=><div key={j} style={{color:B.ok,fontSize:10}}>+ {t}</div>)}
+              {item.cust.drink&&<div style={{color:B.blueL,fontSize:10}}>🥤 {item.cust.drink}</div>}
+              {item.cust.note&&<div style={{color:B.lavD,fontSize:10,fontStyle:'italic'}}>✎ {item.cust.note}</div>}
+            </div>}
+          </button>
+          <button onClick={()=>rmCart(item.id)} style={{width:22,height:22,borderRadius:5,border:'none',background:`${B.no}12`,color:B.no,cursor:'pointer',fontSize:11,fontWeight:800,flexShrink:0}}>✕</button>
+        </div>
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+          <div style={{display:'flex'}}>
+            <button onClick={()=>updQty(item.id,-1)} style={{width:32,height:32,borderRadius:'8px 0 0 8px',border:`1px solid ${B.brd}`,background:B.bg,color:B.txt,cursor:'pointer',fontSize:14,fontWeight:700}}>−</button>
+            <div style={{width:34,height:32,display:'flex',alignItems:'center',justifyContent:'center',background:B.bg,borderTop:`1px solid ${B.brd}`,borderBottom:`1px solid ${B.brd}`,color:B.blue,fontSize:13,fontWeight:800}}>{item.qty}</div>
+            <button onClick={()=>updQty(item.id,1)} style={{width:32,height:32,borderRadius:'0 8px 8px 0',border:`1px solid ${B.brd}`,background:B.bg,color:B.txt,cursor:'pointer',fontSize:14,fontWeight:700}}>+</button>
+          </div>
+          <span style={{fontSize:14,fontWeight:800,color:B.txt}}>{fp(item.total)}</span>
+        </div>
+      </div>)}
+    </div>
+  </div>;
+
+  return <div style={{height:'100vh',display:'flex',flexDirection:'column',background:B.bg,color:B.txt,overflow:'hidden',userSelect:'none'}}>
+
+    {/* NAV */}
+    <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'0 10px',height:mob?46:52,background:`linear-gradient(135deg,${B.blue},${B.blueD})`,flexShrink:0}}>
+      <div style={{display:'flex',alignItems:'center',gap:mob?5:12}}>
+        <Logo size={mob?14:18}/>
+        {!mob&&<div style={{width:1,height:24,background:'rgba(255,255,255,0.2)'}}/>}
+        {[{id:'pos',l:'Caisse',i:'🍔'},{id:'stock',l:'Stock',i:'📦',pr:true},{id:'dashboard',l:'Stats',i:'📊',pr:true}].map(t=><button key={t.id} onClick={()=>t.pr?navTo(t.id):setView(t.id)} style={{padding:mob?'4px 7px':'5px 12px',borderRadius:7,border:'none',cursor:'pointer',fontSize:mob?10:12,fontWeight:700,background:view===t.id?'rgba(255,255,255,0.2)':'transparent',color:view===t.id?'#fff':'rgba(255,255,255,0.5)'}}>{t.i}{mob?'':' '+t.l}</button>)}
+      </div>
+      <div style={{display:'flex',alignItems:'center',gap:6}}>
+        {printStatus&&<span style={{fontSize:10,color:B.cream,fontWeight:700,background:'rgba(0,0,0,0.2)',padding:'2px 7px',borderRadius:6}}>{printStatus}</span>}
+        <span style={{fontSize:11,color:'rgba(255,255,255,0.6)'}}>{ft(now)}</span>
+      </div>
+    </div>
+
+    {/* POS */}
+    {view==='pos'&&<div style={{flex:1,display:'flex',flexDirection:'column',overflow:'hidden',position:'relative'}}>
+
+      {/* Categories */}
+      <div style={{display:'flex',gap:3,padding:mob?'5px 8px':'7px 10px',overflowX:'auto',flexShrink:0,borderBottom:`1px solid ${B.brdL}`,background:B.bg}}>
+        {CATS.map(cat=><button key={cat.id} onClick={()=>setSelCat(cat.id)} style={{padding:mob?'5px 8px':'6px 12px',borderRadius:8,border:selCat===cat.id?`2px solid ${cat.color}`:'2px solid transparent',cursor:'pointer',fontSize:mob?10:11,fontWeight:700,whiteSpace:'nowrap',background:selCat===cat.id?`${cat.color}12`:B.card,color:selCat===cat.id?cat.color:B.txtL}}>{cat.icon}{mob?'':' '+cat.name}</button>)}
+      </div>
+
+      {/* Desktop: 2 colonnes */}
+      {!mob&&<div style={{flex:1,display:'flex',overflow:'hidden'}}>
+        <div style={{flex:1,overflowY:'auto'}}>{renderGrid()}</div>
+        <div style={{width:290,display:'flex',flexDirection:'column',background:B.side,borderLeft:`1px solid ${B.brd}`,flexShrink:0}}>
+          <div style={{padding:'8px 10px',borderBottom:`1px solid ${B.brdL}`,display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+            <span style={{fontSize:13,fontWeight:800,color:B.txt}}>🛒 Panier ({cart.length})</span>
+            {cart.length>0&&<button onClick={()=>setCart([])} style={{padding:'2px 8px',borderRadius:6,border:`1px solid ${B.no}30`,background:'transparent',color:B.no,fontSize:9,fontWeight:700,cursor:'pointer'}}>Vider</button>}
+          </div>
+          <div style={{flex:1,overflowY:'auto',padding:'4px 8px'}}>
+            {cart.length===0?<div style={{textAlign:'center',padding:'24px 10px',color:B.txtM}}><div style={{fontSize:28}}>🍔</div><div style={{fontSize:11}}>Panier vide</div></div>
+            :cart.map(item=><div key={item.id} style={{background:B.card,borderRadius:9,padding:8,marginBottom:4,border:`1px solid ${B.brdL}`}}>
+              <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+                <button onClick={()=>handleEditCart(item)} style={{flex:1,background:'none',border:'none',cursor:'pointer',textAlign:'left',padding:0}}>
+                  <div style={{fontSize:12,fontWeight:700,color:B.txt}}>{item.name}</div>
+                  {item.cust&&<div>
+                    {item.cust.retraits?.map((r,j)=><div key={j} style={{color:B.no,fontSize:9}}>✕ {r}</div>)}
+                    {item.cust.supplements?.map((s,j)=><div key={j} style={{color:B.ok,fontSize:9}}>+ {s}</div>)}
+                    {item.cust.sauces?.map((s,j)=><div key={j} style={{color:B.pink,fontSize:9}}>● {s}</div>)}
+                    {item.cust.version&&<div style={{color:B.blue,fontSize:9}}>▸ {item.cust.version}</div>}
+                    {item.cust.type&&<div style={{color:'#E08030',fontSize:9}}>▸ {item.cust.type}</div>}
+                    {item.cust.drink&&<div style={{color:B.blueL,fontSize:9}}>🥤 {item.cust.drink}</div>}
+                    {item.cust.note&&<div style={{color:B.lavD,fontSize:9,fontStyle:'italic'}}>✎ {item.cust.note}</div>}
+                  </div>}
+                </button>
+                <button onClick={()=>rmCart(item.id)} style={{width:18,height:18,borderRadius:4,border:'none',background:`${B.no}10`,color:B.no,cursor:'pointer',fontSize:9,fontWeight:800,flexShrink:0}}>✕</button>
+              </div>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+                <div style={{display:'flex'}}>
+                  <button onClick={()=>updQty(item.id,-1)} style={{width:26,height:26,borderRadius:'6px 0 0 6px',border:`1px solid ${B.brd}`,background:B.bg,cursor:'pointer',fontSize:12,fontWeight:700}}>−</button>
+                  <div style={{width:28,height:26,display:'flex',alignItems:'center',justifyContent:'center',background:B.bg,borderTop:`1px solid ${B.brd}`,borderBottom:`1px solid ${B.brd}`,color:B.blue,fontSize:12,fontWeight:800}}>{item.qty}</div>
+                  <button onClick={()=>updQty(item.id,1)} style={{width:26,height:26,borderRadius:'0 6px 6px 0',border:`1px solid ${B.brd}`,background:B.bg,cursor:'pointer',fontSize:12,fontWeight:700}}>+</button>
+                </div>
+                <span style={{fontSize:12,fontWeight:800,color:B.txt}}>{fp(item.total)}</span>
+              </div>
+            </div>)}
+          </div>
+          {cart.length>0&&<div style={{padding:'8px 10px',borderTop:`1px solid ${B.brd}`}}>
+            <div style={{display:'flex',justifyContent:'space-between',marginBottom:8}}>
+              <span style={{fontSize:12,color:B.txtL}}>Total</span>
+              <span style={{fontSize:20,fontWeight:900,color:B.pink}}>{fp(cartTotal)}</span>
+            </div>
+            <button onClick={()=>setConfirmM(true)} style={{width:'100%',padding:13,borderRadius:11,border:'none',fontSize:15,fontWeight:800,cursor:'pointer',background:B.ok,color:'#fff'}}>Valider ✓</button>
+          </div>}
+        </div>
+      </div>}
+
+      {/* Mobile: produits + barre fixe en bas */}
+      {mob&&<>
+        <div style={{flex:1,overflowY:'auto',paddingBottom:cart.length>0?72:0}}>{renderGrid()}</div>
+
+        {/* Barre fixe en bas — TOUJOURS VISIBLE si panier non vide */}
+        {cart.length>0&&<div style={{position:'absolute',bottom:0,left:0,right:0,background:B.card,borderTop:`2px solid ${B.brd}`,padding:'8px 10px',display:'flex',gap:8,zIndex:50}}>
+          <button onClick={()=>setCartOpen(true)} style={{flex:1,padding:'12px 8px',borderRadius:11,border:`1px solid ${B.brd}`,background:B.bg,color:B.txt,fontSize:12,fontWeight:700,cursor:'pointer'}}>🛒 {cart.length} · {fp(cartTotal)}</button>
+          <button onClick={()=>setConfirmM(true)} style={{flex:2,padding:'12px',borderRadius:11,border:'none',background:B.ok,color:'#fff',fontSize:15,fontWeight:800,cursor:'pointer'}}>Valider ✓</button>
+        </div>}
+
+        {/* Panier slide */}
+        {cartOpen&&<div style={{position:'absolute',inset:0,zIndex:100,display:'flex',flexDirection:'column'}}>
+          <div onClick={()=>setCartOpen(false)} style={{height:60,background:'rgba(42,32,64,0.4)'}}/>
+          <div style={{flex:1,background:B.side,borderTop:`2px solid ${B.brd}`,display:'flex',flexDirection:'column'}}><CartSlide/></div>
+        </div>}
+      </>}
+    </div>}
+
+    {view==='stock'&&<StockView stockOut={stockOut} toggle={toggleStock}/>}
+    {view==='dashboard'&&<Dash orders={orders}/>}
+
+    {/* MODALS */}
+    {pinFor&&<PinModal onClose={()=>setPinFor(null)} onOk={()=>{setAdmin(true);setView(pinFor);setPinFor(null);}}/>}
+
+    {custM?.type==='burger'&&<BurgerCust product={custM.product} initial={custM.initial} onClose={()=>setCustM(null)} onOk={(c,ext)=>{
+      if(custM.editId)editCartCust(custM.editId,c,ext,custM.product.price);
+      else{const has=c.retraits.length||c.supplements.length||c.sauces.length||c.version||c.note;addCart(custM.product.name,custM.product.price+ext,custM.product.id,has?c:null);}
+      setCustM(null);
+    }}/>}
+
+    {custM?.type==='riz'&&<RizCust product={custM.product} initial={custM.initial} onClose={()=>setCustM(null)} onOk={(c)=>{
+      if(custM.editId){editCartCust(custM.editId,c,0,custM.product.price);setCustM(null);return;}
+      if(custM.needsDrink){const rizC=c;const prod=custM.product;setCustM(null);setDrinkM({cb:d=>addCart(prod.name+(d?` (${d})`:''),prod.price,prod.id,{...rizC,drink:d})});}
+      else{addCart(custM.product.name,custM.product.price,custM.product.id,c);setCustM(null);}
+    }}/>}
+
+    {(custM?.type==='milk'||custM?.type==='crepe')&&<TopModal product={custM.product} isCrepe={custM.type==='crepe'} initial={custM.initial} onClose={()=>setCustM(null)} onOk={(c,ext)=>{
+      if(custM.editId)editCartCust(custM.editId,c,ext,custM.product.price);
+      else{const has=c.toppings.length||c.glace||c.note;addCart(custM.product.name,custM.product.price+ext,custM.product.id,has?c:null);}
+      setCustM(null);
+    }}/>}
+
+    {drinkM&&<DrinkPick onClose={()=>setDrinkM(null)} onPick={d=>{drinkM.cb(d);setDrinkM(null);}}/>}
+    {duoM&&<DuoBuild formule={duoM} onClose={()=>setDuoM(null)} onAdd={item=>{addCart(item.name,item.price,duoM.id,item.cust);setDuoM(null);}}/>}
+
+    {confirmM&&<Modal onClose={()=>setConfirmM(false)}>
+      <div style={{position:'relative',background:B.card,borderRadius:20,width:'min(85vw,380px)',padding:24,border:`2px solid ${B.brd}`,textAlign:'center'}}>
+        <div style={{fontSize:18,fontWeight:800,color:B.txt,marginBottom:4}}>Confirmer la commande ?</div>
+        <div style={{fontSize:12,color:B.txtL,marginBottom:12}}>{cart.length} article{cart.length>1?'s':''}</div>
+        <div style={{fontSize:30,fontWeight:900,color:B.pink,marginBottom:20}}>{fp(cartTotal)}</div>
+        <div style={{display:'flex',gap:10}}>
+          <button onClick={()=>setConfirmM(false)} style={btnS('transparent',B.txtL,{flex:1,border:`1px solid ${B.brd}`})}>Annuler</button>
+          <button onClick={placeOrder} style={btnS(B.ok,'#fff',{flex:2})}>Valider ✓</button>
+        </div>
+      </div>
+    </Modal>}
+
+    {successM&&<Modal onClose={()=>setSuccessM(null)}>
+      <div style={{position:'relative',background:B.card,borderRadius:20,width:'min(85vw,380px)',padding:24,border:`2px solid ${B.brd}`,textAlign:'center'}}>
+        <Logo size={18}/>
+        <div style={{fontSize:44,margin:'8px 0'}}>🎉</div>
+        <div style={{fontSize:14,fontWeight:700,color:B.txtL}}>Commande enregistrée</div>
+        <div style={{fontSize:34,fontWeight:900,color:B.blue,margin:'6px 0',fontFamily:'monospace'}}>#{successM.num}</div>
+        <div style={{fontSize:22,fontWeight:800,color:B.pink,marginBottom:8}}>{fp(successM.total)}</div>
+        {printStatus&&<div style={{fontSize:12,fontWeight:700,marginBottom:10,color:B.ok}}>{printStatus}</div>}
+        <button onClick={()=>setSuccessM(null)} style={btnS(B.blue,'#fff',{width:'100%'})}>OK — Nouvelle commande</button>
+      </div>
+    </Modal>}
+
+  </div>;
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
