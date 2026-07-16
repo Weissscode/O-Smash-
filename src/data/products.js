@@ -403,3 +403,13 @@ export const TOPS = [{
   p: 0.5
 }];
 export const FRITES_SAUCES = ['Algerienne', 'Biggy', 'Ketchup', 'Mayonnaise', 'BBQ'];
+export const TWISTER_SUPPS = [{
+  l: 'Bacon',
+  p: 1
+}, {
+  l: 'Oignon frits',
+  p: 0.5
+}, {
+  l: 'Cheddar',
+  p: 1
+}];
