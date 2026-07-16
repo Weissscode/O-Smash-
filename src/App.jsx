@@ -16,6 +16,11 @@ import { PieChart } from './components/PieChart.jsx';
 import { InsightsCard } from './components/InsightsCard.jsx';
 import { StockView } from './components/StockView.jsx';
 import { Dash } from './components/Dash.jsx';
+import { CItem } from './components/CItem.jsx';
+import { ConfirmModal } from './components/ConfirmModal.jsx';
+import { PhonePayModal } from './components/PhonePayModal.jsx';
+import { SplitModal } from './components/SplitModal.jsx';
+import { TelephoneView } from './components/TelephoneView.jsx';
 
 const mkOrder = (num, hour, min, items, payment, phone) => ({
   id: 'o' + num, num, date: new Date(new Date().setHours(hour, min)).toISOString(),
@@ -40,6 +45,14 @@ const PIE_DATA = [
   { label: 'Especes', value: 60, color: '#10B981' },
   { label: 'CB', value: 40, color: '#2563EB' },
 ];
+const FAKE_CART = [
+  { id: 'c1', pid: 'b-orig', name: "O'Smash Original", qty: 1, unit: 6.5, total: 6.5, cust: { retraits: ['Sans oignon'], sauces: ['Algerienne'] } },
+  { id: 'c2', pid: 'dr-coca', name: 'Coca-Cola 33cl', qty: 2, unit: 2, total: 4, cust: null },
+];
+const FAKE_PHONE_ORDER = mkOrder(201, 12, 30, [
+  { pid: 'b-orig', name: "O'Smash Original", qty: 1, total: 6.5 },
+  { pid: 'dr-coca', name: 'Coca-Cola 33cl', qty: 1, total: 2 }
+], null, '0612345678');
 
 export default function App() {
   const [showPin, setShowPin] = React.useState(false);
@@ -51,6 +64,10 @@ export default function App() {
   const [showStockView, setShowStockView] = React.useState(false);
   const [stockOut, setStockOut] = React.useState([]);
   const toggleStock = id => setStockOut(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
+  const [showConfirm, setShowConfirm] = React.useState(false);
+  const [showPhonePay, setShowPhonePay] = React.useState(false);
+  const [showSplit, setShowSplit] = React.useState(false);
+  const [clientName, setClientName] = React.useState('');
 
   return /*#__PURE__*/React.createElement("div", {
     style: { padding: 40, fontFamily: 'sans-serif', background: T.bg, minHeight: '100vh' }
@@ -84,8 +101,35 @@ export default function App() {
       }, "Choisir des Toppings"),
       /*#__PURE__*/React.createElement("button", {
         onClick: () => setShowStockView(true)
-      }, "Ouvrir StockView")
+      }, "Ouvrir StockView"),
+      /*#__PURE__*/React.createElement("button", {
+        onClick: () => setShowConfirm(true)
+      }, "Confirmer commande"),
+      /*#__PURE__*/React.createElement("button", {
+        onClick: () => setShowPhonePay(true)
+      }, "PhonePayModal"),
+      /*#__PURE__*/React.createElement("button", {
+        onClick: () => setShowSplit(true)
+      }, "SplitModal")
     ),
+    /*#__PURE__*/React.createElement(SL, { title: 'CItem (ligne de panier)' }),
+    /*#__PURE__*/React.createElement("div", { style: { maxWidth: 500 } },
+      FAKE_CART.map(item => /*#__PURE__*/React.createElement(CItem, {
+        key: item.id,
+        item,
+        onEdit: () => console.log('edit', item.id),
+        onDel: () => console.log('del', item.id),
+        onQ: (d) => console.log('qty', item.id, d)
+      }))
+    ),
+    /*#__PURE__*/React.createElement(SL, { title: 'TelephoneView' }),
+    /*#__PURE__*/React.createElement(TelephoneView, {
+      phoneOrders: [FAKE_PHONE_ORDER],
+      onPaid: (o) => console.log('paid', o),
+      onDelete: (id) => console.log('delete', id),
+      onSplit: (o) => console.log('split', o),
+      onStartAdd: (o) => console.log('startAdd', o)
+    }),
     /*#__PURE__*/React.createElement(SL, { title: 'Dashboard (charts & insights)' }),
     /*#__PURE__*/React.createElement("div", { style: { display: 'flex', gap: 24, flexWrap: 'wrap', marginBottom: 20 } },
       /*#__PURE__*/React.createElement("div", { style: { width: 260 } },
@@ -140,6 +184,26 @@ export default function App() {
       toggle: toggleStock,
       customProds: [],
       onSaveCP: () => {}
-    }))
+    })),
+    showConfirm && /*#__PURE__*/React.createElement(ConfirmModal, {
+      cart: FAKE_CART,
+      cartTotal: FAKE_CART.reduce((s, i) => s + i.total, 0),
+      clientName,
+      setClientName,
+      onCancel: () => setShowConfirm(false),
+      onValidate: (service, payment, phone) => { console.log('validate', service, payment, phone); setShowConfirm(false); },
+      onSplit: () => { console.log('split from confirm'); setShowConfirm(false); }
+    }),
+    showPhonePay && /*#__PURE__*/React.createElement(PhonePayModal, {
+      order: FAKE_PHONE_ORDER,
+      onClose: () => setShowPhonePay(false),
+      onPaid: (o, payment) => { console.log('phone paid', o, payment); setShowPhonePay(false); },
+      onSplit: () => { console.log('split from phone pay'); setShowPhonePay(false); }
+    }),
+    showSplit && /*#__PURE__*/React.createElement(SplitModal, {
+      order: FAKE_PHONE_ORDER,
+      onClose: () => setShowSplit(false),
+      onPay: (parts) => { console.log('split pay', parts); setShowSplit(false); }
+    })
   );
 }
