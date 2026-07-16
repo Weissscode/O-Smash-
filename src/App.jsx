@@ -15,14 +15,20 @@ import { AreaChart } from './components/AreaChart.jsx';
 import { PieChart } from './components/PieChart.jsx';
 import { InsightsCard } from './components/InsightsCard.jsx';
 import { StockView } from './components/StockView.jsx';
+import { Dash } from './components/Dash.jsx';
 
-const FAKE_ORDERS = [
-  { total: 23.5, date: new Date(new Date().setHours(12, 15)).toISOString() },
-  { total: 18.0, date: new Date(new Date().setHours(12, 45)).toISOString() },
-  { total: 31.2, date: new Date(new Date().setHours(19, 30)).toISOString() },
-  { total: 12.5, date: new Date(new Date().setHours(19, 50)).toISOString() },
-  { total: 27.0, date: new Date(new Date().setHours(20, 10)).toISOString() },
+const mkOrder = (num, hour, min, items, payment, phone) => ({
+  id: 'o' + num, num, date: new Date(new Date().setHours(hour, min)).toISOString(),
+  items, total: items.reduce((s, i) => s + i.total, 0), payment, phone: phone || null, status: 'ok'
+});
+const FAKE_FULL_ORDERS = [
+  mkOrder(101, 12, 15, [{ pid: 'b-orig', name: "O'Smash Original", qty: 1, total: 6.5 }, { pid: 'dr-coca', name: 'Coca-Cola 33cl', qty: 1, total: 2 }], 'Especes'),
+  mkOrder(102, 12, 45, [{ pid: 'b-smoke', name: 'O\'Smash Smoke', qty: 2, total: 17 }], 'CB'),
+  mkOrder(103, 19, 30, [{ pid: 'r-riz', name: 'Riz Crousty', qty: 1, total: 9.5 }, { pid: 'mk-oreo', name: 'Milkshake Oreo', qty: 1, total: 6 }], 'Especes', '0612345678'),
+  mkOrder(104, 19, 50, [{ pid: 'b-orig', name: "O'Smash Original", qty: 1, total: 6.5 }], 'CB'),
+  mkOrder(105, 20, 10, [{ pid: 'b-smoke', name: "O'Smash Smoke", qty: 1, total: 8.5 }, { pid: 'dr-coca', name: 'Coca-Cola 33cl', qty: 2, total: 4 }], 'Especes'),
 ];
+const FAKE_ORDERS = FAKE_FULL_ORDERS;
 const BAR_DATA = [
   { label: 'Lun', value: 120 },
   { label: 'Mar', value: 200 },
@@ -96,6 +102,13 @@ export default function App() {
       )
     ),
     /*#__PURE__*/React.createElement(InsightsCard, { orders: FAKE_ORDERS }),
+    /*#__PURE__*/React.createElement(SL, { title: 'Dash (tableau de bord complet)' }),
+    /*#__PURE__*/React.createElement(Dash, {
+      orders: FAKE_FULL_ORDERS,
+      phoneOrders: [],
+      onReset: () => console.log('reset'),
+      onSendReport: () => console.log('send report')
+    }),
     showModal && /*#__PURE__*/React.createElement(Modal, {
       onClose: () => setShowModal(false)
     }, /*#__PURE__*/React.createElement("div", {
