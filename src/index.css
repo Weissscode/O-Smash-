@@ -1,0 +1,20 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
+}
+html, body, #root {
+  height: 100%;
+  overflow: hidden;
+}
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #FFF8E8;
+}
+::-webkit-scrollbar {
+  display: none;
+}
+input, textarea, select, button {
+  font-family: inherit;
+}
