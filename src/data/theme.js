@@ -1,0 +1,23 @@
+export const T = {
+  primary: '#B48FE0',
+  primaryD: '#9370CC',
+  primaryL: '#F2ECFF',
+  primaryLL: '#FAF7FF',
+  accent: '#F5C842',
+  white: '#FFFFFF',
+  bg: '#F8F5FF',
+  bgCard: '#FFFFFF',
+  bgSide: '#F4F0FF',
+  txt: '#1A1028',
+  txtSub: '#6B7280',
+  txtMuted: '#9CA3AF',
+  brd: '#E8E0F5',
+  brdL: '#EEE8FF',
+  ok: '#10B981',
+  okL: '#D1FAE5',
+  no: '#EF4444',
+  noL: '#FEE2E2',
+  warn: '#F59E0B',
+  warnL: '#FEF3C7',
+  sh: '0 1px 4px rgba(180,143,224,0.10), 0 4px 14px rgba(180,143,224,0.08)'
+};
