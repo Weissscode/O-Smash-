@@ -57,7 +57,7 @@ export function TopModal({
       color: T.white,
       fontWeight: 700,
       padding: '5px 16px',
-      borderRadius: 20,
+      borderRadius: 10,
       fontSize: 14
     }
   }, fp(product.price + ext))), /*#__PURE__*/React.createElement(SL, {
@@ -113,7 +113,7 @@ export function TopModal({
     style: {
       width: '100%',
       padding: 12,
-      borderRadius: 10,
+      borderRadius: 6,
       border: `1.5px solid ${T.brd}`,
       background: T.bg,
       color: T.txt,

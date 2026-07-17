@@ -137,7 +137,7 @@ export function CItem({
     style: {
       width: 22,
       height: 22,
-      borderRadius: 6,
+      borderRadius: 4,
       border: 'none',
       background: T.noL,
       color: T.no,

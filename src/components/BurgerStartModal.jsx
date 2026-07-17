@@ -44,7 +44,7 @@ export function BurgerStartModal({
     onClick: () => onChoice('seul'),
     style: {
       padding: '24px 16px',
-      borderRadius: 14,
+      borderRadius: 10,
       border: `2px solid ${T.brd}`,
       background: T.bgCard,
       cursor: 'pointer',
@@ -67,7 +67,7 @@ export function BurgerStartModal({
     onClick: () => onChoice('menu'),
     style: {
       padding: '24px 16px',
-      borderRadius: 14,
+      borderRadius: 10,
       border: `2px solid #0891B2`,
       background: '#0891B214',
       cursor: 'pointer',

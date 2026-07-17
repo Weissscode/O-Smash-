@@ -80,7 +80,7 @@ export function StockView({
       style: {
         width: 18,
         height: 18,
-        borderRadius: 4,
+        borderRadius: 3,
         border: `2px solid ${out ? T.no : T.brd}`,
         background: out ? T.no : 'transparent',
         display: 'flex',
@@ -128,7 +128,7 @@ export function StockView({
       ...btn(T.noL, T.no, {
         fontSize: 10.5,
         padding: '6px 10px',
-        borderRadius: 6,
+        borderRadius: 4,
         fontWeight: 700
       })
     }
@@ -143,7 +143,7 @@ export function StockView({
       padding: '14px 16px',
       marginBottom: 16,
       background: T.primaryL,
-      borderRadius: 12,
+      borderRadius: 6,
       border: `1.5px solid ${T.primary}44`
     }
   }, /*#__PURE__*/React.createElement("div", {
@@ -165,7 +165,7 @@ export function StockView({
     placeholder: "Nom",
     style: {
       padding: '9px 11px',
-      borderRadius: 8,
+      borderRadius: 6,
       border: `1.5px solid ${T.brd}`,
       background: T.bg,
       color: T.txt,
@@ -178,7 +178,7 @@ export function StockView({
     placeholder: "Prix",
     style: {
       padding: '9px 11px',
-      borderRadius: 8,
+      borderRadius: 6,
       border: `1.5px solid ${T.brd}`,
       background: T.bg,
       color: T.txt,

@@ -81,7 +81,7 @@ export function BurgerCust({
       color: T.white,
       fontWeight: 700,
       padding: '7px 18px',
-      borderRadius: 20,
+      borderRadius: 10,
       fontSize: 16
     }
   }, fp(product.price + ext))), /*#__PURE__*/React.createElement("div", {
@@ -105,7 +105,7 @@ export function BurgerCust({
     style: {
       width: '100%',
       padding: 16,
-      borderRadius: 12,
+      borderRadius: 6,
       border: s.version === 'Chicken' ? `2.5px solid #8B5CF6` : `1.5px solid ${T.brd}`,
       background: s.version === 'Chicken' ? '#8B5CF614' : T.bgCard,
       cursor: 'pointer',
@@ -210,7 +210,7 @@ export function BurgerCust({
     style: {
       width: '100%',
       padding: 12,
-      borderRadius: 10,
+      borderRadius: 6,
       border: `1.5px solid ${T.brd}`,
       background: T.bg,
       color: T.txt,

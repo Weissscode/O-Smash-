@@ -60,7 +60,7 @@ export function PhonePayModal({
     onClick: () => setPayment(p),
     style: {
       padding: 20,
-      borderRadius: 12,
+      borderRadius: 6,
       border: payment === p ? `2.5px solid ${T.ok}` : `1.5px solid ${T.brd}`,
       background: payment === p ? T.okL : T.bgCard,
       cursor: 'pointer',

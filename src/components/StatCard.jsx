@@ -10,7 +10,7 @@ export function StatCard({
   return /*#__PURE__*/React.createElement("div", {
     style: {
       background: '#fff',
-      borderRadius: 16,
+      borderRadius: 10,
       padding: '16px 18px',
       border: '1px solid #ECE5F7',
       boxShadow: '0 2px 10px rgba(90,40,150,0.06)',
@@ -45,7 +45,7 @@ export function StatCard({
     style: {
       width: 8,
       height: 8,
-      borderRadius: 4,
+      borderRadius: 3,
       background: color
     }
   })), /*#__PURE__*/React.createElement("div", {

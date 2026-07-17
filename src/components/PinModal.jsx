@@ -56,7 +56,7 @@ export function PinModal({
     style: {
       width: 42,
       height: 48,
-      borderRadius: 12,
+      borderRadius: 6,
       border: `2px solid ${err ? T.no : pin.length > i ? T.primary : T.brd}`,
       display: 'flex',
       alignItems: 'center',
@@ -74,7 +74,7 @@ export function PinModal({
       marginBottom: 10,
       padding: '6px',
       background: T.noL,
-      borderRadius: 8
+      borderRadius: 6
     }
   }, "Code incorrect"), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -91,7 +91,7 @@ export function PinModal({
     },
     style: {
       height: 50,
-      borderRadius: 11,
+      borderRadius: 6,
       border: `1.5px solid ${T.brd}`,
       background: n === 'OK' ? T.ok : n === 'C' ? T.noL : T.bg,
       color: n === 'OK' ? T.white : n === 'C' ? T.no : T.txt,

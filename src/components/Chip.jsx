@@ -11,7 +11,7 @@ export function Chip({
     onClick: onClick,
     style: {
       padding: '11px 14px',
-      borderRadius: 9,
+      borderRadius: 6,
       fontSize: 15,
       fontWeight: active ? 700 : 500,
       cursor: 'pointer',

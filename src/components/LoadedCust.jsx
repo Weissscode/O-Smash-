@@ -71,7 +71,7 @@ export function LoadedCust({
       color: T.white,
       fontWeight: 700,
       padding: '7px 18px',
-      borderRadius: 20,
+      borderRadius: 10,
       fontSize: 16
     }
   }, fp(product.price + ext))), /*#__PURE__*/React.createElement("div", {
@@ -125,7 +125,7 @@ export function LoadedCust({
     style: {
       width: '100%',
       padding: 12,
-      borderRadius: 10,
+      borderRadius: 6,
       border: `1.5px solid ${T.brd}`,
       background: T.bg,
       color: T.txt,

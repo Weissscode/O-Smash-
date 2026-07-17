@@ -435,7 +435,7 @@ export default function App() {
         fontWeight: 700,
         color: T.no,
         padding: '4px 12px',
-        borderRadius: 8,
+        borderRadius: 6,
         background: T.noL,
         border: `1px solid ${T.no}`
       }
@@ -547,7 +547,7 @@ export default function App() {
     onClick: () => setCart([]),
     style: {
       padding: '3px 10px',
-      borderRadius: 7,
+      borderRadius: 4,
       border: `1px solid ${T.no}`,
       background: T.noL,
       color: T.no,
@@ -559,7 +559,7 @@ export default function App() {
     onClick: () => setCartOpen(false),
     style: {
       padding: '3px 10px',
-      borderRadius: 7,
+      borderRadius: 4,
       border: `1px solid ${T.brd}`,
       background: 'transparent',
       color: T.txtSub,
@@ -623,7 +623,7 @@ export default function App() {
       background: '#F59E0B',
       color: '#fff',
       padding: '8px 12px',
-      borderRadius: 10,
+      borderRadius: 6,
       marginBottom: 8,
       fontSize: 12,
       fontWeight: 700,
@@ -640,7 +640,7 @@ export default function App() {
       background: 'rgba(0,0,0,0.2)',
       border: 'none',
       color: '#fff',
-      borderRadius: 6,
+      borderRadius: 4,
       padding: '2px 8px',
       cursor: 'pointer',
       fontSize: 11
@@ -650,7 +650,7 @@ export default function App() {
     style: {
       width: '100%',
       padding: 14,
-      borderRadius: 12,
+      borderRadius: 6,
       border: 'none',
       fontSize: 15,
       fontWeight: 700,
@@ -663,7 +663,7 @@ export default function App() {
     style: {
       width: '100%',
       padding: 14,
-      borderRadius: 12,
+      borderRadius: 6,
       border: 'none',
       fontSize: 15,
       fontWeight: 700,
@@ -728,7 +728,7 @@ export default function App() {
     onClick: () => t.pr ? setPinFor(t.id) : setView(t.id),
     style: {
       padding: mob ? '7px 12px' : '8px 20px',
-      borderRadius: 10,
+      borderRadius: 6,
       border: 'none',
       cursor: 'pointer',
       fontSize: mob ? 12 : 14,
@@ -765,7 +765,7 @@ export default function App() {
       fontWeight: 700,
       background: 'rgba(0,0,0,0.18)',
       padding: '4px 12px',
-      borderRadius: 20
+      borderRadius: 10
     }
   }, printSt), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -811,7 +811,7 @@ export default function App() {
     onClick: () => setSelCat(cat.id),
     style: {
       padding: mob ? '9px 14px' : '10px 22px',
-      borderRadius: 10,
+      borderRadius: 6,
       border: selCat === cat.id ? `2.5px solid ${cat.color}` : '2px solid transparent',
       cursor: 'pointer',
       fontSize: mob ? 12 : 14,
@@ -879,7 +879,7 @@ export default function App() {
     style: {
       flex: 1,
       padding: '11px 8px',
-      borderRadius: 11,
+      borderRadius: 6,
       border: `1.5px solid ${T.brd}`,
       background: T.bg,
       cursor: 'pointer',
@@ -901,7 +901,7 @@ export default function App() {
     style: {
       flex: 1.2,
       padding: '15px',
-      borderRadius: 11,
+      borderRadius: 6,
       border: 'none',
       background: T.ok,
       color: T.white,
@@ -1156,7 +1156,7 @@ export default function App() {
       fontWeight: 700,
       background: '#DBEAFE',
       padding: '8px 16px',
-      borderRadius: 10,
+      borderRadius: 6,
       marginBottom: 8
     }
   }, "Ticket cuisine imprim\xE9. Le ticket caisse sera imprim\xE9 \xE0 l'arriv\xE9e du client."), successM.client && /*#__PURE__*/React.createElement("div", {
@@ -1181,7 +1181,7 @@ export default function App() {
       fontWeight: 700,
       background: T.warnL,
       padding: '4px 12px',
-      borderRadius: 20
+      borderRadius: 10
     }
   }, successM.service), successM.payment && /*#__PURE__*/React.createElement("span", {
     style: {
@@ -1190,7 +1190,7 @@ export default function App() {
       fontWeight: 700,
       background: successM.payment === 'CB' ? '#DBEAFE' : T.okL,
       padding: '4px 12px',
-      borderRadius: 20
+      borderRadius: 10
     }
   }, successM.payment)), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -1206,7 +1206,7 @@ export default function App() {
       color: T.ok,
       padding: '5px 14px',
       background: T.okL,
-      borderRadius: 20,
+      borderRadius: 10,
       display: 'inline-block',
       marginBottom: 16
     }

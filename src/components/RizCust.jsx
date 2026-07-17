@@ -69,7 +69,7 @@ export function RizCust({
     })),
     style: {
       padding: 20,
-      borderRadius: 12,
+      borderRadius: 6,
       border: s.type === t ? `2.5px solid ${T.warn}` : `1.5px solid ${T.brd}`,
       background: s.type === t ? T.warnL : T.bgCard,
       cursor: 'pointer',
@@ -110,7 +110,7 @@ export function RizCust({
     style: {
       width: '100%',
       padding: 12,
-      borderRadius: 10,
+      borderRadius: 6,
       border: `1.5px solid ${T.brd}`,
       background: T.bg,
       color: T.txt,

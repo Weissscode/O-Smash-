@@ -96,7 +96,7 @@ export function Dash({
     style: {
       flex: 1,
       padding: '10px 8px',
-      borderRadius: 10,
+      borderRadius: 6,
       border: `2px solid ${tab === id ? color : T.brd}`,
       background: tab === id ? `${color}12` : T.bgCard,
       color: tab === id ? color : T.txtSub,
@@ -189,7 +189,7 @@ export function Dash({
       ...btn('#16A34A', T.white, {
         fontSize: 10.5,
         padding: '6px 10px',
-        borderRadius: 6,
+        borderRadius: 4,
         fontWeight: 700
       })
     }
@@ -200,7 +200,7 @@ export function Dash({
       ...btn('#059669', T.white, {
         fontSize: 10.5,
         padding: '6px 10px',
-        borderRadius: 6,
+        borderRadius: 4,
         fontWeight: 700
       })
     }
@@ -213,7 +213,7 @@ export function Dash({
       ...btn('#9333EA', T.white, {
         fontSize: 10.5,
         padding: '6px 10px',
-        borderRadius: 6,
+        borderRadius: 4,
         fontWeight: 700
       })
     }
@@ -230,7 +230,7 @@ export function Dash({
       ...btn(T.primary, T.white, {
         fontSize: 10.5,
         padding: '6px 10px',
-        borderRadius: 6,
+        borderRadius: 4,
         fontWeight: 700
       })
     }
@@ -425,7 +425,7 @@ export function Dash({
       fontWeight: 600,
       background: T.primaryL,
       padding: '1px 8px',
-      borderRadius: 20
+      borderRadius: 10
     }
   }, o.client), o.service && /*#__PURE__*/React.createElement("span", {
     style: {
@@ -434,7 +434,7 @@ export function Dash({
       fontWeight: 600,
       background: T.warnL,
       padding: '1px 8px',
-      borderRadius: 20
+      borderRadius: 10
     }
   }, o.service), o.payment && /*#__PURE__*/React.createElement("span", {
     style: {
@@ -443,7 +443,7 @@ export function Dash({
       fontWeight: 600,
       background: o.payment === 'CB' ? '#DBEAFE' : T.okL,
       padding: '1px 8px',
-      borderRadius: 20
+      borderRadius: 10
     }
   }, o.payment)), /*#__PURE__*/React.createElement("div", {
     style: {

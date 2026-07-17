@@ -113,7 +113,7 @@ export function SplitModal({
     key: ticket.id,
     style: {
       border: `1.5px solid ${ticket.payment ? T.ok : T.brd}`,
-      borderRadius: 12,
+      borderRadius: 6,
       overflow: 'hidden',
       background: T.bgCard
     }

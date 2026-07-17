@@ -66,7 +66,7 @@ export function ConfirmModal({
     style: {
       width: '100%',
       padding: '12px 14px',
-      borderRadius: 10,
+      borderRadius: 6,
       border: `1.5px solid ${T.brd}`,
       background: T.bg,
       color: T.txt,
@@ -84,7 +84,7 @@ export function ConfirmModal({
     style: {
       width: '100%',
       padding: '12px 14px',
-      borderRadius: 10,
+      borderRadius: 6,
       border: `1.5px solid ${isTel ? '#2563EB' : T.brd}`,
       background: T.bg,
       color: T.txt,
@@ -100,7 +100,7 @@ export function ConfirmModal({
       marginBottom: 14,
       padding: '6px 10px',
       background: '#DBEAFE',
-      borderRadius: 8
+      borderRadius: 6
     }
   }, "Commande telephone"), /*#__PURE__*/React.createElement(SL, {
     title: "SUR PLACE OU A EMPORTER",
@@ -117,7 +117,7 @@ export function ConfirmModal({
     onClick: () => setService(s),
     style: {
       padding: 18,
-      borderRadius: 12,
+      borderRadius: 6,
       border: service === s ? `2.5px solid ${T.warn}` : `1.5px solid ${T.brd}`,
       background: service === s ? T.warnL : T.bgCard,
       cursor: 'pointer',
@@ -142,7 +142,7 @@ export function ConfirmModal({
     onClick: () => setPayment(p),
     style: {
       padding: 18,
-      borderRadius: 12,
+      borderRadius: 6,
       border: payment === p ? `2.5px solid ${T.ok}` : `1.5px solid ${T.brd}`,
       background: payment === p ? T.okL : T.bgCard,
       cursor: 'pointer',

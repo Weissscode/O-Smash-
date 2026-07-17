@@ -23,7 +23,7 @@ export function InsightsCard({
   }, "Analyse automatique"), insights.length === 0 ? /*#__PURE__*/React.createElement("div", {
     style: {
       background: '#fff',
-      borderRadius: 16,
+      borderRadius: 10,
       padding: '20px 18px',
       border: '1px solid #ECE5F7',
       textAlign: 'center',

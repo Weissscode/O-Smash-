@@ -9,7 +9,7 @@ export function MiniStat({
   return /*#__PURE__*/React.createElement("div", {
     style: {
       background: '#fff',
-      borderRadius: 12,
+      borderRadius: 6,
       padding: '10px 12px',
       border: '1px solid #ECE5F7',
       boxShadow: '0 1px 6px rgba(90,40,150,0.05)',

@@ -9,8 +9,8 @@ html, body, #root {
   overflow: hidden;
 }
 body {
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background: #FFF8E8;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  background: #F8F5FF;
 }
 ::-webkit-scrollbar {
   display: none;

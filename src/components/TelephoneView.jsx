@@ -111,7 +111,7 @@ export function TelephoneView({
       fontWeight: 700,
       background: T.warnL,
       padding: '2px 8px',
-      borderRadius: 20,
+      borderRadius: 10,
       marginBottom: 3
     }
   }, order.service), /*#__PURE__*/React.createElement("div", {

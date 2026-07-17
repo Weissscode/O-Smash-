@@ -8,7 +8,7 @@ export function Tag({
     style: {
       display: 'inline-block',
       padding: '2px 9px',
-      borderRadius: 6,
+      borderRadius: 4,
       fontSize: 10,
       fontWeight: 700,
       background: `${color}16`,

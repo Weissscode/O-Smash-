@@ -63,7 +63,7 @@ export function FritesSauce({
       color: T.white,
       fontWeight: 700,
       padding: '5px 16px',
-      borderRadius: 20,
+      borderRadius: 10,
       fontSize: 14
     }
   }, fp((product?.price || 3) + ext))), /*#__PURE__*/React.createElement(SL, {
