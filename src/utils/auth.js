@@ -38,5 +38,5 @@ export async function getProfile(userId) {
     .from('profiles')
     .select('*, restaurants(*)')
     .eq('id', userId)
-    .single();
+    .maybeSingle();
 }

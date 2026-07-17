@@ -83,7 +83,8 @@ export function AuthGate() {
         textAlign: 'center'
       }
     },
-      /*#__PURE__*/React.createElement('div', null, 'Impossible de charger ton profil restaurant.'),
+      /*#__PURE__*/React.createElement('div', { style: { fontWeight: 700 } }, "Ce compte n'a pas encore de restaurant associé."),
+      /*#__PURE__*/React.createElement('div', { style: { fontSize: 12, color: T.txtSub, maxWidth: 320 } }, "L'inscription s'est probablement arretee avant confirmation. Deconnecte-toi et recree un compte (ou utilise un autre email)."),
       profileError && /*#__PURE__*/React.createElement('div', { style: { fontSize: 12, color: T.txtSub } }, profileError),
       /*#__PURE__*/React.createElement('button', {
         onClick: () => signOut(),
