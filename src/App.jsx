@@ -8,6 +8,7 @@ import { isPhoneNumber } from './utils/phone.js';
 import { getNextOrderNum } from './utils/orderNumber.js';
 import { sendPrint, sendPrintCuisine, sendPrintCaisse, sendDailyReport } from './utils/printServer.js';
 import { printTicket } from './utils/ticketPrint.js';
+import { fetchOrders, insertOrder, insertOrders, updateOrder, deleteOrder, deleteOrdersForDate, flushQueue, hasPendingSync } from './utils/ordersApi.js';
 import { Logo } from './components/Logo.jsx';
 import { Modal } from './components/Modal.jsx';
 import { Tag } from './components/Tag.jsx';
@@ -28,21 +29,43 @@ import { ConfirmModal } from './components/ConfirmModal.jsx';
 import { SplitModal } from './components/SplitModal.jsx';
 import { TelephoneView } from './components/TelephoneView.jsx';
 
-export default function App() {
+export default function App({ restaurantId }) {
   const [view, setView] = React.useState('pos');
   const [selCat, setSelCat] = React.useState('burger');
   const [cart, setCart] = React.useState([]);
-  const [orders, setOrders] = React.useState(() => LS.get('osm7-orders', []));
-  const [phoneOrders, setPhoneOrders] = React.useState(() => LS.get('osm7-phoneorders', []));
+  const [allOrders, setAllOrders] = React.useState(() => LS.get('osm7-orders-cache', []));
+  const [ordersLoaded, setOrdersLoaded] = React.useState(false);
+  const [syncPending, setSyncPending] = React.useState(hasPendingSync());
+  const orders = allOrders.filter(o => o.status !== 'en attente');
+  const phoneOrders = allOrders.filter(o => o.status === 'en attente');
   const [stockOut, setStockOut] = React.useState(() => LS.get('osm7-stock', []));
   const [customProds, setCustomProds] = React.useState(() => LS.get('osm7-custom-prods', []));
   const saveCP = p => {
     setCustomProds(p);
     LS.set('osm7-custom-prods', p);
   };
+  React.useEffect(() => {
+    LS.set('osm7-orders-cache', allOrders);
+  }, [allOrders]);
+  React.useEffect(() => {
+    if (!restaurantId) return;
+    fetchOrders(restaurantId).then(setAllOrders).catch(() => {}).finally(() => setOrdersLoaded(true));
+  }, [restaurantId]);
+  React.useEffect(() => {
+    const trySync = async () => {
+      await flushQueue();
+      setSyncPending(hasPendingSync());
+    };
+    window.addEventListener('online', trySync);
+    const t = setInterval(trySync, 30000);
+    return () => {
+      window.removeEventListener('online', trySync);
+      clearInterval(t);
+    };
+  }, []);
   const finalizePhoneAdd = () => {
     if (!phoneAddCtx || cart.length === 0) return;
-    setPhoneOrders(prev => {
+    setAllOrders(prev => {
       const updated = prev.map(o => o.id !== phoneAddCtx.orderId ? o : {
         ...o,
         items: [...o.items, ...cart.map(c => ({
@@ -50,7 +73,10 @@ export default function App() {
         }))],
         total: o.items.reduce((s, i) => s + (i.total || 0), 0) + cart.reduce((s, i) => s + (i.total || 0), 0)
       });
-      LS.set('osm7-phoneorders', updated);
+      const target = updated.find(o => o.id === phoneAddCtx.orderId);
+      if (target) {
+        updateOrder(target.id, { items: target.items, total: target.total }).then(r => setSyncPending(r.offline || hasPendingSync()));
+      }
       return updated;
     });
     setCart([]);
@@ -104,14 +130,8 @@ export default function App() {
     return () => clearInterval(t2);
   }, [orders]);
   React.useEffect(() => {
-    LS.set('osm7-orders', orders);
-  }, [orders]);
-  React.useEffect(() => {
     LS.set('osm7-stock', stockOut);
   }, [stockOut]);
-  React.useEffect(() => {
-    LS.set('osm7-phoneorders', phoneOrders);
-  }, [phoneOrders]);
   const togStock = id => {
     if (id === '__reset') {
       setStockOut([]);
@@ -169,29 +189,33 @@ export default function App() {
         ...o,
         status: 'en attente'
       };
-      setPhoneOrders(p => [phoneO, ...p]);
+      const { order: savedO, offline } = await insertOrder(restaurantId, phoneO);
+      setSyncPending(offline || hasPendingSync());
+      setAllOrders(p => [savedO, ...p]);
       setCart([]);
       setClientName('');
       setConfirmM(false);
       setCartOpen(false);
       setSuccessM({
-        ...o,
+        ...savedO,
         isTel: true
       });
       setPrintSt('Envoi cuisine...');
-      const r = await sendPrintCuisine(phoneO);
+      const r = await sendPrintCuisine(savedO);
       setPrintSt(r.success !== false ? 'Cuisine imprimée !' : 'Erreur cuisine');
       setTimeout(() => setPrintSt(null), 3000);
     } else {
       // Commande normale
-      setOrders(p => [o, ...p]);
+      const { order: savedO, offline } = await insertOrder(restaurantId, o);
+      setSyncPending(offline || hasPendingSync());
+      setAllOrders(p => [savedO, ...p]);
       setCart([]);
       setClientName('');
       setConfirmM(false);
       setCartOpen(false);
-      setSuccessM(o);
+      setSuccessM(savedO);
       setPrintSt('Impression...');
-      const r = await sendPrint(o);
+      const r = await sendPrint(savedO);
       setPrintSt(r.success !== false ? 'Imprimé !' : 'Erreur impression');
       setTimeout(() => setPrintSt(null), 3000);
     }
@@ -204,20 +228,15 @@ export default function App() {
       payment,
       status: 'payée'
     };
-    // Retirer de phoneOrders, ajouter à orders
-    setPhoneOrders(p => p.filter(x => x.id !== order.id));
-    setOrders(p => [paidO, ...p]);
+    const r0 = await updateOrder(order.id, { payment, status: 'payée' });
+    setSyncPending(r0.offline || hasPendingSync());
+    setAllOrders(p => p.map(x => x.id === order.id ? paidO : x));
     setPrintSt('Impression caisse...');
     const r = await sendPrintCaisse(paidO);
     setPrintSt(r.success !== false ? 'Ticket imprime !' : 'Erreur impression');
     setTimeout(() => setPrintSt(null), 3000);
   };
-  const splitPhoneOrder = async (order, tickets) => {
-    setPhoneOrders(p => {
-      const u = p.filter(x => x.id !== order.id);
-      LS.set('osm7-phoneorders', u);
-      return u;
-    });
+  const buildSplitSubOrders = (order, tickets, status) => {
     const newOrders = [];
     for (var i = 0; i < tickets.length; i++) {
       const t = tickets[i];
@@ -233,57 +252,38 @@ export default function App() {
         items: cleanItems,
         total: subTotal,
         payment: t.payment,
-        status: 'payee',
+        status,
         splitOf: order.num
       };
       newOrders.push(sub);
     }
-    setOrders(p => {
-      const u = [...newOrders, ...p];
-      LS.set('osm7-orders', u);
-      return u;
-    });
-    for (var j = 0; j < newOrders.length; j++) {
-      await sendPrintCaisse(newOrders[j]);
+    return newOrders;
+  };
+  const splitPhoneOrder = async (order, tickets) => {
+    const newOrders = buildSplitSubOrders(order, tickets, 'payee');
+    await deleteOrder(order.id);
+    const results = await insertOrders(restaurantId, newOrders);
+    setSyncPending(results.some(r => r.offline) || hasPendingSync());
+    const savedOrders = results.map(r => r.order);
+    setAllOrders(p => [...savedOrders, ...p.filter(x => x.id !== order.id)]);
+    for (var j = 0; j < savedOrders.length; j++) {
+      await sendPrintCaisse(savedOrders[j]);
     }
     setPrintSt('Paiements enregistres !');
     setTimeout(() => setPrintSt(null), 3000);
   };
   const splitCartOrder = async (order, tickets) => {
-    setOrders(p => {
-      const filtered = p.filter(x => x.id !== order.id);
-      return filtered;
-    });
-    const newOrders = [];
-    for (var i = 0; i < tickets.length; i++) {
-      const t = tickets[i];
-      if (!t || t.items.length === 0 || !t.payment) continue;
-      const cleanItems = t.items.map(it => ({
-        ...it,
-        id: it.id.toString().split('_')[0]
-      }));
-      const subTotal = cleanItems.reduce((s, it) => s + (it.total || 0), 0);
-      const sub = {
-        ...order,
-        id: uid(),
-        items: cleanItems,
-        total: subTotal,
-        payment: t.payment,
-        status: 'en cours',
-        splitOf: order.num
-      };
-      newOrders.push(sub);
-    }
-    setOrders(p => {
-      const u = [...newOrders, ...p];
-      LS.set('osm7-orders', u);
-      return u;
-    });
+    const newOrders = buildSplitSubOrders(order, tickets, 'en cours');
+    await deleteOrder(order.id);
+    const results = await insertOrders(restaurantId, newOrders);
+    setSyncPending(results.some(r => r.offline) || hasPendingSync());
+    const savedOrders = results.map(r => r.order);
+    setAllOrders(p => [...savedOrders, ...p.filter(x => x.id !== order.id)]);
     // Cuisine UNE SEULE FOIS sur la commande complete originale
     await sendPrintCuisine(order);
     // Caisse separee pour chaque sous-ticket
-    for (var j = 0; j < newOrders.length; j++) {
-      await sendPrintCaisse(newOrders[j]);
+    for (var j = 0; j < savedOrders.length; j++) {
+      await sendPrintCaisse(savedOrders[j]);
     }
     setPrintSt('Paiements enregistres !');
     setTimeout(() => setPrintSt(null), 3000);
@@ -759,7 +759,16 @@ export default function App() {
       alignItems: 'center',
       gap: 12
     }
-  }, printSt && /*#__PURE__*/React.createElement("div", {
+  }, syncPending && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 11,
+      color: '#fff',
+      fontWeight: 700,
+      background: 'rgba(245,158,11,0.35)',
+      padding: '4px 12px',
+      borderRadius: 6
+    }
+  }, "Hors ligne - synchro en attente"), printSt && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
       color: '#fff',
@@ -920,9 +929,11 @@ export default function App() {
     orders: orders,
     phoneOrders: phoneOrders,
     onSendReport: (dayOrders,dateStr,screenshot)=>sendDailyReport(dateStr,dayOrders,screenshot),
-    onReset: () => {
+    onReset: async () => {
       if (window.confirm('Reset toutes les commandes du jour ?')) {
-        setOrders(p => p.filter(o => fd(o.date) !== fd(new Date())));
+        const today = fd(new Date());
+        setAllOrders(p => p.filter(o => fd(o.date) !== today));
+        await deleteOrdersForDate(restaurantId, today);
         LS.set('osm7-counter', {
           date: '',
           num: 0
@@ -940,12 +951,10 @@ export default function App() {
       });
       setView('pos');
     },
-    onDelete: id => {
-      setPhoneOrders(p => {
-        const u = p.filter(x => x.id !== id);
-        LS.set('osm7-phoneorders', u);
-        return u;
-      });
+    onDelete: async id => {
+      setAllOrders(p => p.filter(x => x.id !== id));
+      const r = await deleteOrder(id);
+      setSyncPending(r.offline || hasPendingSync());
     }
   }), pinFor && /*#__PURE__*/React.createElement(PinModal, {
     onClose: () => setPinFor(null),
