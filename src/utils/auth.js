@@ -14,19 +14,21 @@ export async function signUpRestaurant(nomRestaurant, email, password) {
     return { needsEmailConfirmation: true };
   }
 
-  const { data: restaurant, error: restError } = await supabase
+  // On genere l'id du restaurant nous-memes : tant que le profil n'existe
+  // pas encore, la policy de lecture RLS empeche de relire la ligne qu'on
+  // vient de creer (.select() apres insert() echouerait silencieusement).
+  const restaurantId = crypto.randomUUID();
+  const { error: restError } = await supabase
     .from('restaurants')
-    .insert({ nom: nomRestaurant, email_contact: email })
-    .select()
-    .single();
+    .insert({ id: restaurantId, nom: nomRestaurant, email_contact: email });
   if (restError) return { error: restError };
 
   const { error: profileError } = await supabase
     .from('profiles')
-    .insert({ id: user.id, restaurant_id: restaurant.id, email, role: 'gerant' });
+    .insert({ id: user.id, restaurant_id: restaurantId, email, role: 'gerant' });
   if (profileError) return { error: profileError };
 
-  return { data: { user, restaurant } };
+  return { data: { user, restaurantId } };
 }
 
 export async function signOut() {
