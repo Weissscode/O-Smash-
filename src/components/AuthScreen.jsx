@@ -1,7 +1,6 @@
 import React from 'react';
 import { T } from '../data/theme.js';
 import { card, btn } from '../utils/styles.js';
-import { Logo } from './Logo.jsx';
 import { signIn, signUpRestaurant } from '../utils/auth.js';
 
 const ERR_MESSAGES = {
@@ -92,19 +91,20 @@ export function AuthScreen({ onAuthed }) {
       style: {
         background: T.primary,
         borderRadius: 6,
-        width: 80,
-        height: 80,
+        padding: '10px 18px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center'
       }
-    }, /*#__PURE__*/React.createElement(Logo, { size: 60 }))),
+    }, /*#__PURE__*/React.createElement('span', {
+      style: { fontSize: 22, fontWeight: 800, color: T.white, letterSpacing: -0.5 }
+    }, 'Weiss', /*#__PURE__*/React.createElement('span', { style: { fontWeight: 300 } }, 'Code')))),
     /*#__PURE__*/React.createElement('h1', {
       style: { fontSize: 20, fontWeight: 800, textAlign: 'center', color: T.txt, marginBottom: 4 }
     }, mode === 'login' ? 'Connexion' : 'Créer mon compte restaurant'),
     /*#__PURE__*/React.createElement('p', {
       style: { fontSize: 13, color: T.txtSub, textAlign: 'center', marginBottom: 24 }
-    }, mode === 'login' ? 'Accède à ton espace O\'SMASH' : 'Inscris ton restaurant en quelques secondes'),
+    }, mode === 'login' ? 'Accède à ton espace de gestion' : 'Inscris ton restaurant en quelques secondes'),
 
     mode === 'signup' && /*#__PURE__*/React.createElement('div', { style: { marginBottom: 14 } },
       /*#__PURE__*/React.createElement('label', {
