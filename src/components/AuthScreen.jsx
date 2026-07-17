@@ -1,6 +1,7 @@
 import React from 'react';
 import { T } from '../data/theme.js';
 import { card, btn } from '../utils/styles.js';
+import { ViceCodeLogo } from './ViceCodeLogo.jsx';
 import { signIn, signUpRestaurant } from '../utils/auth.js';
 
 const ERR_MESSAGES = {
@@ -86,19 +87,8 @@ export function AuthScreen({ onAuthed }) {
     }
   },
     /*#__PURE__*/React.createElement('div', {
-      style: { display: 'flex', justifyContent: 'center', marginBottom: 16 }
-    }, /*#__PURE__*/React.createElement('div', {
-      style: {
-        background: T.primary,
-        borderRadius: 6,
-        padding: '10px 18px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center'
-      }
-    }, /*#__PURE__*/React.createElement('span', {
-      style: { fontSize: 22, fontWeight: 800, color: T.white, letterSpacing: -0.5 }
-    }, 'Weiss', /*#__PURE__*/React.createElement('span', { style: { fontWeight: 300 } }, 'Code')))),
+      style: { display: 'flex', justifyContent: 'center', marginBottom: 8 }
+    }, /*#__PURE__*/React.createElement(ViceCodeLogo, { scale: 0.7 })),
     /*#__PURE__*/React.createElement('h1', {
       style: { fontSize: 20, fontWeight: 800, textAlign: 'center', color: T.txt, marginBottom: 4 }
     }, mode === 'login' ? 'Connexion' : 'Créer mon compte restaurant'),
