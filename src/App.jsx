@@ -408,6 +408,7 @@ export default function App() {
       },
       style: {
         ...card(),
+        borderRadius: 4,
         padding: '16px 18px',
         cursor: out ? 'not-allowed' : 'pointer',
         textAlign: 'left',
@@ -489,15 +490,15 @@ export default function App() {
       }))), prods.length > 9 && /*#__PURE__*/React.createElement("div", {
         style: {
           display: 'grid',
-          gridTemplateColumns: '1fr repeat(2,1fr) 1fr',
+          gridTemplateColumns: 'repeat(3,1fr)',
           gap: 9,
           marginTop: 9
         }
-      }, /*#__PURE__*/React.createElement("div", null), prods.slice(9, 11).map(p => /*#__PURE__*/React.createElement(PCard, {
+      }, prods.slice(9, 11).map(p => /*#__PURE__*/React.createElement(PCard, {
         key: p.id,
         p: p,
         cat: "burger"
-      })), /*#__PURE__*/React.createElement("div", null)));
+      }))));
     }
     // Onglets peu remplis = cases plus grandes
     const sparse = ['formule', 'riz', 'sides', 'loaded'].includes(selCat);

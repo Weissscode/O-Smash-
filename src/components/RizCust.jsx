@@ -147,29 +147,3 @@ export function RizCust({
     }
   }, "Confirmer"))));
 }
-const FRITES_SUPPS = [{
-  l: 'Bacon',
-  p: 1
-}, {
-  l: 'Oignons frits',
-  p: 0.5
-}, {
-  l: 'Cheddar',
-  p: 1
-}];
-
-// Modal pour Canadiennes / Cheddars / Wings
-const LOADED_RETRAITS = ['Sans cheddar', 'Sans oignon crispy', 'Sans sauce', 'Sans chicken'];
-const LOADED_SUPPS = [{
-  l: 'Supp. Cheddar',
-  p: 1
-}, {
-  l: 'Supp. Bacon',
-  p: 1
-}, {
-  l: 'Supp. Oignon Crispy',
-  p: 0.5
-}, {
-  l: 'Supp. Chicken',
-  p: 2
-}];

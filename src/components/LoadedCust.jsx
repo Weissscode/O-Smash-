@@ -1,5 +1,6 @@
 import React from 'react';
 import { T } from '../data/theme.js';
+import { LOADED_RETRAITS, LOADED_SUPPS } from '../data/products.js';
 import { card, btn } from '../utils/styles.js';
 import { fp } from '../utils/format.js';
 import { Modal } from './Modal.jsx';

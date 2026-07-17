@@ -2,6 +2,7 @@ import React from 'react';
 import { T } from '../data/theme.js';
 import { CB } from '../data/products.js';
 import { FRITES_SAUCES } from '../data/products.js';
+import { TWISTER_SUPPS } from '../data/products.js';
 import { card, btn } from '../utils/styles.js';
 import { fp } from '../utils/format.js';
 import { Modal } from './Modal.jsx';

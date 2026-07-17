@@ -1,6 +1,6 @@
 import React from 'react';
 import { T } from '../data/theme.js';
-import { BURGERS, RIZ } from '../data/products.js';
+import { BURGERS, RIZ, ETUD_CHOICES } from '../data/products.js';
 import { card, btn } from '../utils/styles.js';
 import { fp } from '../utils/format.js';
 import { Modal } from './Modal.jsx';
