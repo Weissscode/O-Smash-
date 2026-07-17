@@ -27,7 +27,6 @@ import { CItem } from './components/CItem.jsx';
 import { ConfirmModal } from './components/ConfirmModal.jsx';
 import { SplitModal } from './components/SplitModal.jsx';
 import { TelephoneView } from './components/TelephoneView.jsx';
-import { supabase } from './supabaseClient.js';
 
 export default function App() {
   const [view, setView] = React.useState('pos');
@@ -74,12 +73,6 @@ export default function App() {
   const [burgerStartM, setBurgerStartM] = React.useState(null);
   const [confirmM, setConfirmM] = React.useState(false);
   const [successM, setSuccessM] = React.useState(null);
-  const [supaStatus, setSupaStatus] = React.useState('test en cours...');
-  React.useEffect(() => {
-    supabase.from('restaurants').select('id').limit(1).then(({ error }) => {
-      setSupaStatus(error ? 'erreur : ' + error.message : 'connecté');
-    });
-  }, []);
   React.useEffect(() => {
     const ck = () => setMob(window.innerWidth < 1100);
     window.addEventListener('resize', ck);
@@ -766,16 +759,7 @@ export default function App() {
       alignItems: 'center',
       gap: 12
     }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: '#fff',
-      fontWeight: 700,
-      background: supaStatus === 'connecté' ? 'rgba(16,185,129,0.35)' : 'rgba(239,68,68,0.35)',
-      padding: '4px 12px',
-      borderRadius: 10
-    }
-  }, 'Supabase: ' + supaStatus), printSt && /*#__PURE__*/React.createElement("div", {
+  }, printSt && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
       color: '#fff',
