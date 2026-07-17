@@ -74,10 +74,10 @@ export default function App() {
   const [burgerStartM, setBurgerStartM] = React.useState(null);
   const [confirmM, setConfirmM] = React.useState(false);
   const [successM, setSuccessM] = React.useState(null);
-  const [supaStatus, setSupaStatus] = React.useState('test...');
+  const [supaStatus, setSupaStatus] = React.useState('test en cours...');
   React.useEffect(() => {
     supabase.from('restaurants').select('id').limit(1).then(({ error }) => {
-      setSupaStatus(error ? 'erreur: ' + error.message : 'connecte');
+      setSupaStatus(error ? 'erreur : ' + error.message : 'connecté');
     });
   }, []);
   React.useEffect(() => {
@@ -771,7 +771,7 @@ export default function App() {
       fontSize: 11,
       color: '#fff',
       fontWeight: 700,
-      background: supaStatus === 'connecte' ? 'rgba(16,185,129,0.35)' : 'rgba(239,68,68,0.35)',
+      background: supaStatus === 'connecté' ? 'rgba(16,185,129,0.35)' : 'rgba(239,68,68,0.35)',
       padding: '4px 12px',
       borderRadius: 10
     }
