@@ -9,6 +9,7 @@ import { getNextOrderNum } from './utils/orderNumber.js';
 import { sendPrint, sendPrintCuisine, sendPrintCaisse, sendDailyReport } from './utils/printServer.js';
 import { printTicket } from './utils/ticketPrint.js';
 import { fetchOrders, insertOrder, insertOrders, updateOrder, deleteOrder, deleteOrdersForDate, flushQueue, hasPendingSync } from './utils/ordersApi.js';
+import { fetchStockOut, setStockStatus, resetStock, flushStockQueue, hasPendingStockSync } from './utils/stockApi.js';
 import { Logo } from './components/Logo.jsx';
 import { Modal } from './components/Modal.jsx';
 import { Tag } from './components/Tag.jsx';
@@ -54,7 +55,8 @@ export default function App({ restaurantId }) {
   React.useEffect(() => {
     const trySync = async () => {
       await flushQueue();
-      setSyncPending(hasPendingSync());
+      await flushStockQueue();
+      setSyncPending(hasPendingSync() || hasPendingStockSync());
     };
     window.addEventListener('online', trySync);
     const t = setInterval(trySync, 30000);
@@ -132,12 +134,19 @@ export default function App({ restaurantId }) {
   React.useEffect(() => {
     LS.set('osm7-stock', stockOut);
   }, [stockOut]);
+  React.useEffect(() => {
+    if (!restaurantId) return;
+    fetchStockOut(restaurantId).then(setStockOut).catch(() => {});
+  }, [restaurantId]);
   const togStock = id => {
     if (id === '__reset') {
       setStockOut([]);
+      resetStock(restaurantId).then(r => setSyncPending(r.offline || hasPendingSync() || hasPendingStockSync()));
       return;
     }
+    const willBeOut = !stockOut.includes(id);
     setStockOut(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
+    setStockStatus(restaurantId, id, willBeOut).then(r => setSyncPending(r.offline || hasPendingSync() || hasPendingStockSync()));
   };
   const addCart = (name, price, pid, cust = null) => setCart(p => [...p, {
     id: uid(),
