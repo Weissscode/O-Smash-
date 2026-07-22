@@ -15,7 +15,8 @@ function rowToOrder(row) {
     phone: row.phone,
     client: row.client,
     status: row.status,
-    splitOf: row.split_of
+    splitOf: row.split_of,
+    printRequest: row.print_request
   };
 }
 
@@ -30,7 +31,8 @@ function orderToRow(restaurantId, order) {
     phone: order.phone || null,
     client: order.client || null,
     status: order.status,
-    split_of: order.splitOf || null
+    split_of: order.splitOf || null,
+    print_request: order.printRequest || null
   };
 }
 
@@ -88,6 +90,7 @@ export async function updateOrder(id, updates) {
   if ('status' in updates) row.status = updates.status;
   if ('items' in updates) row.items = updates.items;
   if ('total' in updates) row.total = updates.total;
+  if ('printRequest' in updates) row.print_request = updates.printRequest;
   if (id.toString().startsWith('local_')) {
     enqueue({ type: 'update-local', localId: id, row });
     return { offline: true };

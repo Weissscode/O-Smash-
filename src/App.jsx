@@ -6,7 +6,7 @@ import { fp, ft, fd, uid } from './utils/format.js';
 import { LS } from './utils/storage.js';
 import { isPhoneNumber } from './utils/phone.js';
 import { getNextOrderNum } from './utils/orderNumber.js';
-import { sendPrint, sendPrintCuisine, sendPrintCaisse, sendDailyReport } from './utils/printServer.js';
+import { sendPrintCuisine, sendDailyReport } from './utils/printServer.js';
 import { printTicket } from './utils/ticketPrint.js';
 import { fetchOrders, insertOrder, insertOrders, updateOrder, deleteOrder, deleteOrdersForDate, flushQueue, hasPendingSync } from './utils/ordersApi.js';
 import { fetchStockOut, setStockStatus, resetStock, flushStockQueue, hasPendingStockSync } from './utils/stockApi.js';
@@ -196,7 +196,8 @@ export default function App({ restaurantId }) {
       // Commande téléphone : stocker dans phoneOrders, imprimer seulement cuisine
       const phoneO = {
         ...o,
-        status: 'en attente'
+        status: 'en attente',
+        printRequest: 'cuisine'
       };
       const { order: savedO, offline } = await insertOrder(restaurantId, phoneO);
       setSyncPending(offline || hasPendingSync());
@@ -209,13 +210,11 @@ export default function App({ restaurantId }) {
         ...savedO,
         isTel: true
       });
-      setPrintSt('Envoi cuisine...');
-      const r = await sendPrintCuisine(savedO);
-      setPrintSt(r.success !== false ? 'Cuisine imprimée !' : 'Erreur cuisine');
+      setPrintSt(offline ? 'Impression des la reconnexion...' : 'Ticket envoyé a l’imprimante...');
       setTimeout(() => setPrintSt(null), 3000);
     } else {
       // Commande normale
-      const { order: savedO, offline } = await insertOrder(restaurantId, o);
+      const { order: savedO, offline } = await insertOrder(restaurantId, { ...o, printRequest: 'full' });
       setSyncPending(offline || hasPendingSync());
       setAllOrders(p => [savedO, ...p]);
       setCart([]);
@@ -223,9 +222,7 @@ export default function App({ restaurantId }) {
       setConfirmM(false);
       setCartOpen(false);
       setSuccessM(savedO);
-      setPrintSt('Impression...');
-      const r = await sendPrint(savedO);
-      setPrintSt(r.success !== false ? 'Imprimé !' : 'Erreur impression');
+      setPrintSt(offline ? 'Impression des la reconnexion...' : 'Ticket envoyé a l’imprimante...');
       setTimeout(() => setPrintSt(null), 3000);
     }
   };
@@ -237,12 +234,10 @@ export default function App({ restaurantId }) {
       payment,
       status: 'payée'
     };
-    const r0 = await updateOrder(order.id, { payment, status: 'payée' });
+    const r0 = await updateOrder(order.id, { payment, status: 'payée', printRequest: 'caisse' });
     setSyncPending(r0.offline || hasPendingSync());
     setAllOrders(p => p.map(x => x.id === order.id ? paidO : x));
-    setPrintSt('Impression caisse...');
-    const r = await sendPrintCaisse(paidO);
-    setPrintSt(r.success !== false ? 'Ticket imprime !' : 'Erreur impression');
+    setPrintSt(r0.offline ? 'Impression des la reconnexion...' : 'Ticket envoyé a l’imprimante...');
     setTimeout(() => setPrintSt(null), 3000);
   };
   const buildSplitSubOrders = (order, tickets, status) => {
@@ -269,31 +264,26 @@ export default function App({ restaurantId }) {
     return newOrders;
   };
   const splitPhoneOrder = async (order, tickets) => {
-    const newOrders = buildSplitSubOrders(order, tickets, 'payee');
+    const newOrders = buildSplitSubOrders(order, tickets, 'payee').map(o => ({ ...o, printRequest: 'caisse' }));
     await deleteOrder(order.id);
     const results = await insertOrders(restaurantId, newOrders);
     setSyncPending(results.some(r => r.offline) || hasPendingSync());
     const savedOrders = results.map(r => r.order);
     setAllOrders(p => [...savedOrders, ...p.filter(x => x.id !== order.id)]);
-    for (var j = 0; j < savedOrders.length; j++) {
-      await sendPrintCaisse(savedOrders[j]);
-    }
     setPrintSt('Paiements enregistres !');
     setTimeout(() => setPrintSt(null), 3000);
   };
   const splitCartOrder = async (order, tickets) => {
-    const newOrders = buildSplitSubOrders(order, tickets, 'en cours');
+    const newOrders = buildSplitSubOrders(order, tickets, 'en cours').map(o => ({ ...o, printRequest: 'caisse' }));
     await deleteOrder(order.id);
     const results = await insertOrders(restaurantId, newOrders);
     setSyncPending(results.some(r => r.offline) || hasPendingSync());
     const savedOrders = results.map(r => r.order);
     setAllOrders(p => [...savedOrders, ...p.filter(x => x.id !== order.id)]);
-    // Cuisine UNE SEULE FOIS sur la commande complete originale
+    // Cuisine UNE SEULE FOIS sur la commande complete originale.
+    // Cette commande n'existe pas en base (split avant insertion) donc
+    // impression directe, pas via Realtime.
     await sendPrintCuisine(order);
-    // Caisse separee pour chaque sous-ticket
-    for (var j = 0; j < savedOrders.length; j++) {
-      await sendPrintCaisse(savedOrders[j]);
-    }
     setPrintSt('Paiements enregistres !');
     setTimeout(() => setPrintSt(null), 3000);
   };

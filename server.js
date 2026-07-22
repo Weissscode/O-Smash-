@@ -5,6 +5,7 @@ const cors = require('cors');
 const path = require('path');
 const nodemailer = require('nodemailer');
 const PDFDocument = require('pdfkit');
+const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 app.use(cors({ origin: '*' }));
@@ -614,9 +615,8 @@ app.get('/status', function(req, res) {
   res.json({ status: 'ok', caisse: CAISSE.ip, cuisine: CUISINE.ip });
 });
 
-// ── /print : commande classique ──────────────────────────────
-app.post('/print', async function(req, res) {
-  var order = req.body;
+// ── Logique d'impression partagee (endpoints HTTP + Realtime) ──
+async function doPrintFull(order) {
   var results = { caisse: 'ok', cuisine: 'ok', milkshake: 'skip' };
 
   // 1. Ticket caisse client
@@ -649,12 +649,10 @@ app.post('/print', async function(req, res) {
     console.log('[CUISINE] #' + order.num + ' SKIP');
   }
 
-  res.json({ success: true, results });
-});
+  return results;
+}
 
-// ── /print-cuisine : commande telephone recue ────────────────
-app.post('/print-cuisine', async function(req, res) {
-  var order = req.body;
+async function doPrintCuisine(order) {
   var results = { cuisine: 'ok', milkshake: 'skip' };
 
   var mk = buildMilkshake(order);
@@ -676,17 +674,33 @@ app.post('/print-cuisine', async function(req, res) {
   } else {
     results.cuisine = 'skip';
   }
-  res.json({ success: true, results });
-});
+  return results;
+}
 
-// ── /print-caisse : client telephone qui vient payer ────────
-app.post('/print-caisse', async function(req, res) {
-  var order = req.body;
+async function doPrintCaisse(order) {
   var results = { caisse: 'ok' };
   try {
     await imprimer(CAISSE, buildCaisse(order), 8000);
     console.log('[CAISSE] TEL #' + order.num + ' OK');
   } catch(e) { results.caisse = e.message; console.error('[CAISSE] TEL Erreur:', e.message); }
+  return results;
+}
+
+// ── /print : commande classique ──────────────────────────────
+app.post('/print', async function(req, res) {
+  var results = await doPrintFull(req.body);
+  res.json({ success: true, results });
+});
+
+// ── /print-cuisine : commande telephone recue ────────────────
+app.post('/print-cuisine', async function(req, res) {
+  var results = await doPrintCuisine(req.body);
+  res.json({ success: true, results });
+});
+
+// ── /print-caisse : client telephone qui vient payer ────────
+app.post('/print-caisse', async function(req, res) {
+  var results = await doPrintCaisse(req.body);
   res.json({ success: true, results });
 });
 
@@ -726,6 +740,71 @@ app.post('/test-cuisine', async function(req, res) {
   res.json({ success: true, results: r });
 });
 
+// ── IMPRESSION VIA SUPABASE REALTIME ─────────────────────────────────────────
+// L'app (navigateur) ne fait plus d'appel direct a ce serveur pour imprimer :
+// elle pose un champ print_request ('full' | 'cuisine' | 'caisse') sur la
+// commande dans Supabase. Ce serveur ecoute les changements en temps reel sur
+// la table orders de SON restaurant, imprime des qu'il voit une valeur non
+// vide, puis la remet a null. Ca marche aussi pour les commandes qui arrivent
+// en retard depuis la file d'attente hors-ligne du navigateur.
+//
+// Valeurs fournies via .env (jamais commitees) - voir .env.example :
+//   SUPABASE_URL, SUPABASE_SECRET_KEY (cle secrete, PAS la publishable key),
+//   RESTAURANT_ID (id du restaurant, Supabase > Table Editor > restaurants)
+const SUPABASE_URL = process.env.SUPABASE_URL;
+const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY;
+const RESTAURANT_ID = process.env.RESTAURANT_ID;
+
+function rowToPrintOrder(row) {
+  return {
+    num: row.num,
+    date: row.cree_le,
+    items: row.items || [],
+    total: row.total,
+    payment: row.payment,
+    service: row.service,
+    phone: row.phone,
+    client: row.client
+  };
+}
+
+function startRealtimePrinting() {
+  var supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY);
+
+  async function handleIncomingOrderRow(row) {
+    if (!row || !row.print_request) return;
+    var order = rowToPrintOrder(row);
+    var kind = row.print_request;
+    console.log('[REALTIME] Commande #' + order.num + ' -> impression ' + kind);
+    try {
+      if (kind === 'full') await doPrintFull(order);
+      else if (kind === 'cuisine') await doPrintCuisine(order);
+      else if (kind === 'caisse') await doPrintCaisse(order);
+    } catch (e) {
+      console.error('[REALTIME] Erreur impression #' + order.num + ':', e.message);
+    }
+    try {
+      await supabaseAdmin.from('orders').update({ print_request: null }).eq('id', row.id);
+    } catch (e) {
+      console.error('[REALTIME] Erreur remise a zero print_request #' + order.num + ':', e.message);
+    }
+  }
+
+  supabaseAdmin
+    .channel('orders-print')
+    .on('postgres_changes', {
+      event: 'INSERT', schema: 'public', table: 'orders',
+      filter: 'restaurant_id=eq.' + RESTAURANT_ID
+    }, function(payload) { handleIncomingOrderRow(payload.new); })
+    .on('postgres_changes', {
+      event: 'UPDATE', schema: 'public', table: 'orders',
+      filter: 'restaurant_id=eq.' + RESTAURANT_ID
+    }, function(payload) { handleIncomingOrderRow(payload.new); })
+    .subscribe(function(status) {
+      console.log('[REALTIME] Statut abonnement impression : ' + status);
+    });
+}
+
 app.listen(HTTP_PORT, '0.0.0.0', function() {
   console.log('');
   console.log('==========================================');
@@ -734,7 +813,16 @@ app.listen(HTTP_PORT, '0.0.0.0', function() {
   console.log('  Caisse  : ' + CAISSE.ip + ':' + CAISSE.port);
   console.log('  Cuisine : ' + CUISINE.ip + ':' + CUISINE.port);
   console.log('  HTTP    : http://localhost:' + HTTP_PORT);
+  if (SUPABASE_URL && SUPABASE_SECRET_KEY && RESTAURANT_ID) {
+    console.log('  Realtime: active (restaurant ' + RESTAURANT_ID + ')');
+  } else {
+    console.log('  Realtime: DESACTIVE (SUPABASE_URL / SUPABASE_SECRET_KEY / RESTAURANT_ID manquant dans .env)');
+  }
   console.log('==========================================');
   console.log('  Pret !');
   console.log('==========================================');
+
+  if (SUPABASE_URL && SUPABASE_SECRET_KEY && RESTAURANT_ID) {
+    startRealtimePrinting();
+  }
 });
