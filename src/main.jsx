@@ -11,8 +11,10 @@ import '@fontsource/anton';
 import '@fontsource/permanent-marker';
 import './index.css';
 
+const mode = window.location.pathname.startsWith('/gestion') ? 'manager' : 'pos';
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <AuthGate />
+    <AuthGate mode={mode} />
   </React.StrictMode>
 );

@@ -4,8 +4,9 @@ import { T } from './data/theme.js';
 import { AuthScreen } from './components/AuthScreen.jsx';
 import { getProfile, signOut } from './utils/auth.js';
 import App from './App.jsx';
+import { ManagerDash } from './components/ManagerDash.jsx';
 
-export function AuthGate() {
+export function AuthGate({ mode = 'pos' }) {
   const [session, setSession] = React.useState(undefined);
   const [profile, setProfile] = React.useState(undefined);
   const [profileError, setProfileError] = React.useState(null);
@@ -91,6 +92,13 @@ export function AuthGate() {
         style: { color: T.primary, background: 'none', border: 'none', cursor: 'pointer', fontWeight: 700 }
       }, 'Se déconnecter')
     );
+  }
+
+  if (mode === 'manager') {
+    return /*#__PURE__*/React.createElement(ManagerDash, {
+      restaurantId: profile.restaurant_id,
+      restaurantName: profile.restaurants ? profile.restaurants.nom : ''
+    });
   }
 
   return /*#__PURE__*/React.createElement(App, { restaurantId: profile.restaurant_id, profile });
