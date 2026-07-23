@@ -17,7 +17,7 @@ export function ManagerDash({ restaurantId, restaurantName }) {
   React.useEffect(() => {
     let cancelled = false;
     const load = () => {
-      fetchOrders(restaurantId).then(o => { if (!cancelled) setAllOrders(o); }).finally(() => { if (!cancelled) setLoaded(true); });
+      fetchOrders(restaurantId, 90).then(o => { if (!cancelled) setAllOrders(o); }).finally(() => { if (!cancelled) setLoaded(true); });
     };
     load();
     const t = setInterval(load, REFRESH_MS);

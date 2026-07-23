@@ -48,9 +48,9 @@ function enqueue(mutation) {
   setQueue([...getQueue(), mutation]);
 }
 
-export async function fetchOrders(restaurantId) {
+export async function fetchOrders(restaurantId, daysBack = 2) {
   const since = new Date();
-  since.setDate(since.getDate() - 2);
+  since.setDate(since.getDate() - daysBack);
   const { data, error } = await supabase
     .from('orders')
     .select('*')

@@ -2,7 +2,6 @@ import React from 'react';
 import { T } from '../data/theme.js';
 import { card, btn } from '../utils/styles.js';
 import { fp, ft, fd } from '../utils/format.js';
-import { downloadDashboardPDF } from '../utils/dashboardExport.js';
 import { BarChart } from './BarChart.jsx';
 import { AreaChart } from './AreaChart.jsx';
 import { PieChart } from './PieChart.jsx';
@@ -15,7 +14,20 @@ export function Dash({
   phoneOrders,
   onReset
 }) {
-  const today = fd(new Date());
+  const [selectedDate, setSelectedDate] = React.useState(() => new Date());
+  const today = fd(selectedDate);
+  const isToday = today === fd(new Date());
+  const toDateInputValue = d => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  };
+  const shiftDate = deltaDays => setSelectedDate(d => {
+    const n = new Date(d);
+    n.setDate(n.getDate() + deltaDays);
+    return n;
+  });
   const tO = orders.filter(o => fd(o.date) === today && o.status !== 'annulee');
   const telTotal = tO.filter(o => o.phone).length + (phoneOrders || []).filter(o => fd(o.date) === today).length;
   const midi = tO.filter(o => new Date(o.date).getHours() < 15);
@@ -26,8 +38,6 @@ export function Dash({
   const revEsp = tO.filter(o => (o.payment || '').toLowerCase().startsWith('esp')).reduce((s, o) => s + o.total, 0);
   const revCB = tO.filter(o => o.payment === 'CB').reduce((s, o) => s + o.total, 0);
   const [tab, setTab] = React.useState('all');
-  const [capturing, setCapturing] = React.useState(false);
-  const dashRef = React.useRef(null);
   const shown = tab === 'midi' ? midi : tab === 'soir' ? soir : tO;
   const cnt = pref => shown.reduce((s, o) => s + o.items.filter(i => (i.pid || '').startsWith(pref)).reduce((a, i) => a + i.qty, 0), 0);
 
@@ -147,34 +157,49 @@ export function Dash({
     }
   }, "Dashboard"), /*#__PURE__*/React.createElement("div", {
     style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 6,
+      marginTop: 4
+    }
+  },
+  /*#__PURE__*/React.createElement("button", {
+    onClick: () => shiftDate(-1),
+    style: { ...btn(T.bgSide, T.txt, { padding: '4px 9px', fontSize: 13 }) }
+  }, "◀"),
+  /*#__PURE__*/React.createElement("input", {
+    type: 'date',
+    value: toDateInputValue(selectedDate),
+    onChange: e => {
+      if (!e.target.value) return;
+      const [y, m, d] = e.target.value.split('-').map(Number);
+      setSelectedDate(new Date(y, m - 1, d));
+    },
+    style: {
+      border: `1px solid ${T.brd}`,
+      borderRadius: 4,
+      padding: '3px 6px',
       fontSize: 12,
       color: T.txtSub,
-      marginTop: 2
+      background: T.bgCard
     }
-  }, today)), /*#__PURE__*/React.createElement("div", {
+  }),
+  /*#__PURE__*/React.createElement("button", {
+    onClick: () => shiftDate(1),
+    disabled: isToday,
+    style: { ...btn(T.bgSide, T.txt, { padding: '4px 9px', fontSize: 13, opacity: isToday ? 0.4 : 1 }) }
+  }, "▶"),
+  !isToday && /*#__PURE__*/React.createElement("button", {
+    onClick: () => setSelectedDate(new Date()),
+    style: { ...btn(T.primaryL, T.primaryD, { padding: '4px 9px', fontSize: 11, fontWeight: 700 }) }
+  }, "Aujourd'hui")
+  )), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       gap: 6,
       flexWrap: 'wrap'
     }
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: async () => {
-      if (capturing) return;
-      setCapturing(true);
-      try { await downloadDashboardPDF(dashRef.current, today); }
-      catch(e) { alert('Erreur capture : ' + e.message); }
-      setCapturing(false);
-    },
-    disabled: capturing,
-    style: {
-      ...btn(T.primary, T.white, {
-        fontSize: 10.5,
-        padding: '6px 10px',
-        borderRadius: 4,
-        fontWeight: 700
-      })
-    }
-  }, capturing ? 'Capture..' : 'Exporter PDF'), /*#__PURE__*/React.createElement("button", {
+  }, isToday && /*#__PURE__*/React.createElement("button", {
     onClick: onReset,
     style: {
       ...btn(T.noL, T.no, {
@@ -213,7 +238,6 @@ export function Dash({
       flexShrink: 0
     }
   }, tabBtn('all', 'Toute la journée', T.primary), tabBtn('midi', 'Midi', '#D97706'), tabBtn('soir', 'Soir', '#7C3AED')), /*#__PURE__*/React.createElement("div", {
-    ref: dashRef,
     style: {
       flex: 1,
       overflowY: 'auto',
