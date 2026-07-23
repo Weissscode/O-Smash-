@@ -38,20 +38,3 @@ export async function downloadDashboardPDF(el, dateStr) {
   }
   pdf.save('dashboard-osmash-' + dateStr.replace(/\//g, '-') + '.pdf');
 }
-
-export async function getDashboardScreenshotBase64(el) {
-  const origOverflow = el.style.overflowY;
-  const origHeight = el.style.height;
-  el.style.overflowY = 'visible';
-  el.style.height = 'auto';
-  const canvas = await html2canvas(el, {
-    scale: 1.3,
-    backgroundColor: '#F5F1FB',
-    useCORS: true,
-    windowWidth: el.scrollWidth,
-    windowHeight: el.scrollHeight
-  });
-  el.style.overflowY = origOverflow;
-  el.style.height = origHeight;
-  return canvas.toDataURL('image/jpeg', 0.7);
-}

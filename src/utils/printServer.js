@@ -48,25 +48,3 @@ export async function sendPrintCaisse(order) {
     };
   }
 }
-
-export async function sendDailyReport(dateStr, dayOrders, screenshot) {
-  try {
-    const r = await fetch(`${PRINT_SERVER}/send-daily-report`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        date: dateStr,
-        orders: dayOrders,
-        screenshot: screenshot || null
-      })
-    });
-    return await r.json();
-  } catch (e) {
-    return {
-      success: false,
-      error: e.message
-    };
-  }
-}

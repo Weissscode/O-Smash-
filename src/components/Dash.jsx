@@ -2,7 +2,7 @@ import React from 'react';
 import { T } from '../data/theme.js';
 import { card, btn } from '../utils/styles.js';
 import { fp, ft, fd } from '../utils/format.js';
-import { downloadDashboardPDF, getDashboardScreenshotBase64 } from '../utils/dashboardExport.js';
+import { downloadDashboardPDF } from '../utils/dashboardExport.js';
 import { BarChart } from './BarChart.jsx';
 import { AreaChart } from './AreaChart.jsx';
 import { PieChart } from './PieChart.jsx';
@@ -13,8 +13,7 @@ import { InsightsCard } from './InsightsCard.jsx';
 export function Dash({
   orders,
   phoneOrders,
-  onReset,
-  onSendReport
+  onReset
 }) {
   const today = fd(new Date());
   const tO = orders.filter(o => fd(o.date) === today && o.status !== 'annulee');
@@ -27,7 +26,6 @@ export function Dash({
   const revEsp = tO.filter(o => (o.payment || '').toLowerCase().startsWith('esp')).reduce((s, o) => s + o.total, 0);
   const revCB = tO.filter(o => o.payment === 'CB').reduce((s, o) => s + o.total, 0);
   const [tab, setTab] = React.useState('all');
-  const [sending, setSending] = React.useState(false);
   const [capturing, setCapturing] = React.useState(false);
   const dashRef = React.useRef(null);
   const shown = tab === 'midi' ? midi : tab === 'soir' ? soir : tO;
@@ -124,31 +122,6 @@ export function Dash({
       marginBottom: 10
     }
   }, title), children);
-  const handleSendReport = async useYesterday => {
-    if (sending) return;
-    setSending(true);
-    let targetDate = today,
-      targetOrders = tO;
-    if (useYesterday) {
-      const y = new Date();
-      y.setDate(y.getDate() - 1);
-      targetDate = fd(y);
-      targetOrders = orders.filter(o => fd(o.date) === targetDate && o.status !== 'annulee');
-    }
-    if (targetOrders.length === 0) {
-      setSending(false);
-      alert('Aucune commande pour ' + (useYesterday ? 'hier' : 'aujourd\'hui') + ' — rien a envoyer.');
-      return;
-    }
-    let screenshot = null;
-    if (!useYesterday && dashRef.current) {
-      try { screenshot = await getDashboardScreenshotBase64(dashRef.current); }
-      catch(e) { console.error('Screenshot error:', e.message); }
-    }
-    const r = await onSendReport(targetOrders, targetDate, screenshot);
-    setSending(false);
-    alert(r && r.success ? 'Rapport envoye par mail !' : 'Erreur : ' + (r && r.error ? r.error : 'connexion impossible'));
-  };
   return /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
@@ -185,41 +158,6 @@ export function Dash({
       flexWrap: 'wrap'
     }
   }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => handleSendReport(false),
-    disabled: sending,
-    style: {
-      ...btn('#16A34A', T.white, {
-        fontSize: 10.5,
-        padding: '6px 10px',
-        borderRadius: 4,
-        fontWeight: 700
-      })
-    }
-  }, sending ? 'Envoi..' : 'Envoyer (aujourd\'hui)'), /*#__PURE__*/React.createElement("button", {
-    onClick: () => handleSendReport(true),
-    disabled: sending,
-    style: {
-      ...btn('#059669', T.white, {
-        fontSize: 10.5,
-        padding: '6px 10px',
-        borderRadius: 4,
-        fontWeight: 700
-      })
-    }
-  }, "Envoyer (hier)"), /*#__PURE__*/React.createElement("button", {
-    onClick: async () => {
-      const r = await fetch(`${PRINT_SERVER}/test-email`, { method: 'POST' }).then(x=>x.json()).catch(e=>({success:false,error:e.message}));
-      alert(r && r.success ? 'Email de test envoye ! Verifie ta boite mail.' : 'Erreur : ' + (r && r.error || 'connexion impossible'));
-    },
-    style: {
-      ...btn('#9333EA', T.white, {
-        fontSize: 10.5,
-        padding: '6px 10px',
-        borderRadius: 4,
-        fontWeight: 700
-      })
-    }
-  }, 'Test email'), /*#__PURE__*/React.createElement("button", {
     onClick: async () => {
       if (capturing) return;
       setCapturing(true);

@@ -4,7 +4,6 @@ import { btn } from '../utils/styles.js';
 import { fd } from '../utils/format.js';
 import { LS } from '../utils/storage.js';
 import { fetchOrders, deleteOrdersForDate } from '../utils/ordersApi.js';
-import { sendDailyReport } from '../utils/printServer.js';
 import { signOut } from '../utils/auth.js';
 import { Dash } from './Dash.jsx';
 import { ViceCodeLogo } from './ViceCodeLogo.jsx';
@@ -57,7 +56,6 @@ export function ManagerDash({ restaurantId, restaurantName }) {
       : /*#__PURE__*/React.createElement(Dash, {
           orders,
           phoneOrders,
-          onSendReport: (dayOrders, dateStr, screenshot) => sendDailyReport(dateStr, dayOrders, screenshot),
           onReset: async () => {
             if (window.confirm('Reset toutes les commandes du jour ?')) {
               const today = fd(new Date());

@@ -6,7 +6,7 @@ import { fp, ft, fd, uid } from './utils/format.js';
 import { LS } from './utils/storage.js';
 import { isPhoneNumber } from './utils/phone.js';
 import { getNextOrderNum } from './utils/orderNumber.js';
-import { sendPrintCuisine, sendDailyReport } from './utils/printServer.js';
+import { sendPrintCuisine } from './utils/printServer.js';
 import { printTicket } from './utils/ticketPrint.js';
 import { fetchOrders, insertOrder, insertOrders, updateOrder, deleteOrder, deleteOrdersForDate, flushQueue, hasPendingSync } from './utils/ordersApi.js';
 import { fetchStockOut, setStockStatus, resetStock, flushStockQueue, hasPendingStockSync } from './utils/stockApi.js';
@@ -110,27 +110,6 @@ export default function App({ restaurantId }) {
     const t = setInterval(() => setNow(new Date()), 30000);
     return () => clearInterval(t);
   }, []);
-  React.useEffect(() => {
-    const check = async () => {
-      const n = new Date();
-      if (n.getHours() === 0 && n.getMinutes() <= 2) {
-        const reportDate = fd(new Date(n.getTime() - 5*60*1000));
-        const lastSent = LS.get('osm7-last-report', '');
-        if (lastSent !== reportDate) {
-          const dayOrders = orders.filter(o => fd(o.date) === reportDate && o.status !== 'annulee');
-          if (dayOrders.length > 0) {
-            const r = await sendDailyReport(reportDate, dayOrders);
-            if (r && r.success) { LS.set('osm7-last-report', reportDate); }
-          } else {
-            LS.set('osm7-last-report', reportDate);
-          }
-        }
-      }
-    };
-    const t2 = setInterval(check, 60000);
-    check();
-    return () => clearInterval(t2);
-  }, [orders]);
   React.useEffect(() => {
     LS.set('osm7-stock', stockOut);
   }, [stockOut]);
@@ -927,7 +906,6 @@ export default function App({ restaurantId }) {
   }), view === 'dashboard' && /*#__PURE__*/React.createElement(Dash, {
     orders: orders,
     phoneOrders: phoneOrders,
-    onSendReport: (dayOrders,dateStr,screenshot)=>sendDailyReport(dateStr,dayOrders,screenshot),
     onReset: async () => {
       if (window.confirm('Reset toutes les commandes du jour ?')) {
         const today = fd(new Date());

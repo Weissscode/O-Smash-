@@ -3,8 +3,6 @@ const net = require('net');
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
-const nodemailer = require('nodemailer');
-const PDFDocument = require('pdfkit');
 const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
@@ -22,19 +20,6 @@ app.use(express.static(path.join(__dirname)));
 const CAISSE  = { ip: '192.168.1.37', port: 9100 };
 const CUISINE = { ip: '192.168.1.38', port: 9100 };
 const HTTP_PORT = 3000;
-
-// ── CONFIG EMAIL (rapport quotidien) ─────────────────────────────────────────
-// Mot de passe application Gmail (16 caracteres), PAS le mot de passe normal.
-// Genere sur : https://myaccount.google.com/apppasswords
-// Valeurs fournies via .env (jamais commite) - voir .env.example
-const EMAIL_FROM = process.env.EMAIL_FROM;
-const EMAIL_APP_PASSWORD = process.env.EMAIL_APP_PASSWORD || '';
-const EMAIL_TO = process.env.EMAIL_TO;
-
-const mailTransporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: { user: EMAIL_FROM, pass: EMAIL_APP_PASSWORD.replace(/\s/g, '') }
-});
 
 const SNACK_TEL     = '07 56 88 73 47';
 const SNACK_ADDRESS = '14 Rue Victor Hugo, 54400 Longwy';
@@ -457,159 +442,6 @@ async function imprimerCuisineAvecRetry(data, orderNum) {
   }
 }
 
-
-// ── RAPPORT JOURNALIER PDF ───────────────────────────────────────────────────
-function buildDailyReportPDF(dateStr, orders, screenshotBase64) {
-  return new Promise(function(resolve, reject) {
-    var doc = new PDFDocument({ margin: 40, size: 'A4' });
-    var chunks = [];
-    doc.on('data', function(c) { chunks.push(c); });
-    doc.on('end', function() { resolve(Buffer.concat(chunks)); });
-    doc.on('error', reject);
-
-    var validOrders = orders.filter(function(o) { return o.status !== 'annulee'; });
-    var totalCA = validOrders.reduce(function(s, o) { return s + (o.total || 0); }, 0);
-    var totalEsp = validOrders.filter(function(o) { return (o.payment || '').toLowerCase().indexOf('esp') === 0; })
-      .reduce(function(s, o) { return s + (o.total || 0); }, 0);
-    var totalCB = validOrders.filter(function(o) { return o.payment === 'CB'; })
-      .reduce(function(s, o) { return s + (o.total || 0); }, 0);
-    var telCount = validOrders.filter(function(o) { return o.phone; }).length;
-
-    // Top produits
-    var prodTally = {};
-    validOrders.forEach(function(o) {
-      (o.items || []).forEach(function(it) {
-        prodTally[it.name] = (prodTally[it.name] || 0) + (it.qty || 0);
-      });
-    });
-    var topProducts = Object.keys(prodTally).map(function(k) { return { name: k, qty: prodTally[k] }; })
-      .sort(function(a, b) { return b.qty - a.qty; }).slice(0, 10);
-
-    // Capture visuelle du dashboard (si fournie)
-    if (screenshotBase64) {
-      try {
-        var b64Data = screenshotBase64.replace(/^data:image\/\w+;base64,/, '');
-        var imgBuffer = Buffer.from(b64Data, 'base64');
-        doc.fontSize(16).fillColor('#5425A8').text("O'SMASH - Apercu visuel du Dashboard", { align: 'center' });
-        doc.moveDown(0.5);
-        var pageWidth = doc.page.width - 80;
-        doc.image(imgBuffer, 40, doc.y, { width: pageWidth, align: 'center' });
-        doc.addPage();
-      } catch (e) {
-        console.error('[PDF] Erreur insertion screenshot:', e.message);
-      }
-    }
-
-    // En-tete
-    doc.fontSize(20).fillColor('#5425A8').text("O'SMASH - Rapport quotidien", { align: 'center' });
-    doc.fontSize(12).fillColor('#666').text(dateStr, { align: 'center' });
-    doc.moveDown(1.2);
-
-    // KPI
-    doc.fontSize(14).fillColor('#000').text('Resume');
-    doc.moveDown(0.3);
-    doc.fontSize(11).fillColor('#333');
-    doc.text('Chiffre d\'affaires total : ' + totalCA.toFixed(2) + ' EUR');
-    doc.text('Nombre de commandes : ' + validOrders.length);
-    doc.text('Especes : ' + totalEsp.toFixed(2) + ' EUR');
-    doc.text('Carte bancaire : ' + totalCB.toFixed(2) + ' EUR');
-    doc.text('Commandes telephone : ' + telCount);
-    doc.moveDown(1);
-
-    // Top produits
-    doc.fontSize(14).fillColor('#000').text('Top produits');
-    doc.moveDown(0.3);
-    doc.fontSize(11).fillColor('#333');
-    if (topProducts.length === 0) {
-      doc.text('Aucune vente enregistree.');
-    } else {
-      topProducts.forEach(function(p, i) {
-        doc.text((i + 1) + '. ' + p.name + '  x' + p.qty);
-      });
-    }
-    doc.moveDown(1);
-
-    // Repartition horaire
-    var hourTotals = {};
-    validOrders.forEach(function(o) {
-      var h = new Date(o.date).getHours();
-      hourTotals[h] = (hourTotals[h] || 0) + (o.total || 0);
-    });
-    doc.fontSize(14).fillColor('#000').text('Chiffre d\'affaires par heure');
-    doc.moveDown(0.3);
-    doc.fontSize(10).fillColor('#333');
-    var hours = Object.keys(hourTotals).map(Number).sort(function(a, b) { return a - b; });
-    if (hours.length === 0) {
-      doc.text('Aucune donnee.');
-    } else {
-      hours.forEach(function(h) {
-        doc.text(h + 'h : ' + hourTotals[h].toFixed(2) + ' EUR');
-      });
-    }
-    doc.moveDown(1.2);
-
-    // Detail commandes
-    doc.fontSize(14).fillColor('#000').text('Detail des commandes');
-    doc.moveDown(0.3);
-    doc.fontSize(9).fillColor('#333');
-    validOrders.forEach(function(o) {
-      var items = (o.items || []).map(function(it) { return it.qty + 'x ' + it.name; }).join(', ');
-      var line = '#' + o.num + '  ' + new Date(o.date).toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'}) +
-        '  ' + (o.payment || '-') + '  ' + o.total.toFixed(2) + 'EUR  -  ' + items;
-      doc.text(line, { width: 515 });
-    });
-
-    doc.end();
-  });
-}
-
-
-app.post('/test-email', async function(req, res) {
-  try {
-    var now = new Date();
-    var dateStr = now.toLocaleDateString('fr-FR');
-    var fakeOrders = [
-      { num: 1, date: new Date(now.getTime() - 3*3600000).toISOString(), total: 23.5, payment: 'Especes', phone: null,
-        items: [{ name: "O'Smash Smoke", qty: 1 }, { name: 'Frites Twister', qty: 1 }, { name: 'Coca-Cola 33cl', qty: 1 }] },
-      { num: 2, date: new Date(now.getTime() - 2*3600000).toISOString(), total: 19.0, payment: 'CB', phone: '0612345678',
-        items: [{ name: 'Riz Crousty', qty: 2 }] },
-      { num: 3, date: new Date(now.getTime() - 1*3600000).toISOString(), total: 15.5, payment: 'Especes', phone: null,
-        items: [{ name: 'Milkshake Oreo', qty: 1 }, { name: "O'Smash Original", qty: 1 }] },
-    ];
-    var pdfBuffer = await buildDailyReportPDF(dateStr + ' (TEST)', fakeOrders);
-    await mailTransporter.sendMail({
-      from: EMAIL_FROM,
-      to: EMAIL_TO,
-      subject: "O'SMASH - TEST rapport",
-      text: 'Ceci est un email de test avec des donnees factices.',
-      attachments: [{ filename: 'test-rapport-osmash.pdf', content: pdfBuffer }]
-    });
-    res.json({ success: true });
-  } catch (e) {
-    console.error('[EMAIL TEST] Erreur:', e.message);
-    res.json({ success: false, error: e.message });
-  }
-});
-
-app.post('/send-daily-report', async function(req, res) {
-  try {
-    var dateStr = req.body.date;
-    var orders = req.body.orders || [];
-    var screenshot = req.body.screenshot || null;
-    var pdfBuffer = await buildDailyReportPDF(dateStr, orders, screenshot);
-    await mailTransporter.sendMail({
-      from: EMAIL_FROM,
-      to: EMAIL_TO,
-      subject: "O'SMASH - Rapport du " + dateStr,
-      text: 'Rapport quotidien O\'SMASH en piece jointe.',
-      attachments: [{ filename: 'rapport-osmash-' + dateStr.replace(/\//g, '-') + '.pdf', content: pdfBuffer }]
-    });
-    res.json({ success: true });
-  } catch (e) {
-    console.error('[EMAIL] Erreur envoi rapport:', e.message);
-    res.json({ success: false, error: e.message });
-  }
-});
 
 app.get('/status', function(req, res) {
   res.json({ status: 'ok', caisse: CAISSE.ip, cuisine: CUISINE.ip });
