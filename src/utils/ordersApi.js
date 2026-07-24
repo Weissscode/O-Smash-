@@ -91,6 +91,9 @@ export async function updateOrder(id, updates) {
   if ('items' in updates) row.items = updates.items;
   if ('total' in updates) row.total = updates.total;
   if ('printRequest' in updates) row.print_request = updates.printRequest;
+  if ('client' in updates) row.client = updates.client;
+  if ('phone' in updates) row.phone = updates.phone;
+  if ('service' in updates) row.service = updates.service;
   if (id.toString().startsWith('local_')) {
     enqueue({ type: 'update-local', localId: id, row });
     return { offline: true };

@@ -905,7 +905,6 @@ export default function App({ restaurantId }) {
     toggle: togStock
   }), view === 'dashboard' && /*#__PURE__*/React.createElement(Dash, {
     orders: orders,
-    phoneOrders: phoneOrders,
     onReset: async () => {
       if (window.confirm('Reset toutes les commandes du jour ?')) {
         const today = fd(new Date());
@@ -916,6 +915,16 @@ export default function App({ restaurantId }) {
           num: 0
         });
       }
+    },
+    onUpdateOrder: async (id, updates) => {
+      const r = await updateOrder(id, updates);
+      setAllOrders(p => p.map(o => o.id === id ? { ...o, ...updates } : o));
+      setSyncPending(r.offline || hasPendingSync());
+    },
+    onDeleteOrder: async id => {
+      const r = await deleteOrder(id);
+      setAllOrders(p => p.filter(o => o.id !== id));
+      setSyncPending(r.offline || hasPendingSync());
     }
   }), view === 'telephone' && /*#__PURE__*/React.createElement(TelephoneView, {
     phoneOrders: phoneOrders,

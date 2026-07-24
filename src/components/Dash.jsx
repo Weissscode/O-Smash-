@@ -1,426 +1,435 @@
 import React from 'react';
 import { T } from '../data/theme.js';
-import { card, btn } from '../utils/styles.js';
 import { fp, ft, fd } from '../utils/format.js';
-import { BarChart } from './BarChart.jsx';
-import { AreaChart } from './AreaChart.jsx';
-import { PieChart } from './PieChart.jsx';
-import { StatCard } from './StatCard.jsx';
-import { MiniStat } from './MiniStat.jsx';
-import { InsightsCard } from './InsightsCard.jsx';
+import { Modal } from './Modal.jsx';
+import {
+  IconMoney, IconReceipt, IconBag, IconCash, IconCard,
+  IconClock, IconClose, IconChevronLeft, IconChevronRight,
+  IconTrash, IconEdit, IconCalendar
+} from './icons.jsx';
 
-export function Dash({
-  orders,
-  phoneOrders,
-  onReset
-}) {
+const PAYMENT_OPTIONS = ['Especes', 'CB'];
+const SERVICE_OPTIONS = ['Sur place', 'A emporter'];
+
+function itemsSummary(items) {
+  if (!items || items.length === 0) return 'Aucun article';
+  const parts = items.slice(0, 2).map(i => `${i.qty}x ${i.name}`);
+  const extra = items.length - 2;
+  return parts.join(', ') + (extra > 0 ? ` +${extra}` : '');
+}
+
+function custLines(cust, depth = 0) {
+  if (!cust) return [];
+  const pad = '  '.repeat(depth);
+  const lines = [];
+  if (cust.protein) lines.push(pad + 'Protéine : ' + cust.protein);
+  if (cust.version) lines.push(pad + cust.version);
+  if (cust.type) lines.push(pad + 'Type : ' + cust.type);
+  if (cust.choix) lines.push(pad + 'Choix : ' + cust.choix);
+  if (cust.retraits) cust.retraits.forEach(r => lines.push(pad + '– Sans ' + r));
+  if (cust.supplements) cust.supplements.forEach(s => lines.push(pad + '+ ' + s));
+  if (cust.sauces) cust.sauces.forEach(s => lines.push(pad + 'Sauce : ' + s));
+  if (cust.sauce) lines.push(pad + 'Sauce : ' + cust.sauce);
+  if (cust.fritesSauce) lines.push(pad + 'Sauce frites : ' + cust.fritesSauce);
+  if (cust.fritesSupps) cust.fritesSupps.forEach(s => lines.push(pad + '+ ' + s));
+  if (cust.chantilly) lines.push(pad + '+ Chantilly');
+  if (cust.toppings) cust.toppings.forEach(t => lines.push(pad + '+ ' + t));
+  if (cust.glace) lines.push(pad + '+ Glace');
+  if (cust.drink) lines.push(pad + 'Boisson : ' + cust.drink);
+  if (cust.note) lines.push(pad + 'Note : ' + cust.note);
+  if (cust.burgers) cust.burgers.forEach((b, i) => {
+    lines.push(pad + (i + 1) + '. ' + b.name);
+    lines.push(...custLines(b.cust, depth + 1));
+  });
+  return lines;
+}
+
+function dayLabel(d) {
+  const startOfDay = x => { const y = new Date(x); y.setHours(0, 0, 0, 0); return y; };
+  const t = startOfDay(new Date());
+  const y = new Date(t); y.setDate(y.getDate() - 1);
+  const dd = startOfDay(d);
+  if (dd.getTime() === t.getTime()) return "Aujourd'hui";
+  if (dd.getTime() === y.getTime()) return 'Hier';
+  return dd.toLocaleDateString('fr-FR', { weekday: 'short', day: 'numeric', month: 'long' });
+}
+
+function toDateInputValue(d) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
+const iconTileStyle = tint => ({
+  width: 38,
+  height: 38,
+  borderRadius: 11,
+  background: tint + '17',
+  color: tint,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  flexShrink: 0
+});
+
+function StatTile({ icon, label, value, tint }) {
+  return /*#__PURE__*/React.createElement('div', {
+    style: {
+      background: T.bgCard,
+      borderRadius: 16,
+      border: `1px solid ${T.brd}`,
+      boxShadow: '0 1px 3px rgba(20,10,40,0.05)',
+      padding: '16px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 12,
+      minHeight: 78
+    }
+  },
+    /*#__PURE__*/React.createElement('div', { style: iconTileStyle(tint) }, icon),
+    /*#__PURE__*/React.createElement('div', { style: { minWidth: 0 } },
+      /*#__PURE__*/React.createElement('div', { style: { fontSize: 12.5, color: T.txtSub, fontWeight: 600, whiteSpace: 'nowrap' } }, label),
+      /*#__PURE__*/React.createElement('div', { style: { fontSize: 20, fontWeight: 800, color: T.txt, marginTop: 2, whiteSpace: 'nowrap' } }, value)
+    )
+  );
+}
+
+function IconButton({ icon, onClick, disabled, tint }) {
+  return /*#__PURE__*/React.createElement('button', {
+    onClick,
+    disabled,
+    style: {
+      width: 40,
+      height: 40,
+      borderRadius: 10,
+      border: 'none',
+      background: 'transparent',
+      color: disabled ? T.txtMuted : (tint || T.txt),
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      cursor: disabled ? 'default' : 'pointer',
+      opacity: disabled ? 0.4 : 1
+    }
+  }, icon);
+}
+
+function InfoRow({ label, value }) {
+  return /*#__PURE__*/React.createElement('div', {
+    style: {
+      display: 'flex',
+      justifyContent: 'space-between',
+      gap: 12,
+      padding: '9px 0',
+      borderBottom: `1px solid ${T.brdL}`,
+      fontSize: 14.5
+    }
+  },
+    /*#__PURE__*/React.createElement('span', { style: { color: T.txtSub } }, label),
+    /*#__PURE__*/React.createElement('span', { style: { color: T.txt, fontWeight: 700, textAlign: 'right' } }, value)
+  );
+}
+
+const fieldStyle = {
+  width: '100%',
+  padding: '11px 12px',
+  fontSize: 15,
+  borderRadius: 10,
+  border: `1px solid ${T.brd}`,
+  background: T.bgCard,
+  color: T.txt,
+  boxSizing: 'border-box'
+};
+
+function EditField({ label, children }) {
+  return /*#__PURE__*/React.createElement('div', { style: { marginBottom: 14 } },
+    /*#__PURE__*/React.createElement('div', { style: { fontSize: 12.5, color: T.txtSub, fontWeight: 600, marginBottom: 6 } }, label),
+    children
+  );
+}
+
+function OrderDetailModal({ order, onClose, onSave, onDelete }) {
+  const [editing, setEditing] = React.useState(false);
+  const [saving, setSaving] = React.useState(false);
+  const [form, setForm] = React.useState({
+    client: order.client || '',
+    phone: order.phone || '',
+    service: order.service || SERVICE_OPTIONS[0],
+    payment: order.payment || PAYMENT_OPTIONS[0]
+  });
+
+  const save = async () => {
+    setSaving(true);
+    await onSave(order.id, form);
+    setSaving(false);
+    setEditing(false);
+  };
+
+  const del = async () => {
+    if (!window.confirm(`Supprimer la commande #${order.num} ? Cette action est définitive.`)) return;
+    await onDelete(order.id);
+    onClose();
+  };
+
+  return /*#__PURE__*/React.createElement(Modal, { onClose }, /*#__PURE__*/React.createElement('div', {
+    onClick: e => e.stopPropagation(),
+    style: {
+      width: 'min(92vw, 460px)',
+      maxHeight: '88vh',
+      display: 'flex',
+      flexDirection: 'column',
+      background: T.bgCard,
+      borderRadius: 20,
+      boxShadow: '0 24px 70px rgba(20,10,40,0.28)',
+      overflow: 'hidden'
+    }
+  },
+    /*#__PURE__*/React.createElement('div', {
+      style: {
+        display: 'flex',
+        alignItems: 'flex-start',
+        justifyContent: 'space-between',
+        padding: '18px 18px 14px 20px',
+        borderBottom: `1px solid ${T.brdL}`
+      }
+    },
+      /*#__PURE__*/React.createElement('div', null,
+        /*#__PURE__*/React.createElement('div', { style: { fontSize: 18, fontWeight: 800, color: T.txt } }, 'Commande #' + order.num),
+        /*#__PURE__*/React.createElement('div', { style: { fontSize: 12.5, color: T.txtSub, marginTop: 3 } }, fd(order.date) + ' à ' + ft(order.date))
+      ),
+      /*#__PURE__*/React.createElement(IconButton, { icon: /*#__PURE__*/React.createElement(IconClose, { size: 18 }), onClick: onClose })
+    ),
+
+    /*#__PURE__*/React.createElement('div', { style: { padding: '16px 20px', overflowY: 'auto', flex: 1 } },
+      editing
+        ? [
+            /*#__PURE__*/React.createElement(EditField, { key: 'client', label: 'Prénom / Client' },
+              /*#__PURE__*/React.createElement('input', { style: fieldStyle, value: form.client, onChange: e => setForm({ ...form, client: e.target.value }), placeholder: 'Prénom du client' })
+            ),
+            /*#__PURE__*/React.createElement(EditField, { key: 'phone', label: 'Téléphone' },
+              /*#__PURE__*/React.createElement('input', { style: fieldStyle, value: form.phone, onChange: e => setForm({ ...form, phone: e.target.value }), placeholder: 'Numéro de téléphone' })
+            ),
+            /*#__PURE__*/React.createElement(EditField, { key: 'service', label: 'Service' },
+              /*#__PURE__*/React.createElement('select', { style: fieldStyle, value: form.service, onChange: e => setForm({ ...form, service: e.target.value }) },
+                SERVICE_OPTIONS.map(s => /*#__PURE__*/React.createElement('option', { key: s, value: s }, s))
+              )
+            ),
+            /*#__PURE__*/React.createElement(EditField, { key: 'payment', label: 'Paiement' },
+              /*#__PURE__*/React.createElement('select', { style: fieldStyle, value: form.payment, onChange: e => setForm({ ...form, payment: e.target.value }) },
+                PAYMENT_OPTIONS.map(p => /*#__PURE__*/React.createElement('option', { key: p, value: p }, p))
+              )
+            )
+          ]
+        : [
+            /*#__PURE__*/React.createElement(InfoRow, { key: 'client', label: 'Client', value: order.client || '—' }),
+            /*#__PURE__*/React.createElement(InfoRow, { key: 'phone', label: 'Téléphone', value: order.phone || '—' }),
+            /*#__PURE__*/React.createElement(InfoRow, { key: 'service', label: 'Service', value: order.service || '—' }),
+            /*#__PURE__*/React.createElement(InfoRow, { key: 'payment', label: 'Paiement', value: order.payment || '—' }),
+            /*#__PURE__*/React.createElement('div', { key: 'items-title', style: { fontSize: 12.5, fontWeight: 700, color: T.txtMuted, textTransform: 'uppercase', letterSpacing: 0.6, marginTop: 16, marginBottom: 8 } }, 'Articles'),
+            ...order.items.map((it, i) => /*#__PURE__*/React.createElement('div', {
+              key: 'item' + i,
+              style: { padding: '10px 0', borderBottom: `1px solid ${T.brdL}` }
+            },
+              /*#__PURE__*/React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: 14.5, color: T.txt } },
+                /*#__PURE__*/React.createElement('span', null, it.qty + 'x ' + it.name),
+                /*#__PURE__*/React.createElement('span', null, fp(it.total))
+              ),
+              custLines(it.cust).map((line, j) => /*#__PURE__*/React.createElement('div', {
+                key: 'l' + j,
+                style: { fontSize: 12.5, color: T.txtSub, marginTop: 2 }
+              }, line))
+            )),
+            /*#__PURE__*/React.createElement('div', {
+              key: 'total',
+              style: { display: 'flex', justifyContent: 'space-between', paddingTop: 14, marginTop: 6, fontSize: 17, fontWeight: 800, color: T.txt }
+            },
+              /*#__PURE__*/React.createElement('span', null, 'Total'),
+              /*#__PURE__*/React.createElement('span', { style: { color: T.primaryD } }, fp(order.total))
+            )
+          ]
+    ),
+
+    /*#__PURE__*/React.createElement('div', { style: { display: 'flex', gap: 10, padding: '14px 20px', borderTop: `1px solid ${T.brdL}` } },
+      editing
+        ? [
+            /*#__PURE__*/React.createElement('button', {
+              key: 'cancel',
+              onClick: () => setEditing(false),
+              style: { flex: 1, padding: '13px', borderRadius: 12, border: `1px solid ${T.brd}`, background: T.bgCard, color: T.txtSub, fontWeight: 700, fontSize: 15, cursor: 'pointer' }
+            }, 'Annuler'),
+            /*#__PURE__*/React.createElement('button', {
+              key: 'save',
+              onClick: save,
+              disabled: saving,
+              style: { flex: 1, padding: '13px', borderRadius: 12, border: 'none', background: T.primary, color: '#fff', fontWeight: 700, fontSize: 15, cursor: 'pointer', opacity: saving ? 0.7 : 1 }
+            }, saving ? 'Enregistrement...' : 'Enregistrer')
+          ]
+        : [
+            /*#__PURE__*/React.createElement('button', {
+              key: 'edit',
+              onClick: () => setEditing(true),
+              style: { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '13px', borderRadius: 12, border: `1px solid ${T.brd}`, background: T.bgCard, color: T.txt, fontWeight: 700, fontSize: 15, cursor: 'pointer' }
+            }, /*#__PURE__*/React.createElement(IconEdit, { size: 17 }), 'Modifier'),
+            /*#__PURE__*/React.createElement('button', {
+              key: 'delete',
+              onClick: del,
+              style: { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '13px', borderRadius: 12, border: 'none', background: T.noL, color: T.no, fontWeight: 700, fontSize: 15, cursor: 'pointer' }
+            }, /*#__PURE__*/React.createElement(IconTrash, { size: 17 }), 'Supprimer')
+          ]
+    )
+  ));
+}
+
+function OrderRow({ order, onClick }) {
+  const displayName = order.client || order.phone || order.service || 'Commande';
+  const tint = (order.payment || '').toLowerCase().startsWith('esp') ? T.ok : '#2563EB';
+  return /*#__PURE__*/React.createElement('button', {
+    onClick,
+    style: {
+      width: '100%',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 14,
+      padding: '14px 16px',
+      background: T.bgCard,
+      border: 'none',
+      borderLeft: `3px solid ${tint}`,
+      borderBottom: `1px solid ${T.brdL}`,
+      textAlign: 'left',
+      cursor: 'pointer',
+      minHeight: 68
+    }
+  },
+    /*#__PURE__*/React.createElement('div', { style: { fontWeight: 800, color: T.primaryD, fontSize: 14, width: 32, flexShrink: 0 } }, '#' + order.num),
+    /*#__PURE__*/React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 4, color: T.txtMuted, fontSize: 12.5, width: 52, flexShrink: 0 } },
+      /*#__PURE__*/React.createElement(IconClock, { size: 13 }), ft(order.date)
+    ),
+    /*#__PURE__*/React.createElement('div', { style: { flex: 1, minWidth: 0 } },
+      /*#__PURE__*/React.createElement('div', { style: { fontWeight: 700, fontSize: 15, color: T.txt, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, displayName),
+      /*#__PURE__*/React.createElement('div', { style: { fontSize: 12.5, color: T.txtSub, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 1 } }, itemsSummary(order.items))
+    ),
+    /*#__PURE__*/React.createElement('div', { style: { fontWeight: 800, fontSize: 15.5, color: T.txt, flexShrink: 0 } }, fp(order.total))
+  );
+}
+
+export function Dash({ orders, onReset, onUpdateOrder, onDeleteOrder }) {
   const [selectedDate, setSelectedDate] = React.useState(() => new Date());
+  const [selectedOrder, setSelectedOrder] = React.useState(null);
   const today = fd(selectedDate);
   const isToday = today === fd(new Date());
-  const toDateInputValue = d => {
-    const y = d.getFullYear();
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-    return `${y}-${m}-${day}`;
-  };
+
   const shiftDate = deltaDays => setSelectedDate(d => {
     const n = new Date(d);
     n.setDate(n.getDate() + deltaDays);
     return n;
   });
-  const tO = orders.filter(o => fd(o.date) === today && o.status !== 'annulee');
-  const telTotal = tO.filter(o => o.phone).length + (phoneOrders || []).filter(o => fd(o.date) === today).length;
-  const midi = tO.filter(o => new Date(o.date).getHours() < 15);
-  const soir = tO.filter(o => new Date(o.date).getHours() >= 15);
-  const rev = tO.reduce((s, o) => s + o.total, 0);
-  const revM = midi.reduce((s, o) => s + o.total, 0);
-  const revS = soir.reduce((s, o) => s + o.total, 0);
-  const revEsp = tO.filter(o => (o.payment || '').toLowerCase().startsWith('esp')).reduce((s, o) => s + o.total, 0);
-  const revCB = tO.filter(o => o.payment === 'CB').reduce((s, o) => s + o.total, 0);
-  const [tab, setTab] = React.useState('all');
-  const shown = tab === 'midi' ? midi : tab === 'soir' ? soir : tO;
-  const cnt = pref => shown.reduce((s, o) => s + o.items.filter(i => (i.pid || '').startsWith(pref)).reduce((a, i) => a + i.qty, 0), 0);
 
-  // Top produits
-  const prodTally = {};
-  shown.forEach(o => o.items.forEach(i => {
-    const key = i.name;
-    prodTally[key] = (prodTally[key] || 0) + i.qty;
-  }));
-  const topProducts = Object.entries(prodTally).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([label, value]) => ({
-    label,
-    value,
-    valueLabel: value
-  }));
+  const dayOrders = orders
+    .filter(o => fd(o.date) === today && o.status !== 'annulee')
+    .sort((a, b) => new Date(b.date) - new Date(a.date));
 
-  // CA par heure
-  const hourBuckets = Array.from({
-    length: 24
-  }, (_, h) => ({
-    label: h + 'h',
-    value: 0
-  }));
-  shown.forEach(o => {
-    const h = new Date(o.date).getHours();
-    hourBuckets[h].value += o.total;
-  });
-  const activeHours = hourBuckets.filter((h, i) => i >= 8 && i <= 23);
-  const hourData = activeHours.map(h => ({
-    label: h.label,
-    value: Math.round(h.value),
-    valueLabel: h.value > 0 ? Math.round(h.value) + 'e' : ''
-  }));
+  const rev = dayOrders.reduce((s, o) => s + o.total, 0);
+  const revEsp = dayOrders.filter(o => (o.payment || '').toLowerCase().startsWith('esp')).reduce((s, o) => s + o.total, 0);
+  const revCB = dayOrders.filter(o => o.payment === 'CB').reduce((s, o) => s + o.total, 0);
+  const panierMoyen = dayOrders.length ? rev / dayOrders.length : 0;
 
-  // Repartition paiement
-  const paymentData = [{
-    label: 'Especes',
-    value: revEsp,
-    color: '#10B981'
-  }, {
-    label: 'CB',
-    value: revCB,
-    color: '#2563EB'
-  }];
-  // Repartition service
-  const surPlace = shown.filter(o => o.service === 'Sur place').length;
-  const emporter = shown.filter(o => o.service === 'A emporter' || o.service === 'À emporter').length;
-  const telCnt = shown.filter(o => o.phone).length;
-  const serviceData = [{
-    label: 'Sur place',
-    value: surPlace,
-    color: '#7C3AED'
-  }, {
-    label: 'A emporter',
-    value: emporter,
-    color: '#F59E0B'
-  }, {
-    label: 'Telephone',
-    value: telCnt,
-    color: '#2563EB'
-  }];
-  const St = ({l, v, c = T.primary}) => /*#__PURE__*/React.createElement(StatCard, {label: l, value: v, color: c});
-  const tabBtn = (id, label, color) => /*#__PURE__*/React.createElement("button", {
-    onClick: () => setTab(id),
-    style: {
-      flex: 1,
-      padding: '10px 8px',
-      borderRadius: 6,
-      border: `2px solid ${tab === id ? color : T.brd}`,
-      background: tab === id ? `${color}12` : T.bgCard,
-      color: tab === id ? color : T.txtSub,
-      fontSize: 13,
-      fontWeight: tab === id ? 700 : 500,
-      cursor: 'pointer'
-    }
-  }, label);
-  const ChartCard = ({
-    title,
-    children
-  }) => /*#__PURE__*/React.createElement("div", {
-    style: {
-      ...card(),
-      padding: '14px 16px',
-      marginBottom: 12
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      fontWeight: 700,
-      color: T.txtMuted,
-      textTransform: 'uppercase',
-      letterSpacing: 1.2,
-      marginBottom: 10
-    }
-  }, title), children);
-  return /*#__PURE__*/React.createElement("div", {
-    style: {
-      flex: 1,
-      overflow: 'hidden',
-      display: 'flex',
-      flexDirection: 'column'
-    }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: {
-      padding: '14px 20px',
-      borderBottom: `1px solid ${T.brd}`,
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      flexWrap: 'wrap',
-      rowGap: 10
-    }
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 18,
-      fontWeight: 800,
-      color: T.txt
-    }
-  }, "Dashboard"), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: 6,
-      marginTop: 4
-    }
+  const handleSave = async (id, updates) => {
+    await onUpdateOrder(id, updates);
+    setSelectedOrder(prev => prev && prev.id === id ? { ...prev, ...updates } : prev);
+  };
+
+  const handleDelete = async id => {
+    await onDeleteOrder(id);
+  };
+
+  return /*#__PURE__*/React.createElement('div', {
+    style: { flex: 1, overflowY: 'auto', background: T.bg }
   },
-  /*#__PURE__*/React.createElement("button", {
-    onClick: () => shiftDate(-1),
-    style: { ...btn(T.bgSide, T.txt, { padding: '4px 9px', fontSize: 13 }) }
-  }, "◀"),
-  /*#__PURE__*/React.createElement("input", {
-    type: 'date',
-    value: toDateInputValue(selectedDate),
-    onChange: e => {
-      if (!e.target.value) return;
-      const [y, m, d] = e.target.value.split('-').map(Number);
-      setSelectedDate(new Date(y, m - 1, d));
+    /*#__PURE__*/React.createElement('div', {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: 12,
+        flexWrap: 'wrap',
+        padding: '16px 20px 12px'
+      }
     },
-    style: {
-      border: `1px solid ${T.brd}`,
-      borderRadius: 4,
-      padding: '3px 6px',
-      fontSize: 12,
-      color: T.txtSub,
-      background: T.bgCard
-    }
-  }),
-  /*#__PURE__*/React.createElement("button", {
-    onClick: () => shiftDate(1),
-    disabled: isToday,
-    style: { ...btn(T.bgSide, T.txt, { padding: '4px 9px', fontSize: 13, opacity: isToday ? 0.4 : 1 }) }
-  }, "▶"),
-  !isToday && /*#__PURE__*/React.createElement("button", {
-    onClick: () => setSelectedDate(new Date()),
-    style: { ...btn(T.primaryL, T.primaryD, { padding: '4px 9px', fontSize: 11, fontWeight: 700 }) }
-  }, "Aujourd'hui")
-  )), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      gap: 6,
-      flexWrap: 'wrap'
-    }
-  }, isToday && /*#__PURE__*/React.createElement("button", {
-    onClick: onReset,
-    style: {
-      ...btn(T.noL, T.no, {
-        fontSize: 12
-      })
-    }
-  }, "Reset journee"))), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr 1fr',
-      gap: 12,
-      padding: '14px 20px',
-      flexShrink: 0
-    }
-  },
-  /*#__PURE__*/React.createElement(StatCard, { label: "Journee totale", value: fp(rev), sub: tO.length + " commandes", color: T.primary }),
-  /*#__PURE__*/React.createElement(StatCard, { label: "Midi (avant 15h)", value: fp(revM), sub: midi.length + " commandes", color: "#D97706" }),
-  /*#__PURE__*/React.createElement(StatCard, { label: "Soir (apres 15h)", value: fp(revS), sub: soir.length + " commandes", color: "#7C3AED" })
-  ), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      gap: 12,
-      padding: '0 20px 14px',
-      flexShrink: 0
-    }
-  },
-  /*#__PURE__*/React.createElement(StatCard, { label: "Especes", value: fp(revEsp), color: "#10B981" }),
-  /*#__PURE__*/React.createElement(StatCard, { label: "Carte bancaire", value: fp(revCB), color: "#2563EB" })
-  ), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      gap: 8,
-      padding: '10px 20px',
-      borderBottom: `1px solid ${T.brd}`,
-      flexShrink: 0
-    }
-  }, tabBtn('all', 'Toute la journée', T.primary), tabBtn('midi', 'Midi', '#D97706'), tabBtn('soir', 'Soir', '#7C3AED')), /*#__PURE__*/React.createElement("div", {
-    style: {
-      flex: 1,
-      overflowY: 'auto',
-      padding: '14px 20px'
-    }
-  }, /*#__PURE__*/React.createElement(InsightsCard, {
-    orders: shown
-  }), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(4,1fr)',
-      gap: 8,
-      marginBottom: 16
-    }
-  }, /*#__PURE__*/React.createElement(MiniStat, {
-    label: "Commandes",
-    value: shown.length,
-    color: T.ok
-  }), /*#__PURE__*/React.createElement(MiniStat, {
-    label: "Par tel",
-    value: telTotal,
-    color: '#2563EB'
-  }), /*#__PURE__*/React.createElement(MiniStat, {
-    label: "Burgers",
-    value: cnt('b-'),
-    color: T.primary
-  }), /*#__PURE__*/React.createElement(MiniStat, {
-    label: "Riz",
-    value: cnt('r-'),
-    color: T.warn
-  }), /*#__PURE__*/React.createElement(MiniStat, {
-    label: "Boissons",
-    value: cnt('dr-'),
-    color: "#2563EB"
-  }), /*#__PURE__*/React.createElement(MiniStat, {
-    label: "Milkshakes",
-    value: cnt('mk-'),
-    color: "#7C3AED"
-  }), /*#__PURE__*/React.createElement(MiniStat, {
-    label: "Crepes+Desserts",
-    value: cnt('cr-') + cnt('de-'),
-    color: "#DB2777"
-  })), /*#__PURE__*/React.createElement(ChartCard, {
-    title: "Chiffre d'affaires par heure"
-  }, hourData.some(h => h.value > 0) ? /*#__PURE__*/React.createElement(AreaChart, {
-    data: hourData,
-    color: T.primary,
-    height: 150
-  }) : /*#__PURE__*/React.createElement("div", {
-    style: {
-      color: T.txtMuted,
-      fontSize: 13,
-      textAlign: 'center',
-      padding: 20
-    }
-  }, "Pas encore de donnees")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'grid',
-      gridTemplateColumns: '1fr 1fr',
-      gap: 12,
-      marginBottom: 12
-    }
-  }, /*#__PURE__*/React.createElement(ChartCard, {
-    title: "Repartition paiement"
-  }, revEsp + revCB > 0 ? /*#__PURE__*/React.createElement(PieChart, {
-    data: paymentData,
-    size: 120,
-    centerLabel: fp(revEsp+revCB)
-  }) : /*#__PURE__*/React.createElement("div", {
-    style: {
-      color: T.txtMuted,
-      fontSize: 13,
-      textAlign: 'center',
-      padding: 10
-    }
-  }, "Aucune donnee")), /*#__PURE__*/React.createElement(ChartCard, {
-    title: "Repartition service"
-  }, surPlace + emporter + telCnt > 0 ? /*#__PURE__*/React.createElement(PieChart, {
-    data: serviceData,
-    size: 120,
-    centerLabel: (surPlace+emporter+telCnt)
-  }) : /*#__PURE__*/React.createElement("div", {
-    style: {
-      color: T.txtMuted,
-      fontSize: 13,
-      textAlign: 'center',
-      padding: 10
-    }
-  }, "Aucune donnee"))), /*#__PURE__*/React.createElement(ChartCard, {
-    title: "Top 5 produits"
-  }, topProducts.length > 0 ? /*#__PURE__*/React.createElement(BarChart, {
-    data: topProducts,
-    color: "#DB2777"
-  }) : /*#__PURE__*/React.createElement("div", {
-    style: {
-      color: T.txtMuted,
-      fontSize: 13,
-      textAlign: 'center',
-      padding: 20
-    }
-  }, "Aucune vente")), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      fontWeight: 700,
-      color: T.txtMuted,
-      textTransform: 'uppercase',
-      letterSpacing: 1.2,
-      marginBottom: 10,
-      marginTop: 16
-    }
-  }, "Historique"), shown.length === 0 ? /*#__PURE__*/React.createElement("div", {
-    style: {
-      textAlign: 'center',
-      padding: 40,
-      color: T.txtMuted
-    }
-  }, "Aucune commande") : shown.map(o => /*#__PURE__*/React.createElement("div", {
-    key: o.id,
-    style: {
-      ...card(),
-      padding: '12px 16px',
-      marginBottom: 6,
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center'
-    }
-  }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
-    style: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: 10
-    }
-  }, /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontWeight: 900,
-      color: T.primary,
-      fontSize: 16,
-      fontFamily: 'monospace'
-    }
-  }, "#", o.num), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11,
-      color: T.txtMuted
-    }
-  }, ft(o.date)), o.client && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 11,
-      color: T.txtSub,
-      fontWeight: 600,
-      background: T.primaryL,
-      padding: '1px 8px',
-      borderRadius: 10
-    }
-  }, o.client), o.service && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 10,
-      color: T.warn,
-      fontWeight: 600,
-      background: T.warnL,
-      padding: '1px 8px',
-      borderRadius: 10
-    }
-  }, o.service), o.payment && /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontSize: 10,
-      color: o.payment === 'CB' ? '#2563EB' : T.ok,
-      fontWeight: 600,
-      background: o.payment === 'CB' ? '#DBEAFE' : T.okL,
-      padding: '1px 8px',
-      borderRadius: 10
-    }
-  }, o.payment)), /*#__PURE__*/React.createElement("div", {
-    style: {
-      fontSize: 11,
-      color: T.txtSub,
-      marginTop: 3
-    }
-  }, o.items.map(i => `${i.qty}x ${i.name}`).join(', '))), /*#__PURE__*/React.createElement("span", {
-    style: {
-      fontWeight: 800,
-      color: T.primary,
-      fontSize: 16
-    }
-  }, fp(o.total))))));
-}
+      /*#__PURE__*/React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 2 } },
+        /*#__PURE__*/React.createElement(IconButton, { icon: /*#__PURE__*/React.createElement(IconChevronLeft, {}), onClick: () => shiftDate(-1) }),
+        /*#__PURE__*/React.createElement('div', {
+          style: {
+            display: 'flex', alignItems: 'center', gap: 8,
+            padding: '9px 14px', borderRadius: 12,
+            background: T.bgCard, border: `1px solid ${T.brd}`,
+            position: 'relative'
+          }
+        },
+          /*#__PURE__*/React.createElement(IconCalendar, { size: 16 }),
+          /*#__PURE__*/React.createElement('span', { style: { fontSize: 14.5, fontWeight: 700, color: T.txt, textTransform: 'capitalize' } }, dayLabel(selectedDate)),
+          /*#__PURE__*/React.createElement('input', {
+            type: 'date',
+            value: toDateInputValue(selectedDate),
+            onChange: e => {
+              if (!e.target.value) return;
+              const [y, m, d] = e.target.value.split('-').map(Number);
+              setSelectedDate(new Date(y, m - 1, d));
+            },
+            style: { position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer', border: 'none' }
+          })
+        ),
+        /*#__PURE__*/React.createElement(IconButton, { icon: /*#__PURE__*/React.createElement(IconChevronRight, {}), onClick: () => shiftDate(1), disabled: isToday })
+      ),
+      isToday && /*#__PURE__*/React.createElement('button', {
+        onClick: onReset,
+        style: {
+          padding: '9px 14px',
+          borderRadius: 10,
+          border: 'none',
+          background: T.noL,
+          color: T.no,
+          fontWeight: 700,
+          fontSize: 13,
+          cursor: 'pointer'
+        }
+      }, 'Réinitialiser')
+    ),
 
+    /*#__PURE__*/React.createElement('div', {
+      style: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+        gap: 12,
+        padding: '4px 20px 20px'
+      }
+    },
+      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconMoney, {}), label: 'Chiffre d\'affaires', value: fp(rev), tint: T.primary }),
+      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconReceipt, {}), label: 'Commandes', value: String(dayOrders.length), tint: '#7C3AED' }),
+      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconBag, {}), label: 'Panier moyen', value: fp(panierMoyen), tint: '#D97706' }),
+      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconCash, {}), label: 'Espèces', value: fp(revEsp), tint: '#10B981' }),
+      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconCard, {}), label: 'Carte bancaire', value: fp(revCB), tint: '#2563EB' })
+    ),
+
+    /*#__PURE__*/React.createElement('div', {
+      style: {
+        margin: '0 20px 24px',
+        background: T.bgCard,
+        borderRadius: 16,
+        border: `1px solid ${T.brd}`,
+        overflow: 'hidden'
+      }
+    },
+      dayOrders.length === 0
+        ? /*#__PURE__*/React.createElement('div', { style: { padding: 40, textAlign: 'center', color: T.txtMuted, fontSize: 14 } }, 'Aucune commande ce jour-là')
+        : dayOrders.map(o => /*#__PURE__*/React.createElement(OrderRow, { key: o.id, order: o, onClick: () => setSelectedOrder(o) }))
+    ),
+
+    selectedOrder && /*#__PURE__*/React.createElement(OrderDetailModal, {
+      order: selectedOrder,
+      onClose: () => setSelectedOrder(null),
+      onSave: handleSave,
+      onDelete: handleDelete
+    })
+  );
+}

@@ -3,7 +3,7 @@ import { T } from '../data/theme.js';
 import { btn } from '../utils/styles.js';
 import { fd } from '../utils/format.js';
 import { LS } from '../utils/storage.js';
-import { fetchOrders, deleteOrdersForDate } from '../utils/ordersApi.js';
+import { fetchOrders, updateOrder, deleteOrder, deleteOrdersForDate } from '../utils/ordersApi.js';
 import { signOut } from '../utils/auth.js';
 import { Dash } from './Dash.jsx';
 import { ViceCodeLogo } from './ViceCodeLogo.jsx';
@@ -25,7 +25,6 @@ export function ManagerDash({ restaurantId, restaurantName }) {
   }, [restaurantId]);
 
   const orders = allOrders.filter(o => o.status !== 'en attente');
-  const phoneOrders = allOrders.filter(o => o.status === 'en attente');
 
   return /*#__PURE__*/React.createElement('div', {
     style: { minHeight: '100vh', background: T.bg }
@@ -55,7 +54,6 @@ export function ManagerDash({ restaurantId, restaurantName }) {
         }, 'Chargement des commandes...')
       : /*#__PURE__*/React.createElement(Dash, {
           orders,
-          phoneOrders,
           onReset: async () => {
             if (window.confirm('Reset toutes les commandes du jour ?')) {
               const today = fd(new Date());
@@ -63,6 +61,14 @@ export function ManagerDash({ restaurantId, restaurantName }) {
               await deleteOrdersForDate(restaurantId, today);
               LS.set('osm7-counter', { date: '', num: 0 });
             }
+          },
+          onUpdateOrder: async (id, updates) => {
+            await updateOrder(id, updates);
+            setAllOrders(p => p.map(o => o.id === id ? { ...o, ...updates } : o));
+          },
+          onDeleteOrder: async id => {
+            await deleteOrder(id);
+            setAllOrders(p => p.filter(o => o.id !== id));
           }
         })
   );
