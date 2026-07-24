@@ -3,7 +3,7 @@ import { T } from '../data/theme.js';
 import { fp, ft, fd } from '../utils/format.js';
 import { Modal } from './Modal.jsx';
 import {
-  IconMoney, IconReceipt, IconBag, IconCash, IconCard,
+  IconMoney, IconReceipt, IconBag, IconCash, IconCard, IconPhone,
   IconClock, IconClose, IconChevronLeft, IconChevronRight,
   IconTrash, IconEdit, IconCalendar
 } from './icons.jsx';
@@ -91,6 +91,57 @@ function StatTile({ icon, label, value, tint }) {
     /*#__PURE__*/React.createElement('div', { style: { minWidth: 0 } },
       /*#__PURE__*/React.createElement('div', { style: { fontSize: 12.5, color: T.txtSub, fontWeight: 600, whiteSpace: 'nowrap' } }, label),
       /*#__PURE__*/React.createElement('div', { style: { fontSize: 20, fontWeight: 800, color: T.txt, marginTop: 2, whiteSpace: 'nowrap' } }, value)
+    )
+  );
+}
+
+function LetterBadge({ letters, tint }) {
+  return /*#__PURE__*/React.createElement('div', {
+    style: { ...iconTileStyle(tint), fontSize: 13, fontWeight: 800 }
+  }, letters);
+}
+
+function SectionLabel({ children }) {
+  return /*#__PURE__*/React.createElement('div', {
+    style: { fontSize: 12, fontWeight: 700, color: T.txtMuted, textTransform: 'uppercase', letterSpacing: 0.6, padding: '4px 20px 8px' }
+  }, children);
+}
+
+function HourChart({ orders }) {
+  const buckets = Array.from({ length: 16 }, (_, i) => ({ hour: i + 8, total: 0 }));
+  orders.forEach(o => {
+    const h = new Date(o.date).getHours();
+    const b = buckets.find(x => x.hour === h);
+    if (b) b.total += o.total;
+  });
+  const max = Math.max(1, ...buckets.map(b => b.total));
+  return /*#__PURE__*/React.createElement('div', {
+    style: {
+      margin: '0 20px 24px',
+      background: T.bgCard,
+      borderRadius: 16,
+      border: `1px solid ${T.brd}`,
+      padding: '18px 16px 14px'
+    }
+  },
+    /*#__PURE__*/React.createElement('div', { style: { fontSize: 13, fontWeight: 700, color: T.txt, marginBottom: 14, paddingLeft: 4 } }, "Chiffre d'affaires par heure"),
+    /*#__PURE__*/React.createElement('div', { style: { display: 'flex', alignItems: 'flex-end', gap: 4, height: 130 } },
+      buckets.map(b => /*#__PURE__*/React.createElement('div', {
+        key: b.hour,
+        style: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, height: '100%', justifyContent: 'flex-end' }
+      },
+        /*#__PURE__*/React.createElement('div', {
+          title: b.hour + 'h : ' + fp(b.total),
+          style: {
+            width: '100%',
+            maxWidth: 22,
+            height: Math.max(2, (b.total / max) * 100),
+            background: b.total > 0 ? T.primary : T.brdL,
+            borderRadius: '5px 5px 2px 2px'
+          }
+        }),
+        /*#__PURE__*/React.createElement('div', { style: { fontSize: 9.5, color: T.txtMuted } }, b.hour)
+      ))
     )
   );
 }
@@ -333,6 +384,15 @@ export function Dash({ orders, onReset, onUpdateOrder, onDeleteOrder }) {
   const revEsp = dayOrders.filter(o => (o.payment || '').toLowerCase().startsWith('esp')).reduce((s, o) => s + o.total, 0);
   const revCB = dayOrders.filter(o => o.payment === 'CB').reduce((s, o) => s + o.total, 0);
   const panierMoyen = dayOrders.length ? rev / dayOrders.length : 0;
+  const revMidi = dayOrders.filter(o => new Date(o.date).getHours() < 15).reduce((s, o) => s + o.total, 0);
+  const revSoir = dayOrders.filter(o => new Date(o.date).getHours() >= 15).reduce((s, o) => s + o.total, 0);
+  const telCount = dayOrders.filter(o => o.phone).length;
+  const catQty = prefix => dayOrders.reduce((s, o) => s + o.items.filter(i => (i.pid || '').startsWith(prefix)).reduce((a, i) => a + i.qty, 0), 0);
+  const burgersQty = catQty('b-');
+  const rizQty = catQty('r-');
+  const boissonsQty = catQty('dr-');
+  const milkshakesQty = catQty('mk-');
+  const crepesQty = catQty('cr-');
 
   const handleSave = async (id, updates) => {
     await onUpdateOrder(id, updates);
@@ -396,20 +456,42 @@ export function Dash({ orders, onReset, onUpdateOrder, onDeleteOrder }) {
       }, 'Réinitialiser')
     ),
 
+    /*#__PURE__*/React.createElement(SectionLabel, null, 'Résumé du jour'),
     /*#__PURE__*/React.createElement('div', {
       style: {
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
         gap: 12,
-        padding: '4px 20px 20px'
+        padding: '0 20px 20px'
       }
     },
       /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconMoney, {}), label: 'Chiffre d\'affaires', value: fp(rev), tint: T.primary }),
       /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconReceipt, {}), label: 'Commandes', value: String(dayOrders.length), tint: '#7C3AED' }),
       /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconBag, {}), label: 'Panier moyen', value: fp(panierMoyen), tint: '#D97706' }),
+      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconPhone, {}), label: 'Par téléphone', value: String(telCount), tint: '#0EA5E9' }),
+      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconMoney, {}), label: 'Midi (avant 15h)', value: fp(revMidi), tint: '#D97706' }),
+      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconMoney, {}), label: 'Soir (après 15h)', value: fp(revSoir), tint: '#7C3AED' }),
       /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconCash, {}), label: 'Espèces', value: fp(revEsp), tint: '#10B981' }),
       /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconCard, {}), label: 'Carte bancaire', value: fp(revCB), tint: '#2563EB' })
     ),
+
+    /*#__PURE__*/React.createElement(SectionLabel, null, 'Ventes par catégorie'),
+    /*#__PURE__*/React.createElement('div', {
+      style: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+        gap: 12,
+        padding: '0 20px 20px'
+      }
+    },
+      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(LetterBadge, { letters: 'B' }), label: 'Burgers', value: String(burgersQty), tint: '#D97706' }),
+      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(LetterBadge, { letters: 'R' }), label: 'Riz Crousty', value: String(rizQty), tint: T.primary }),
+      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(LetterBadge, { letters: 'Bo' }), label: 'Boissons', value: String(boissonsQty), tint: '#2563EB' }),
+      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(LetterBadge, { letters: 'M' }), label: 'Milkshakes', value: String(milkshakesQty), tint: '#DB2777' }),
+      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(LetterBadge, { letters: 'Cr' }), label: 'Crêpes', value: String(crepesQty), tint: '#0D9488' })
+    ),
+
+    /*#__PURE__*/React.createElement(HourChart, { orders: dayOrders }),
 
     /*#__PURE__*/React.createElement('div', {
       style: {
