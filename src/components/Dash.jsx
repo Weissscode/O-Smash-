@@ -177,6 +177,39 @@ function SectionLabel({ children }) {
   }, children);
 }
 
+function WideStat({ icon, label, value, tint, size }) {
+  const isLg = size === 'lg';
+  return /*#__PURE__*/React.createElement('div', {
+    style: {
+      margin: '0 20px 12px',
+      background: tint + '14',
+      border: `1px solid ${tint}35`,
+      borderRadius: 18,
+      padding: isLg ? '20px 22px' : '15px 20px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 16
+    }
+  },
+    /*#__PURE__*/React.createElement('div', {
+      style: {
+        width: isLg ? 50 : 40, height: isLg ? 50 : 40, borderRadius: 14,
+        background: tint + '22', color: tint,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+      }
+    }, icon),
+    /*#__PURE__*/React.createElement('div', { style: { minWidth: 0 } },
+      /*#__PURE__*/React.createElement('div', { style: { fontSize: 12.5, fontWeight: 700, color: tint, textTransform: 'uppercase', letterSpacing: 0.6 } }, label),
+      /*#__PURE__*/React.createElement('div', {
+        style: {
+          fontSize: isLg ? 'clamp(26px, 7vw, 34px)' : 'clamp(21px, 5.5vw, 26px)',
+          fontWeight: 800, color: T.txt, marginTop: 3, lineHeight: 1
+        }
+      }, value)
+    )
+  );
+}
+
 const PERIODS = [
   { key: 'all', label: 'Journée', tag: 'du jour' },
   { key: 'midi', label: 'Midi', tag: 'du midi' },
@@ -683,18 +716,11 @@ export function Dash({ orders, onReset, onUpdateOrder, onDeleteOrder }) {
       /*#__PURE__*/React.createElement(PaymentHeroCard, { icon: /*#__PURE__*/React.createElement(IconCard, { size: 20 }), label: 'Carte bancaire', value: fp(revCB), bg: '#2563EB' })
     ),
 
-    /*#__PURE__*/React.createElement(SectionLabel, null, 'Autres indicateurs'),
-    /*#__PURE__*/React.createElement('div', {
-      style: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
-        gap: 10,
-        padding: '0 20px 20px'
-      }
-    },
-      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconReceipt, { size: 16 }), label: 'Commandes', value: String(periodOrders.length), tint: '#7C3AED', compact: true }),
-      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconBag, { size: 16 }), label: 'Panier moyen', value: fp(panierMoyen), tint: '#D97706', compact: true }),
-      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconPhone, { size: 16 }), label: 'Par téléphone', value: String(telCount), tint: '#0EA5E9', compact: true })
+    /*#__PURE__*/React.createElement(WideStat, { icon: /*#__PURE__*/React.createElement(IconPhone, { size: 22 }), label: 'Par téléphone', value: String(telCount), tint: '#0EA5E9', size: 'lg' }),
+    /*#__PURE__*/React.createElement(WideStat, { icon: /*#__PURE__*/React.createElement(IconBag, { size: 18 }), label: 'Panier moyen', value: fp(panierMoyen), tint: '#D97706', size: 'md' }),
+
+    /*#__PURE__*/React.createElement('div', { style: { padding: '0 20px 20px' } },
+      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconReceipt, {}), label: 'Commandes', value: String(periodOrders.length), tint: '#7C3AED' })
     ),
 
     /*#__PURE__*/React.createElement(SectionLabel, null, 'Ventes par catégorie'),
