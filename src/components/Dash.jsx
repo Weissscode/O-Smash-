@@ -117,7 +117,7 @@ function StatTile({ icon, label, value, tint, compact }) {
   );
 }
 
-function HeroRevenue({ value }) {
+function HeroRevenue({ value, tag }) {
   return /*#__PURE__*/React.createElement('div', {
     style: {
       margin: '0 20px 12px',
@@ -138,7 +138,7 @@ function HeroRevenue({ value }) {
       }
     }, /*#__PURE__*/React.createElement(IconMoney, { size: 30 })),
     /*#__PURE__*/React.createElement('div', { style: { minWidth: 0 } },
-      /*#__PURE__*/React.createElement('div', { style: { fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.85)', textTransform: 'uppercase', letterSpacing: 0.8 } }, "Chiffre d'affaires du jour"),
+      /*#__PURE__*/React.createElement('div', { style: { fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.85)', textTransform: 'uppercase', letterSpacing: 0.8 } }, "Chiffre d'affaires " + tag),
       /*#__PURE__*/React.createElement('div', { style: { fontSize: 'clamp(34px, 9vw, 48px)', fontWeight: 800, color: '#fff', marginTop: 4, lineHeight: 1, whiteSpace: 'nowrap' } }, value)
     )
   );
@@ -175,6 +175,36 @@ function SectionLabel({ children }) {
   return /*#__PURE__*/React.createElement('div', {
     style: { fontSize: 12, fontWeight: 700, color: T.txtMuted, textTransform: 'uppercase', letterSpacing: 0.6, padding: '4px 20px 8px' }
   }, children);
+}
+
+const PERIODS = [
+  { key: 'all', label: 'Journée', tag: 'du jour' },
+  { key: 'midi', label: 'Midi', tag: 'du midi' },
+  { key: 'soir', label: 'Soir', tag: 'du soir' }
+];
+
+function PeriodSwitch({ period, setPeriod }) {
+  return /*#__PURE__*/React.createElement('div', {
+    style: { display: 'flex', gap: 4, margin: '0 20px 16px', background: T.bgSide, padding: 4, borderRadius: 13 }
+  },
+    PERIODS.map(p => /*#__PURE__*/React.createElement('button', {
+      key: p.key,
+      onClick: () => setPeriod(p.key),
+      style: {
+        flex: 1,
+        padding: '10px 0',
+        borderRadius: 10,
+        border: 'none',
+        background: period === p.key ? T.bgCard : 'transparent',
+        color: period === p.key ? T.primaryD : T.txtSub,
+        fontWeight: 700,
+        fontSize: 14,
+        cursor: 'pointer',
+        boxShadow: period === p.key ? '0 1px 4px rgba(20,10,40,0.1)' : 'none',
+        transition: 'background .15s ease, box-shadow .15s ease'
+      }
+    }, p.label))
+  );
 }
 
 function HourChart({ orders }) {
@@ -548,8 +578,10 @@ function OrderCard({ order, onClick }) {
 export function Dash({ orders, onReset, onUpdateOrder, onDeleteOrder }) {
   const [selectedDate, setSelectedDate] = React.useState(() => new Date());
   const [selectedOrder, setSelectedOrder] = React.useState(null);
+  const [period, setPeriod] = React.useState('all');
   const today = fd(selectedDate);
   const isToday = today === fd(new Date());
+  const periodTag = PERIODS.find(p => p.key === period).tag;
 
   const shiftDate = deltaDays => setSelectedDate(d => {
     const n = new Date(d);
@@ -561,13 +593,17 @@ export function Dash({ orders, onReset, onUpdateOrder, onDeleteOrder }) {
     .filter(o => fd(o.date) === today && o.status !== 'annulee')
     .sort((a, b) => new Date(b.date) - new Date(a.date));
 
-  const rev = dayOrders.reduce((s, o) => s + o.total, 0);
-  const revEsp = dayOrders.filter(o => (o.payment || '').toLowerCase().startsWith('esp')).reduce((s, o) => s + o.total, 0);
-  const revCB = dayOrders.filter(o => o.payment === 'CB').reduce((s, o) => s + o.total, 0);
-  const panierMoyen = dayOrders.length ? rev / dayOrders.length : 0;
-  const revMidi = dayOrders.filter(o => new Date(o.date).getHours() < 15).reduce((s, o) => s + o.total, 0);
-  const revSoir = dayOrders.filter(o => new Date(o.date).getHours() >= 15).reduce((s, o) => s + o.total, 0);
-  const telCount = dayOrders.filter(o => o.phone).length;
+  const periodOrders = period === 'midi'
+    ? dayOrders.filter(o => new Date(o.date).getHours() < 15)
+    : period === 'soir'
+      ? dayOrders.filter(o => new Date(o.date).getHours() >= 15)
+      : dayOrders;
+
+  const rev = periodOrders.reduce((s, o) => s + o.total, 0);
+  const revEsp = periodOrders.filter(o => (o.payment || '').toLowerCase().startsWith('esp')).reduce((s, o) => s + o.total, 0);
+  const revCB = periodOrders.filter(o => o.payment === 'CB').reduce((s, o) => s + o.total, 0);
+  const panierMoyen = periodOrders.length ? rev / periodOrders.length : 0;
+  const telCount = periodOrders.filter(o => o.phone).length;
 
   const handleSave = async (id, updates) => {
     await onUpdateOrder(id, updates);
@@ -631,7 +667,9 @@ export function Dash({ orders, onReset, onUpdateOrder, onDeleteOrder }) {
       }, 'Réinitialiser')
     ),
 
-    /*#__PURE__*/React.createElement(HeroRevenue, { value: fp(rev) }),
+    /*#__PURE__*/React.createElement(PeriodSwitch, { period, setPeriod }),
+
+    /*#__PURE__*/React.createElement(HeroRevenue, { value: fp(rev), tag: periodTag }),
 
     /*#__PURE__*/React.createElement('div', {
       style: {
@@ -654,27 +692,25 @@ export function Dash({ orders, onReset, onUpdateOrder, onDeleteOrder }) {
         padding: '0 20px 20px'
       }
     },
-      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconReceipt, { size: 16 }), label: 'Commandes', value: String(dayOrders.length), tint: '#7C3AED', compact: true }),
+      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconReceipt, { size: 16 }), label: 'Commandes', value: String(periodOrders.length), tint: '#7C3AED', compact: true }),
       /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconBag, { size: 16 }), label: 'Panier moyen', value: fp(panierMoyen), tint: '#D97706', compact: true }),
-      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconPhone, { size: 16 }), label: 'Par téléphone', value: String(telCount), tint: '#0EA5E9', compact: true }),
-      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconMoney, { size: 16 }), label: 'Midi', value: fp(revMidi), tint: '#D97706', compact: true }),
-      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconMoney, { size: 16 }), label: 'Soir', value: fp(revSoir), tint: '#7C3AED', compact: true })
+      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconPhone, { size: 16 }), label: 'Par téléphone', value: String(telCount), tint: '#0EA5E9', compact: true })
     ),
 
     /*#__PURE__*/React.createElement(SectionLabel, null, 'Ventes par catégorie'),
-    /*#__PURE__*/React.createElement(CategoryAccordion, { dayOrders }),
+    /*#__PURE__*/React.createElement(CategoryAccordion, { dayOrders: periodOrders }),
 
-    /*#__PURE__*/React.createElement(HourChart, { orders: dayOrders }),
+    /*#__PURE__*/React.createElement(HourChart, { orders: periodOrders }),
 
-    /*#__PURE__*/React.createElement(SectionLabel, null, 'Commandes du jour'),
+    /*#__PURE__*/React.createElement(SectionLabel, null, 'Commandes ' + periodTag),
     /*#__PURE__*/React.createElement('div', {
       style: { margin: '0 20px 24px', display: 'flex', flexDirection: 'column', gap: 10 }
     },
-      dayOrders.length === 0
+      periodOrders.length === 0
         ? /*#__PURE__*/React.createElement('div', {
             style: { padding: 40, textAlign: 'center', color: T.txtMuted, fontSize: 14, background: T.bgCard, borderRadius: 14, border: `1px solid ${T.brd}` }
-          }, 'Aucune commande ce jour-là')
-        : dayOrders.map(o => /*#__PURE__*/React.createElement(OrderCard, { key: o.id, order: o, onClick: () => setSelectedOrder(o) }))
+          }, 'Aucune commande sur cette période')
+        : periodOrders.map(o => /*#__PURE__*/React.createElement(OrderCard, { key: o.id, order: o, onClick: () => setSelectedOrder(o) }))
     ),
 
     selectedOrder && /*#__PURE__*/React.createElement(OrderDetailModal, {
