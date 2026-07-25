@@ -18,3 +18,9 @@ body {
 input, textarea, select, button {
   font-family: inherit;
 }
+.osm-tap-card {
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.osm-tap-card:active {
+  transform: scale(0.98);
+}

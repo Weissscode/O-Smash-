@@ -76,3 +76,11 @@ export const IconCalendar = ({ size = 16, strokeWidth = 2 }) => /*#__PURE__*/Rea
   /*#__PURE__*/React.createElement('path', { d: 'M3.5 9.5h17' }),
   /*#__PURE__*/React.createElement('path', { d: 'M8 3v4M16 3v4' })
 );
+
+export const IconCheck = ({ size = 14, strokeWidth = 2.4 }) => /*#__PURE__*/React.createElement('svg', base(size, strokeWidth),
+  /*#__PURE__*/React.createElement('path', { d: 'M5 12.5l4.5 4.5L19 7' })
+);
+
+export const IconChevronDown = ({ size = 16, strokeWidth = 2.2 }) => /*#__PURE__*/React.createElement('svg', base(size, strokeWidth),
+  /*#__PURE__*/React.createElement('path', { d: 'M5 9l7 7 7-7' })
+);

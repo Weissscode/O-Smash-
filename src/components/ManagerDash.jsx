@@ -27,7 +27,7 @@ export function ManagerDash({ restaurantId, restaurantName }) {
   const orders = allOrders.filter(o => o.status !== 'en attente');
 
   return /*#__PURE__*/React.createElement('div', {
-    style: { minHeight: '100vh', background: T.bg }
+    style: { height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: T.bg }
   },
     /*#__PURE__*/React.createElement('div', {
       style: {
@@ -36,7 +36,8 @@ export function ManagerDash({ restaurantId, restaurantName }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        gap: 12
+        gap: 12,
+        flexShrink: 0
       }
     },
       /*#__PURE__*/React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 12 } },

@@ -5,11 +5,33 @@ import { Modal } from './Modal.jsx';
 import {
   IconMoney, IconReceipt, IconBag, IconCash, IconCard, IconPhone,
   IconClock, IconClose, IconChevronLeft, IconChevronRight,
-  IconTrash, IconEdit, IconCalendar
+  IconTrash, IconEdit, IconCalendar, IconCheck, IconChevronDown
 } from './icons.jsx';
 
 const PAYMENT_OPTIONS = ['Especes', 'CB'];
 const SERVICE_OPTIONS = ['Sur place', 'A emporter'];
+
+const CATEGORIES = [
+  { key: 'burgers', label: 'Burgers', tint: '#D97706', test: pid => pid.startsWith('b-') },
+  { key: 'menus', label: 'Menus', tint: '#7C3AED', test: pid => pid.startsWith('f-') },
+  { key: 'riz', label: 'Riz Crousty', tint: T.primary, test: pid => pid.startsWith('r-') },
+  { key: 'sides', label: 'Sides', tint: '#0EA5E9', test: pid => pid.startsWith('si-') || pid.startsWith('lo-') },
+  { key: 'desserts', label: 'Desserts', tint: '#DB2777', test: pid => pid.startsWith('de-') || pid.startsWith('cr-') },
+  { key: 'boissons', label: 'Boissons', tint: '#2563EB', test: pid => pid.startsWith('dr-') },
+  { key: 'milkshakes', label: 'Milkshakes', tint: '#0D9488', test: pid => pid.startsWith('mk-') }
+];
+
+function categorySales(dayOrders) {
+  const sales = {};
+  CATEGORIES.forEach(c => { sales[c.key] = {}; });
+  dayOrders.forEach(o => o.items.forEach(it => {
+    const pid = it.pid || '';
+    const cat = CATEGORIES.find(c => c.test(pid));
+    if (!cat) return;
+    sales[cat.key][it.name] = (sales[cat.key][it.name] || 0) + it.qty;
+  }));
+  return sales;
+}
 
 function itemsSummary(items) {
   if (!items || items.length === 0) return 'Aucun article';
@@ -95,12 +117,6 @@ function StatTile({ icon, label, value, tint }) {
   );
 }
 
-function LetterBadge({ letters, tint }) {
-  return /*#__PURE__*/React.createElement('div', {
-    style: { ...iconTileStyle(tint), fontSize: 13, fontWeight: 800 }
-  }, letters);
-}
-
 function SectionLabel({ children }) {
   return /*#__PURE__*/React.createElement('div', {
     style: { fontSize: 12, fontWeight: 700, color: T.txtMuted, textTransform: 'uppercase', letterSpacing: 0.6, padding: '4px 20px 8px' }
@@ -143,6 +159,89 @@ function HourChart({ orders }) {
         /*#__PURE__*/React.createElement('div', { style: { fontSize: 9.5, color: T.txtMuted } }, b.hour)
       ))
     )
+  );
+}
+
+function CategoryAccordion({ dayOrders }) {
+  const [open, setOpen] = React.useState(null);
+  const sales = React.useMemo(() => categorySales(dayOrders), [dayOrders]);
+
+  return /*#__PURE__*/React.createElement('div', {
+    style: { margin: '0 20px 24px', display: 'flex', flexDirection: 'column', gap: 8 }
+  },
+    CATEGORIES.map(cat => {
+      const products = Object.entries(sales[cat.key]).sort((a, b) => b[1] - a[1]);
+      const total = products.reduce((s, [, qty]) => s + qty, 0);
+      const isOpen = open === cat.key;
+      return /*#__PURE__*/React.createElement('div', {
+        key: cat.key,
+        style: {
+          background: T.bgCard,
+          borderRadius: 14,
+          border: `1px solid ${isOpen ? cat.tint : T.brd}`,
+          overflow: 'hidden',
+          transition: 'border-color .15s ease'
+        }
+      },
+        /*#__PURE__*/React.createElement('button', {
+          onClick: () => setOpen(isOpen ? null : cat.key),
+          style: {
+            width: '100%',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '14px 16px',
+            border: 'none',
+            background: isOpen ? cat.tint + '14' : T.bgCard,
+            cursor: 'pointer',
+            minHeight: 56
+          }
+        },
+          /*#__PURE__*/React.createElement('span', { style: { fontWeight: 700, fontSize: 15, color: isOpen ? cat.tint : T.txt } }, cat.label),
+          /*#__PURE__*/React.createElement('span', { style: { display: 'flex', alignItems: 'center', gap: 10 } },
+            /*#__PURE__*/React.createElement('span', { style: { fontSize: 13, fontWeight: 700, color: T.txtMuted } }, total + ' vendus'),
+            /*#__PURE__*/React.createElement('span', {
+              style: {
+                display: 'flex', color: isOpen ? cat.tint : T.txtMuted,
+                transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                transition: 'transform .2s ease'
+              }
+            }, /*#__PURE__*/React.createElement(IconChevronDown, { size: 16 }))
+          )
+        ),
+        /*#__PURE__*/React.createElement('div', {
+          style: {
+            display: 'grid',
+            gridTemplateRows: isOpen ? '1fr' : '0fr',
+            transition: 'grid-template-rows .25s ease'
+          }
+        },
+          /*#__PURE__*/React.createElement('div', { style: { overflow: 'hidden' } },
+            products.length === 0
+              ? /*#__PURE__*/React.createElement('div', { style: { padding: '4px 16px 14px', fontSize: 13, color: T.txtMuted } }, 'Aucune vente ce jour-là')
+              : /*#__PURE__*/React.createElement('div', { style: { padding: '2px 16px 12px', display: 'flex', flexDirection: 'column' } },
+                  products.map(([name, qty]) => /*#__PURE__*/React.createElement('div', {
+                    key: name,
+                    style: {
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '8px 0',
+                      borderTop: `1px solid ${T.brdL}`,
+                      fontSize: 14
+                    }
+                  },
+                    /*#__PURE__*/React.createElement('span', { style: { display: 'flex', alignItems: 'center', gap: 8, color: T.txt, minWidth: 0 } },
+                      /*#__PURE__*/React.createElement(IconCheck, { size: 13 }),
+                      /*#__PURE__*/React.createElement('span', { style: { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, name)
+                    ),
+                    /*#__PURE__*/React.createElement('span', { style: { fontWeight: 700, color: T.txt, flexShrink: 0, marginLeft: 12 } }, qty)
+                  ))
+                )
+          )
+        )
+      );
+    })
   );
 }
 
@@ -332,35 +431,51 @@ function OrderDetailModal({ order, onClose, onSave, onDelete }) {
   ));
 }
 
-function OrderRow({ order, onClick }) {
-  const displayName = order.client || order.phone || order.service || 'Commande';
-  const tint = (order.payment || '').toLowerCase().startsWith('esp') ? T.ok : '#2563EB';
+function PaymentPill({ payment }) {
+  const isEsp = (payment || '').toLowerCase().startsWith('esp');
+  const color = isEsp ? T.ok : '#2563EB';
+  return /*#__PURE__*/React.createElement('span', {
+    style: {
+      fontSize: 11.5,
+      fontWeight: 700,
+      color,
+      background: color + '15',
+      padding: '3px 9px',
+      borderRadius: 999,
+      flexShrink: 0
+    }
+  }, payment || '—');
+}
+
+function OrderCard({ order, onClick }) {
+  const displayName = order.client || order.phone || 'Commande';
   return /*#__PURE__*/React.createElement('button', {
+    className: 'osm-tap-card',
     onClick,
     style: {
       width: '100%',
-      display: 'flex',
-      alignItems: 'center',
-      gap: 14,
-      padding: '14px 16px',
+      display: 'block',
       background: T.bgCard,
-      border: 'none',
-      borderLeft: `3px solid ${tint}`,
-      borderBottom: `1px solid ${T.brdL}`,
+      border: `1px solid ${T.brd}`,
+      borderRadius: 14,
+      boxShadow: '0 1px 2px rgba(20,10,40,0.04)',
+      padding: '13px 16px',
       textAlign: 'left',
-      cursor: 'pointer',
-      minHeight: 68
+      cursor: 'pointer'
     }
   },
-    /*#__PURE__*/React.createElement('div', { style: { fontWeight: 800, color: T.primaryD, fontSize: 14, width: 32, flexShrink: 0 } }, '#' + order.num),
-    /*#__PURE__*/React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 4, color: T.txtMuted, fontSize: 12.5, width: 52, flexShrink: 0 } },
-      /*#__PURE__*/React.createElement(IconClock, { size: 13 }), ft(order.date)
+    /*#__PURE__*/React.createElement('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 } },
+      /*#__PURE__*/React.createElement('span', { style: { display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: T.txtMuted, fontWeight: 600 } },
+        '#' + order.num,
+        /*#__PURE__*/React.createElement('span', { style: { display: 'flex', alignItems: 'center', gap: 3 } }, /*#__PURE__*/React.createElement(IconClock, { size: 12 }), ft(order.date))
+      ),
+      /*#__PURE__*/React.createElement(PaymentPill, { payment: order.payment })
     ),
-    /*#__PURE__*/React.createElement('div', { style: { flex: 1, minWidth: 0 } },
-      /*#__PURE__*/React.createElement('div', { style: { fontWeight: 700, fontSize: 15, color: T.txt, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, displayName),
-      /*#__PURE__*/React.createElement('div', { style: { fontSize: 12.5, color: T.txtSub, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', marginTop: 1 } }, itemsSummary(order.items))
+    /*#__PURE__*/React.createElement('div', { style: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10 } },
+      /*#__PURE__*/React.createElement('span', { style: { fontWeight: 700, fontSize: 16, color: T.txt, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, displayName),
+      /*#__PURE__*/React.createElement('span', { style: { fontWeight: 800, fontSize: 17, color: T.primaryD, flexShrink: 0 } }, fp(order.total))
     ),
-    /*#__PURE__*/React.createElement('div', { style: { fontWeight: 800, fontSize: 15.5, color: T.txt, flexShrink: 0 } }, fp(order.total))
+    /*#__PURE__*/React.createElement('div', { style: { fontSize: 12.5, color: T.txtSub, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, itemsSummary(order.items))
   );
 }
 
@@ -387,12 +502,6 @@ export function Dash({ orders, onReset, onUpdateOrder, onDeleteOrder }) {
   const revMidi = dayOrders.filter(o => new Date(o.date).getHours() < 15).reduce((s, o) => s + o.total, 0);
   const revSoir = dayOrders.filter(o => new Date(o.date).getHours() >= 15).reduce((s, o) => s + o.total, 0);
   const telCount = dayOrders.filter(o => o.phone).length;
-  const catQty = prefix => dayOrders.reduce((s, o) => s + o.items.filter(i => (i.pid || '').startsWith(prefix)).reduce((a, i) => a + i.qty, 0), 0);
-  const burgersQty = catQty('b-');
-  const rizQty = catQty('r-');
-  const boissonsQty = catQty('dr-');
-  const milkshakesQty = catQty('mk-');
-  const crepesQty = catQty('cr-');
 
   const handleSave = async (id, updates) => {
     await onUpdateOrder(id, updates);
@@ -476,35 +585,19 @@ export function Dash({ orders, onReset, onUpdateOrder, onDeleteOrder }) {
     ),
 
     /*#__PURE__*/React.createElement(SectionLabel, null, 'Ventes par catégorie'),
-    /*#__PURE__*/React.createElement('div', {
-      style: {
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-        gap: 12,
-        padding: '0 20px 20px'
-      }
-    },
-      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(LetterBadge, { letters: 'B' }), label: 'Burgers', value: String(burgersQty), tint: '#D97706' }),
-      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(LetterBadge, { letters: 'R' }), label: 'Riz Crousty', value: String(rizQty), tint: T.primary }),
-      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(LetterBadge, { letters: 'Bo' }), label: 'Boissons', value: String(boissonsQty), tint: '#2563EB' }),
-      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(LetterBadge, { letters: 'M' }), label: 'Milkshakes', value: String(milkshakesQty), tint: '#DB2777' }),
-      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(LetterBadge, { letters: 'Cr' }), label: 'Crêpes', value: String(crepesQty), tint: '#0D9488' })
-    ),
+    /*#__PURE__*/React.createElement(CategoryAccordion, { dayOrders }),
 
     /*#__PURE__*/React.createElement(HourChart, { orders: dayOrders }),
 
+    /*#__PURE__*/React.createElement(SectionLabel, null, 'Commandes du jour'),
     /*#__PURE__*/React.createElement('div', {
-      style: {
-        margin: '0 20px 24px',
-        background: T.bgCard,
-        borderRadius: 16,
-        border: `1px solid ${T.brd}`,
-        overflow: 'hidden'
-      }
+      style: { margin: '0 20px 24px', display: 'flex', flexDirection: 'column', gap: 10 }
     },
       dayOrders.length === 0
-        ? /*#__PURE__*/React.createElement('div', { style: { padding: 40, textAlign: 'center', color: T.txtMuted, fontSize: 14 } }, 'Aucune commande ce jour-là')
-        : dayOrders.map(o => /*#__PURE__*/React.createElement(OrderRow, { key: o.id, order: o, onClick: () => setSelectedOrder(o) }))
+        ? /*#__PURE__*/React.createElement('div', {
+            style: { padding: 40, textAlign: 'center', color: T.txtMuted, fontSize: 14, background: T.bgCard, borderRadius: 14, border: `1px solid ${T.brd}` }
+          }, 'Aucune commande ce jour-là')
+        : dayOrders.map(o => /*#__PURE__*/React.createElement(OrderCard, { key: o.id, order: o, onClick: () => setSelectedOrder(o) }))
     ),
 
     selectedOrder && /*#__PURE__*/React.createElement(OrderDetailModal, {
