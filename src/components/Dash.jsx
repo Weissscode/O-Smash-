@@ -95,24 +95,78 @@ const iconTileStyle = tint => ({
   flexShrink: 0
 });
 
-function StatTile({ icon, label, value, tint }) {
+function StatTile({ icon, label, value, tint, compact }) {
   return /*#__PURE__*/React.createElement('div', {
     style: {
       background: T.bgCard,
-      borderRadius: 16,
+      borderRadius: compact ? 12 : 16,
       border: `1px solid ${T.brd}`,
       boxShadow: '0 1px 3px rgba(20,10,40,0.05)',
-      padding: '16px',
+      padding: compact ? '11px 12px' : '16px',
       display: 'flex',
       alignItems: 'center',
-      gap: 12,
-      minHeight: 78
+      gap: compact ? 9 : 12,
+      minHeight: compact ? 56 : 78
     }
   },
-    /*#__PURE__*/React.createElement('div', { style: iconTileStyle(tint) }, icon),
+    /*#__PURE__*/React.createElement('div', { style: compact ? { ...iconTileStyle(tint), width: 30, height: 30, borderRadius: 9 } : iconTileStyle(tint) }, icon),
     /*#__PURE__*/React.createElement('div', { style: { minWidth: 0 } },
-      /*#__PURE__*/React.createElement('div', { style: { fontSize: 12.5, color: T.txtSub, fontWeight: 600, whiteSpace: 'nowrap' } }, label),
-      /*#__PURE__*/React.createElement('div', { style: { fontSize: 20, fontWeight: 800, color: T.txt, marginTop: 2, whiteSpace: 'nowrap' } }, value)
+      /*#__PURE__*/React.createElement('div', { style: { fontSize: compact ? 11 : 12.5, color: T.txtSub, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' } }, label),
+      /*#__PURE__*/React.createElement('div', { style: { fontSize: compact ? 15 : 20, fontWeight: 800, color: T.txt, marginTop: 2, whiteSpace: 'nowrap' } }, value)
+    )
+  );
+}
+
+function HeroRevenue({ value }) {
+  return /*#__PURE__*/React.createElement('div', {
+    style: {
+      margin: '0 20px 12px',
+      background: `linear-gradient(135deg, ${T.primary}, ${T.primaryD})`,
+      borderRadius: 22,
+      padding: '26px 24px',
+      display: 'flex',
+      alignItems: 'center',
+      gap: 18,
+      boxShadow: `0 10px 28px ${T.primaryD}40`
+    }
+  },
+    /*#__PURE__*/React.createElement('div', {
+      style: {
+        width: 58, height: 58, borderRadius: 16,
+        background: 'rgba(255,255,255,0.2)', color: '#fff',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+      }
+    }, /*#__PURE__*/React.createElement(IconMoney, { size: 30 })),
+    /*#__PURE__*/React.createElement('div', { style: { minWidth: 0 } },
+      /*#__PURE__*/React.createElement('div', { style: { fontSize: 13, fontWeight: 700, color: 'rgba(255,255,255,0.85)', textTransform: 'uppercase', letterSpacing: 0.8 } }, "Chiffre d'affaires du jour"),
+      /*#__PURE__*/React.createElement('div', { style: { fontSize: 'clamp(34px, 9vw, 48px)', fontWeight: 800, color: '#fff', marginTop: 4, lineHeight: 1, whiteSpace: 'nowrap' } }, value)
+    )
+  );
+}
+
+function PaymentHeroCard({ icon, label, value, bg }) {
+  return /*#__PURE__*/React.createElement('div', {
+    style: {
+      background: bg,
+      borderRadius: 18,
+      padding: '18px 18px',
+      display: 'flex',
+      flexDirection: 'column',
+      gap: 12,
+      minHeight: 120,
+      boxShadow: '0 6px 18px rgba(20,10,40,0.14)'
+    }
+  },
+    /*#__PURE__*/React.createElement('div', {
+      style: {
+        width: 38, height: 38, borderRadius: 11,
+        background: 'rgba(255,255,255,0.22)', color: '#fff',
+        display: 'flex', alignItems: 'center', justifyContent: 'center'
+      }
+    }, icon),
+    /*#__PURE__*/React.createElement('div', null,
+      /*#__PURE__*/React.createElement('div', { style: { fontSize: 12.5, fontWeight: 700, color: 'rgba(255,255,255,0.9)' } }, label),
+      /*#__PURE__*/React.createElement('div', { style: { fontSize: 'clamp(22px, 6vw, 28px)', fontWeight: 800, color: '#fff', marginTop: 3 } }, value)
     )
   );
 }
@@ -165,13 +219,16 @@ function HourChart({ orders }) {
 function CategoryAccordion({ dayOrders }) {
   const [open, setOpen] = React.useState(null);
   const sales = React.useMemo(() => categorySales(dayOrders), [dayOrders]);
+  const totals = CATEGORIES.map(cat => Object.values(sales[cat.key]).reduce((s, q) => s + q, 0));
+  const grandTotal = totals.reduce((s, t) => s + t, 0);
 
   return /*#__PURE__*/React.createElement('div', {
     style: { margin: '0 20px 24px', display: 'flex', flexDirection: 'column', gap: 8 }
   },
-    CATEGORIES.map(cat => {
+    CATEGORIES.map((cat, idx) => {
       const products = Object.entries(sales[cat.key]).sort((a, b) => b[1] - a[1]);
-      const total = products.reduce((s, [, qty]) => s + qty, 0);
+      const total = totals[idx];
+      const pct = grandTotal > 0 ? Math.round((total / grandTotal) * 100) : 0;
       const isOpen = open === cat.key;
       return /*#__PURE__*/React.createElement('div', {
         key: cat.key,
@@ -187,19 +244,16 @@ function CategoryAccordion({ dayOrders }) {
           onClick: () => setOpen(isOpen ? null : cat.key),
           style: {
             width: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
+            display: 'block',
             padding: '14px 16px',
             border: 'none',
-            background: isOpen ? cat.tint + '14' : T.bgCard,
+            background: isOpen ? cat.tint + '10' : T.bgCard,
             cursor: 'pointer',
-            minHeight: 56
+            textAlign: 'left'
           }
         },
-          /*#__PURE__*/React.createElement('span', { style: { fontWeight: 700, fontSize: 15, color: isOpen ? cat.tint : T.txt } }, cat.label),
-          /*#__PURE__*/React.createElement('span', { style: { display: 'flex', alignItems: 'center', gap: 10 } },
-            /*#__PURE__*/React.createElement('span', { style: { fontSize: 13, fontWeight: 700, color: T.txtMuted } }, total + ' vendus'),
+          /*#__PURE__*/React.createElement('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
+            /*#__PURE__*/React.createElement('span', { style: { fontWeight: 800, fontSize: 13, letterSpacing: 0.6, textTransform: 'uppercase', color: isOpen ? cat.tint : T.txt } }, cat.label),
             /*#__PURE__*/React.createElement('span', {
               style: {
                 display: 'flex', color: isOpen ? cat.tint : T.txtMuted,
@@ -207,6 +261,18 @@ function CategoryAccordion({ dayOrders }) {
                 transition: 'transform .2s ease'
               }
             }, /*#__PURE__*/React.createElement(IconChevronDown, { size: 16 }))
+          ),
+          /*#__PURE__*/React.createElement('div', { style: { height: 8, borderRadius: 999, background: cat.tint + '15', marginTop: 10, overflow: 'hidden' } },
+            /*#__PURE__*/React.createElement('div', {
+              style: {
+                height: '100%', width: pct + '%', background: cat.tint, borderRadius: 999,
+                transition: 'width .5s ease'
+              }
+            })
+          ),
+          /*#__PURE__*/React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', marginTop: 6 } },
+            /*#__PURE__*/React.createElement('span', { style: { fontSize: 12, color: T.txtSub } }, total + ' vente' + (total !== 1 ? 's' : '')),
+            /*#__PURE__*/React.createElement('span', { style: { fontSize: 12, fontWeight: 700, color: cat.tint } }, pct + '%')
           )
         ),
         /*#__PURE__*/React.createElement('div', {
@@ -565,23 +631,34 @@ export function Dash({ orders, onReset, onUpdateOrder, onDeleteOrder }) {
       }, 'Réinitialiser')
     ),
 
-    /*#__PURE__*/React.createElement(SectionLabel, null, 'Résumé du jour'),
+    /*#__PURE__*/React.createElement(HeroRevenue, { value: fp(rev) }),
+
     /*#__PURE__*/React.createElement('div', {
       style: {
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+        gridTemplateColumns: '1fr 1fr',
         gap: 12,
+        margin: '0 20px 20px'
+      }
+    },
+      /*#__PURE__*/React.createElement(PaymentHeroCard, { icon: /*#__PURE__*/React.createElement(IconCash, { size: 20 }), label: 'Espèces', value: fp(revEsp), bg: '#10B981' }),
+      /*#__PURE__*/React.createElement(PaymentHeroCard, { icon: /*#__PURE__*/React.createElement(IconCard, { size: 20 }), label: 'Carte bancaire', value: fp(revCB), bg: '#2563EB' })
+    ),
+
+    /*#__PURE__*/React.createElement(SectionLabel, null, 'Autres indicateurs'),
+    /*#__PURE__*/React.createElement('div', {
+      style: {
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+        gap: 10,
         padding: '0 20px 20px'
       }
     },
-      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconMoney, {}), label: 'Chiffre d\'affaires', value: fp(rev), tint: T.primary }),
-      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconReceipt, {}), label: 'Commandes', value: String(dayOrders.length), tint: '#7C3AED' }),
-      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconBag, {}), label: 'Panier moyen', value: fp(panierMoyen), tint: '#D97706' }),
-      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconPhone, {}), label: 'Par téléphone', value: String(telCount), tint: '#0EA5E9' }),
-      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconMoney, {}), label: 'Midi (avant 15h)', value: fp(revMidi), tint: '#D97706' }),
-      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconMoney, {}), label: 'Soir (après 15h)', value: fp(revSoir), tint: '#7C3AED' }),
-      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconCash, {}), label: 'Espèces', value: fp(revEsp), tint: '#10B981' }),
-      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconCard, {}), label: 'Carte bancaire', value: fp(revCB), tint: '#2563EB' })
+      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconReceipt, { size: 16 }), label: 'Commandes', value: String(dayOrders.length), tint: '#7C3AED', compact: true }),
+      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconBag, { size: 16 }), label: 'Panier moyen', value: fp(panierMoyen), tint: '#D97706', compact: true }),
+      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconPhone, { size: 16 }), label: 'Par téléphone', value: String(telCount), tint: '#0EA5E9', compact: true }),
+      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconMoney, { size: 16 }), label: 'Midi', value: fp(revMidi), tint: '#D97706', compact: true }),
+      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconMoney, { size: 16 }), label: 'Soir', value: fp(revSoir), tint: '#7C3AED', compact: true })
     ),
 
     /*#__PURE__*/React.createElement(SectionLabel, null, 'Ventes par catégorie'),
