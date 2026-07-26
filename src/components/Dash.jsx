@@ -5,7 +5,8 @@ import { Modal } from './Modal.jsx';
 import {
   IconMoney, IconReceipt, IconBag, IconCash, IconCard, IconPhone,
   IconClock, IconClose, IconChevronLeft, IconChevronRight,
-  IconTrash, IconEdit, IconCalendar, IconCheck, IconChevronDown
+  IconTrash, IconEdit, IconCalendar, IconCheck, IconChevronDown,
+  IconSun, IconMoon
 } from './icons.jsx';
 
 const PAYMENT_OPTIONS = ['Especes', 'CB'];
@@ -240,42 +241,120 @@ function PeriodSwitch({ period, setPeriod }) {
   );
 }
 
-function HourChart({ orders }) {
-  const buckets = Array.from({ length: 16 }, (_, i) => ({ hour: i + 8, total: 0 }));
+const MIDI_HOURS = [11, 12, 13, 14];
+const SOIR_HOURS = [18, 19, 20, 21, 22, 23, 0];
+
+const MIDI_CHART_THEME = {
+  bg: 'linear-gradient(160deg, #FFFBF2 0%, #FFF4DE 55%, #FFE9BF 100%)',
+  iconBg: 'rgba(217,119,6,0.15)',
+  iconColor: '#D97706',
+  bar: 'linear-gradient(180deg, #FCD34D, #F59E0B)',
+  barShadow: '0 8px 16px rgba(245,158,11,0.35)',
+  text: '#7C3E0A',
+  subText: '#B45309',
+  shadow: '0 10px 30px rgba(217,119,6,0.14)',
+  glow: 'rgba(252,211,77,0.35)'
+};
+
+const SOIR_CHART_THEME = {
+  bg: 'linear-gradient(160deg, #251A3D 0%, #2E2154 55%, #1B1330 100%)',
+  iconBg: 'rgba(216,180,254,0.16)',
+  iconColor: '#E9D5FF',
+  bar: 'linear-gradient(180deg, #C084FC, #9333EA)',
+  barShadow: '0 8px 18px rgba(147,51,234,0.5)',
+  text: '#F5F0FF',
+  subText: 'rgba(238,225,255,0.7)',
+  shadow: '0 10px 30px rgba(88,28,135,0.35)',
+  glow: 'rgba(192,132,252,0.25)'
+};
+
+function hourLabel(h) {
+  return h === 0 ? '00:00' : String(h);
+}
+
+function ServiceHourChart({ title, icon, hours, orders, theme }) {
+  const buckets = hours.map(hour => ({ hour, total: 0 }));
   orders.forEach(o => {
     const h = new Date(o.date).getHours();
     const b = buckets.find(x => x.hour === h);
     if (b) b.total += o.total;
   });
   const max = Math.max(1, ...buckets.map(b => b.total));
+  const totalRevenue = buckets.reduce((s, b) => s + b.total, 0);
+
   return /*#__PURE__*/React.createElement('div', {
     style: {
-      margin: '0 20px 24px',
-      background: T.bgCard,
-      borderRadius: 16,
-      border: `1px solid ${T.brd}`,
-      padding: '18px 16px 14px'
+      flex: 1,
+      minWidth: 0,
+      borderRadius: 24,
+      padding: '22px 20px 20px',
+      background: theme.bg,
+      boxShadow: theme.shadow,
+      position: 'relative',
+      overflow: 'hidden'
     }
   },
-    /*#__PURE__*/React.createElement('div', { style: { fontSize: 13, fontWeight: 700, color: T.txt, marginBottom: 14, paddingLeft: 4 } }, "Chiffre d'affaires par heure"),
-    /*#__PURE__*/React.createElement('div', { style: { display: 'flex', alignItems: 'flex-end', gap: 4, height: 130 } },
+    /*#__PURE__*/React.createElement('div', {
+      style: {
+        position: 'absolute', top: -40, right: -40, width: 140, height: 140,
+        borderRadius: '50%', background: theme.glow, filter: 'blur(18px)', pointerEvents: 'none'
+      }
+    }),
+    /*#__PURE__*/React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, position: 'relative' } },
+      /*#__PURE__*/React.createElement('div', {
+        style: {
+          width: 42, height: 42, borderRadius: 13,
+          background: theme.iconBg, color: theme.iconColor,
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }
+      }, icon),
+      /*#__PURE__*/React.createElement('div', { style: { textAlign: 'right' } },
+        /*#__PURE__*/React.createElement('div', { style: { fontSize: 11, fontWeight: 700, letterSpacing: 0.8, textTransform: 'uppercase', color: theme.subText } }, title),
+        /*#__PURE__*/React.createElement('div', { style: { fontSize: 22, fontWeight: 800, color: theme.text, marginTop: 2 } }, fp(totalRevenue))
+      )
+    ),
+    /*#__PURE__*/React.createElement('div', { style: { display: 'flex', alignItems: 'flex-end', gap: hours.length > 5 ? 8 : 16, height: 140, position: 'relative' } },
       buckets.map(b => /*#__PURE__*/React.createElement('div', {
         key: b.hour,
-        style: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, height: '100%', justifyContent: 'flex-end' }
+        style: { flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, height: '100%', justifyContent: 'flex-end' }
       },
         /*#__PURE__*/React.createElement('div', {
-          title: b.hour + 'h : ' + fp(b.total),
+          title: hourLabel(b.hour) + 'h : ' + fp(b.total),
           style: {
             width: '100%',
-            maxWidth: 22,
-            height: Math.max(2, (b.total / max) * 100),
-            background: b.total > 0 ? T.primary : T.brdL,
-            borderRadius: '5px 5px 2px 2px'
+            maxWidth: 46,
+            height: Math.max(6, (b.total / max) * 110),
+            background: theme.bar,
+            borderRadius: '12px 12px 4px 4px',
+            boxShadow: b.total > 0 ? theme.barShadow : 'none',
+            transition: 'height .45s cubic-bezier(.34,1.56,.64,1)'
           }
         }),
-        /*#__PURE__*/React.createElement('div', { style: { fontSize: 9.5, color: T.txtMuted } }, b.hour)
+        /*#__PURE__*/React.createElement('div', { style: { fontSize: 11.5, fontWeight: 700, color: theme.subText } }, hourLabel(b.hour))
       ))
     )
+  );
+}
+
+function ServiceHourCharts({ orders }) {
+  return /*#__PURE__*/React.createElement('div', {
+    className: 'osm-service-grid',
+    style: { margin: '0 20px 24px' }
+  },
+    /*#__PURE__*/React.createElement(ServiceHourChart, {
+      title: 'Service du midi',
+      icon: /*#__PURE__*/React.createElement(IconSun, { size: 22 }),
+      hours: MIDI_HOURS,
+      orders,
+      theme: MIDI_CHART_THEME
+    }),
+    /*#__PURE__*/React.createElement(ServiceHourChart, {
+      title: 'Service du soir',
+      icon: /*#__PURE__*/React.createElement(IconMoon, { size: 20 }),
+      hours: SOIR_HOURS,
+      orders,
+      theme: SOIR_CHART_THEME
+    })
   );
 }
 
@@ -726,7 +805,7 @@ export function Dash({ orders, onReset, onUpdateOrder, onDeleteOrder }) {
     /*#__PURE__*/React.createElement(SectionLabel, null, 'Ventes par catégorie'),
     /*#__PURE__*/React.createElement(CategoryAccordion, { dayOrders: periodOrders }),
 
-    /*#__PURE__*/React.createElement(HourChart, { orders: periodOrders }),
+    /*#__PURE__*/React.createElement(ServiceHourCharts, { orders: dayOrders }),
 
     /*#__PURE__*/React.createElement(SectionLabel, null, 'Commandes ' + periodTag),
     /*#__PURE__*/React.createElement('div', {

@@ -24,3 +24,13 @@ input, textarea, select, button {
 .osm-tap-card:active {
   transform: scale(0.98);
 }
+.osm-service-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 680px) {
+  .osm-service-grid {
+    grid-template-columns: 1fr;
+  }
+}
