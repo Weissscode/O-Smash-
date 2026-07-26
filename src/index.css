@@ -60,3 +60,35 @@ input, textarea, select, button {
 .osm-card-glow:active {
   transform: scale(0.99);
 }
+.osm-manager-header {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+}
+.osm-manager-header .osm-header-center {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: center;
+  min-width: 0;
+}
+.osm-manager-header .osm-header-right {
+  display: flex;
+  justify-content: flex-end;
+}
+@media (max-width: 520px) {
+  .osm-manager-header {
+    grid-template-columns: 1fr;
+    row-gap: 6px;
+    justify-items: center;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+  }
+  .osm-manager-header .osm-header-left {
+    display: none;
+  }
+  .osm-manager-header .osm-header-right {
+    justify-content: center;
+  }
+}
