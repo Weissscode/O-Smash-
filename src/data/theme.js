@@ -19,5 +19,11 @@ export const T = {
   noL: '#FEE2E2',
   warn: '#F59E0B',
   warnL: '#FEF3C7',
-  sh: '0 1px 4px rgba(180,143,224,0.10), 0 4px 14px rgba(180,143,224,0.08)'
+  sh: '0 1px 4px rgba(180,143,224,0.10), 0 4px 14px rgba(180,143,224,0.08)',
+  shSoft: '0 2px 8px rgba(148,100,214,0.08), 0 10px 26px rgba(148,100,214,0.10)',
+  bgGradient: 'linear-gradient(165deg, #EFE5FF 0%, #F7F2FF 38%, #FFFFFF 78%)',
+  gradViolet: 'linear-gradient(135deg, #F6F0FF 0%, #EADCFF 100%)',
+  gradBlue: 'linear-gradient(135deg, #EAF3FF 0%, #D9E9FF 100%)',
+  gradGreen: 'linear-gradient(135deg, #E8FBF3 0%, #D3F5E5 100%)',
+  gradOrange: 'linear-gradient(135deg, #FFF4E4 0%, #FFE7C7 100%)'
 };
