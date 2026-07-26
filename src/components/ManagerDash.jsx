@@ -27,17 +27,18 @@ export function ManagerDash({ restaurantId, restaurantName }) {
   const orders = allOrders.filter(o => o.status !== 'en attente');
 
   return /*#__PURE__*/React.createElement('div', {
-    style: { height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: T.bg }
+    style: { height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: T.bgGradient }
   },
     /*#__PURE__*/React.createElement('div', {
       style: {
-        background: T.txt,
+        background: 'linear-gradient(160deg, #251A3D 0%, #2E2154 60%, #1B1330 100%)',
         padding: '14px 20px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
         gap: 12,
-        flexShrink: 0
+        flexShrink: 0,
+        boxShadow: '0 6px 20px rgba(30,15,55,0.3)'
       }
     },
       /*#__PURE__*/React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 12 } },
@@ -45,8 +46,9 @@ export function ManagerDash({ restaurantId, restaurantName }) {
         /*#__PURE__*/React.createElement('div', { style: { color: '#fff', fontWeight: 700, fontSize: 14 } }, restaurantName || '')
       ),
       /*#__PURE__*/React.createElement('button', {
+        className: 'osm-btn-premium',
         onClick: () => signOut(),
-        style: btn('rgba(255,255,255,0.12)', '#fff', { padding: '8px 14px', fontSize: 12 })
+        style: btn('rgba(255,255,255,0.14)', '#fff', { padding: '8px 14px', fontSize: 12, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.15)' })
       }, 'Déconnexion')
     ),
     !loaded

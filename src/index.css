@@ -24,3 +24,39 @@ input, textarea, select, button {
 .osm-tap-card:active {
   transform: scale(0.98);
 }
+.osm-service-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+@media (max-width: 680px) {
+  .osm-service-grid {
+    grid-template-columns: 1fr;
+  }
+}
+.osm-btn-premium {
+  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
+}
+.osm-btn-premium:hover {
+  filter: brightness(1.04);
+  transform: translateY(-1px);
+}
+.osm-btn-premium:active {
+  transform: translateY(0) scale(0.97);
+  filter: brightness(0.98);
+}
+.osm-icon-btn {
+  transition: background .15s ease, transform .15s ease;
+}
+.osm-icon-btn:hover {
+  background: rgba(148,100,214,0.10);
+}
+.osm-icon-btn:active {
+  transform: scale(0.92);
+}
+.osm-card-glow {
+  transition: transform .18s ease, box-shadow .18s ease;
+}
+.osm-card-glow:active {
+  transform: scale(0.99);
+}

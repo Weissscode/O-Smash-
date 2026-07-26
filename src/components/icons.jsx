@@ -84,3 +84,12 @@ export const IconCheck = ({ size = 14, strokeWidth = 2.4 }) => /*#__PURE__*/Reac
 export const IconChevronDown = ({ size = 16, strokeWidth = 2.2 }) => /*#__PURE__*/React.createElement('svg', base(size, strokeWidth),
   /*#__PURE__*/React.createElement('path', { d: 'M5 9l7 7 7-7' })
 );
+
+export const IconSun = ({ size = 20, strokeWidth = 2 }) => /*#__PURE__*/React.createElement('svg', base(size, strokeWidth),
+  /*#__PURE__*/React.createElement('circle', { cx: 12, cy: 12, r: 4.5 }),
+  /*#__PURE__*/React.createElement('path', { d: 'M12 2.5v3M12 18.5v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2.5 12h3M18.5 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1' })
+);
+
+export const IconMoon = ({ size = 20, strokeWidth = 2 }) => /*#__PURE__*/React.createElement('svg', base(size, strokeWidth),
+  /*#__PURE__*/React.createElement('path', { d: 'M20 14.2A8.5 8.5 0 1 1 9.8 4a7 7 0 0 0 10.2 10.2z' })
+);
