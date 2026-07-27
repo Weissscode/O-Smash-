@@ -6,7 +6,6 @@ import { LS } from '../utils/storage.js';
 import { fetchOrders, updateOrder, deleteOrder, deleteOrdersForDate } from '../utils/ordersApi.js';
 import { signOut } from '../utils/auth.js';
 import { Dash } from './Dash.jsx';
-import { ViceCodeLogo } from './ViceCodeLogo.jsx';
 
 const REFRESH_MS = 20000;
 
@@ -40,7 +39,10 @@ export function ManagerDash({ restaurantId, restaurantName }) {
     },
       /*#__PURE__*/React.createElement('div', { className: 'osm-header-left' }),
       /*#__PURE__*/React.createElement('div', { className: 'osm-header-center' },
-        /*#__PURE__*/React.createElement(ViceCodeLogo, { scale: 0.5 }),
+        /*#__PURE__*/React.createElement('img', {
+          src: '/vice-code-logo.png', alt: 'Vice Code',
+          style: { height: 60, width: 60, objectFit: 'contain' }
+        }),
         /*#__PURE__*/React.createElement('div', {
           style: { color: '#fff', fontWeight: 700, fontSize: 15, maxWidth: '50vw', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
         }, restaurantName || '')
