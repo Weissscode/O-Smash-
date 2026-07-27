@@ -6,7 +6,6 @@ import { LS } from '../utils/storage.js';
 import { fetchOrders, updateOrder, deleteOrder, deleteOrdersForDate } from '../utils/ordersApi.js';
 import { signOut } from '../utils/auth.js';
 import { Dash } from './Dash.jsx';
-import { ViceCodeLogo } from './ViceCodeLogo.jsx';
 
 const REFRESH_MS = 20000;
 
@@ -30,26 +29,31 @@ export function ManagerDash({ restaurantId, restaurantName }) {
     style: { height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: T.bgGradient }
   },
     /*#__PURE__*/React.createElement('div', {
+      className: 'osm-manager-header',
       style: {
-        background: 'linear-gradient(160deg, #251A3D 0%, #2E2154 60%, #1B1330 100%)',
-        padding: '14px 20px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: 12,
+        background: 'linear-gradient(160deg, #4C3A7C 0%, #5F4A9B 55%, #3A2C63 100%)',
+        padding: '12px 20px',
         flexShrink: 0,
         boxShadow: '0 6px 20px rgba(30,15,55,0.3)'
       }
     },
-      /*#__PURE__*/React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 12 } },
-        /*#__PURE__*/React.createElement(ViceCodeLogo, { scale: 0.4 }),
-        /*#__PURE__*/React.createElement('div', { style: { color: '#fff', fontWeight: 700, fontSize: 14 } }, restaurantName || '')
+      /*#__PURE__*/React.createElement('div', { className: 'osm-header-left' }),
+      /*#__PURE__*/React.createElement('div', { className: 'osm-header-center' },
+        /*#__PURE__*/React.createElement('img', {
+          src: '/vice-code-logo.png', alt: 'Vice Code',
+          style: { height: 60, width: 60, objectFit: 'contain' }
+        }),
+        /*#__PURE__*/React.createElement('div', {
+          style: { color: '#fff', fontWeight: 700, fontSize: 15, maxWidth: '50vw', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
+        }, restaurantName || '')
       ),
-      /*#__PURE__*/React.createElement('button', {
-        className: 'osm-btn-premium',
-        onClick: () => signOut(),
-        style: btn('rgba(255,255,255,0.14)', '#fff', { padding: '8px 14px', fontSize: 12, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.15)' })
-      }, 'Déconnexion')
+      /*#__PURE__*/React.createElement('div', { className: 'osm-header-right' },
+        /*#__PURE__*/React.createElement('button', {
+          className: 'osm-btn-premium',
+          onClick: () => signOut(),
+          style: btn('rgba(255,255,255,0.16)', '#fff', { padding: '8px 14px', fontSize: 12, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.15)' })
+        }, 'Déconnexion')
+      )
     ),
     !loaded
       ? /*#__PURE__*/React.createElement('div', {
