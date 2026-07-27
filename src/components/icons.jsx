@@ -93,3 +93,19 @@ export const IconSun = ({ size = 20, strokeWidth = 2 }) => /*#__PURE__*/React.cr
 export const IconMoon = ({ size = 20, strokeWidth = 2 }) => /*#__PURE__*/React.createElement('svg', base(size, strokeWidth),
   /*#__PURE__*/React.createElement('path', { d: 'M20 14.2A8.5 8.5 0 1 1 9.8 4a7 7 0 0 0 10.2 10.2z' })
 );
+
+export const IconTrendUp = ({ size = 16, strokeWidth = 2.4 }) => /*#__PURE__*/React.createElement('svg', base(size, strokeWidth),
+  /*#__PURE__*/React.createElement('path', { d: 'M3 16l6.5-6.5L14 14l7-7' }),
+  /*#__PURE__*/React.createElement('path', { d: 'M15 7h6v6' })
+);
+
+export const IconTrendDown = ({ size = 16, strokeWidth = 2.4 }) => /*#__PURE__*/React.createElement('svg', base(size, strokeWidth),
+  /*#__PURE__*/React.createElement('path', { d: 'M3 8l6.5 6.5L14 10l7 7' }),
+  /*#__PURE__*/React.createElement('path', { d: 'M15 17h6v-6' })
+);
+
+export const IconTrophy = ({ size = 20, strokeWidth = 2 }) => /*#__PURE__*/React.createElement('svg', base(size, strokeWidth),
+  /*#__PURE__*/React.createElement('path', { d: 'M7 4h10v5a5 5 0 0 1-10 0V4z' }),
+  /*#__PURE__*/React.createElement('path', { d: 'M7 5H4a3 3 0 0 0 3 4M17 5h3a3 3 0 0 1-3 4' }),
+  /*#__PURE__*/React.createElement('path', { d: 'M12 14v3M9 20h6M9 17.5h6' })
+);
