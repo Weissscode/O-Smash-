@@ -6,10 +6,43 @@ import { LS } from '../utils/storage.js';
 import { fetchOrders, updateOrder, deleteOrder, deleteOrdersForDate } from '../utils/ordersApi.js';
 import { signOut } from '../utils/auth.js';
 import { Dash } from './Dash.jsx';
+import { Analytics } from './Analytics.jsx';
 
 const REFRESH_MS = 20000;
 
+const MANAGER_TABS = [
+  { key: 'dashboard', label: 'Dashboard' },
+  { key: 'analytics', label: 'Analytics' }
+];
+
+function ManagerTabSwitch({ tab, setTab }) {
+  return /*#__PURE__*/React.createElement('div', {
+    style: {
+      display: 'flex', gap: 4, margin: '12px 20px 0',
+      background: 'linear-gradient(135deg, #EDE4FA, #F4EFFF)',
+      padding: 4, borderRadius: 15,
+      border: '1px solid rgba(180,143,224,0.18)',
+      boxShadow: 'inset 0 1px 3px rgba(148,100,214,0.08)',
+      flexShrink: 0
+    }
+  },
+    MANAGER_TABS.map(t => /*#__PURE__*/React.createElement('button', {
+      key: t.key,
+      className: 'osm-btn-premium',
+      onClick: () => setTab(t.key),
+      style: {
+        flex: 1, padding: '10px 0', borderRadius: 11, border: 'none',
+        background: tab === t.key ? 'linear-gradient(135deg, #FFFFFF, #F7F1FF)' : 'transparent',
+        color: tab === t.key ? T.primaryD : T.txtSub,
+        fontWeight: 700, fontSize: 14, cursor: 'pointer',
+        boxShadow: tab === t.key ? '0 4px 12px rgba(148,100,214,0.18)' : 'none'
+      }
+    }, t.label))
+  );
+}
+
 export function ManagerDash({ restaurantId, restaurantName }) {
+  const [tab, setTab] = React.useState('dashboard');
   const [allOrders, setAllOrders] = React.useState([]);
   const [loaded, setLoaded] = React.useState(false);
 
@@ -55,28 +88,31 @@ export function ManagerDash({ restaurantId, restaurantName }) {
         }, 'Déconnexion')
       )
     ),
+    /*#__PURE__*/React.createElement(ManagerTabSwitch, { tab, setTab }),
     !loaded
       ? /*#__PURE__*/React.createElement('div', {
           style: { textAlign: 'center', padding: 60, color: T.txtSub, fontSize: 14 }
         }, 'Chargement des commandes...')
-      : /*#__PURE__*/React.createElement(Dash, {
-          orders,
-          onReset: async () => {
-            if (window.confirm('Reset toutes les commandes du jour ?')) {
-              const today = fd(new Date());
-              setAllOrders(p => p.filter(o => fd(o.date) !== today));
-              await deleteOrdersForDate(restaurantId, today);
-              LS.set('osm7-counter', { date: '', num: 0 });
+      : tab === 'analytics'
+        ? /*#__PURE__*/React.createElement(Analytics, { orders })
+        : /*#__PURE__*/React.createElement(Dash, {
+            orders,
+            onReset: async () => {
+              if (window.confirm('Reset toutes les commandes du jour ?')) {
+                const today = fd(new Date());
+                setAllOrders(p => p.filter(o => fd(o.date) !== today));
+                await deleteOrdersForDate(restaurantId, today);
+                LS.set('osm7-counter', { date: '', num: 0 });
+              }
+            },
+            onUpdateOrder: async (id, updates) => {
+              await updateOrder(id, updates);
+              setAllOrders(p => p.map(o => o.id === id ? { ...o, ...updates } : o));
+            },
+            onDeleteOrder: async id => {
+              await deleteOrder(id);
+              setAllOrders(p => p.filter(o => o.id !== id));
             }
-          },
-          onUpdateOrder: async (id, updates) => {
-            await updateOrder(id, updates);
-            setAllOrders(p => p.map(o => o.id === id ? { ...o, ...updates } : o));
-          },
-          onDeleteOrder: async id => {
-            await deleteOrder(id);
-            setAllOrders(p => p.filter(o => o.id !== id));
-          }
-        })
+          })
   );
 }
