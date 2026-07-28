@@ -7,7 +7,6 @@ import {
   IconClock, IconClose, IconChevronLeft, IconChevronRight,
   IconTrash, IconEdit, IconCalendar, IconCheck, IconChevronDown
 } from './icons.jsx';
-import { MonthlyAnalysis } from './MonthlyAnalysis.jsx';
 import {
   CATEGORIES, StatTile, HeroRevenue, PaymentHeroCard, SectionLabel, WideStat,
   ServiceHourCharts
@@ -111,40 +110,6 @@ function PeriodSwitch({ period, setPeriod }) {
         boxShadow: period === p.key ? '0 4px 12px rgba(148,100,214,0.18)' : 'none'
       }
     }, p.label))
-  );
-}
-
-const TOP_VIEWS = [
-  { key: 'jour', label: 'Journée' },
-  { key: 'mois', label: 'Mois' }
-];
-
-function TopViewSwitch({ topView, setTopView }) {
-  return /*#__PURE__*/React.createElement('div', {
-    style: {
-      display: 'flex', gap: 4, margin: '16px 20px 4px',
-      background: 'linear-gradient(160deg, #251A3D 0%, #2E2154 60%, #1B1330 100%)',
-      padding: 5, borderRadius: 16,
-      boxShadow: '0 6px 18px rgba(30,15,55,0.22)'
-    }
-  },
-    TOP_VIEWS.map(v => /*#__PURE__*/React.createElement('button', {
-      key: v.key,
-      className: 'osm-btn-premium',
-      onClick: () => setTopView(v.key),
-      style: {
-        flex: 1,
-        padding: '11px 0',
-        borderRadius: 12,
-        border: 'none',
-        background: topView === v.key ? 'linear-gradient(135deg, #C084FC, #9333EA)' : 'transparent',
-        color: topView === v.key ? '#fff' : 'rgba(238,225,255,0.65)',
-        fontWeight: 800,
-        fontSize: 14.5,
-        cursor: 'pointer',
-        boxShadow: topView === v.key ? '0 4px 14px rgba(147,51,234,0.45)' : 'none'
-      }
-    }, v.label))
   );
 }
 
@@ -484,11 +449,9 @@ function OrderCard({ order, onClick }) {
 }
 
 export function Dash({ orders, onReset, onUpdateOrder, onDeleteOrder }) {
-  const [topView, setTopView] = React.useState('jour');
   const [selectedDate, setSelectedDate] = React.useState(() => new Date());
   const [selectedOrder, setSelectedOrder] = React.useState(null);
   const [period, setPeriod] = React.useState('all');
-  const goToDay = date => { setSelectedDate(date); setTopView('jour'); };
   const today = fd(selectedDate);
   const isToday = today === fd(new Date());
   const periodTag = PERIODS.find(p => p.key === period).tag;
@@ -527,11 +490,6 @@ export function Dash({ orders, onReset, onUpdateOrder, onDeleteOrder }) {
   return /*#__PURE__*/React.createElement('div', {
     style: { flex: 1, overflowY: 'auto', background: T.bgGradient }
   },
-    /*#__PURE__*/React.createElement(TopViewSwitch, { topView, setTopView }),
-
-    topView === 'mois'
-      ? /*#__PURE__*/React.createElement(MonthlyAnalysis, { orders, onSelectDay: goToDay })
-      : /*#__PURE__*/React.createElement(React.Fragment, null,
     /*#__PURE__*/React.createElement('div', {
       style: {
         display: 'flex',
@@ -637,6 +595,5 @@ export function Dash({ orders, onReset, onUpdateOrder, onDeleteOrder }) {
       onSave: handleSave,
       onDelete: handleDelete
     })
-  )
   );
 }

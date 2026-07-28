@@ -25,6 +25,7 @@ import { TopModal } from './components/TopModal.jsx';
 import { DuoBuild } from './components/DuoBuild.jsx';
 import { StockView } from './components/StockView.jsx';
 import { Dash } from './components/Dash.jsx';
+import { Analytics } from './components/Analytics.jsx';
 import { CItem } from './components/CItem.jsx';
 import { ConfirmModal } from './components/ConfirmModal.jsx';
 import { SplitModal } from './components/SplitModal.jsx';
@@ -50,7 +51,7 @@ export default function App({ restaurantId }) {
   }, [allOrders]);
   React.useEffect(() => {
     if (!restaurantId) return;
-    fetchOrders(restaurantId).then(setAllOrders).catch(() => {}).finally(() => setOrdersLoaded(true));
+    fetchOrders(restaurantId, 90).then(setAllOrders).catch(() => {}).finally(() => setOrdersLoaded(true));
   }, [restaurantId]);
   React.useEffect(() => {
     const trySync = async () => {
@@ -702,6 +703,10 @@ export default function App({ restaurantId }) {
     id: 'dashboard',
     l: 'Dashboard',
     pr: true
+  }, {
+    id: 'analytics',
+    l: 'Analytics',
+    pr: true
   }].map(t => /*#__PURE__*/React.createElement("button", {
     key: t.id,
     onClick: () => t.pr ? setPinFor(t.id) : setView(t.id),
@@ -926,6 +931,8 @@ export default function App({ restaurantId }) {
       setAllOrders(p => p.filter(o => o.id !== id));
       setSyncPending(r.offline || hasPendingSync());
     }
+  }), view === 'analytics' && /*#__PURE__*/React.createElement(Analytics, {
+    orders: orders
   }), view === 'telephone' && /*#__PURE__*/React.createElement(TelephoneView, {
     phoneOrders: phoneOrders,
     onPaid: payPhoneOrder,
@@ -944,7 +951,7 @@ export default function App({ restaurantId }) {
     }
   }), pinFor && /*#__PURE__*/React.createElement(PinModal, {
     onClose: () => setPinFor(null),
-    title: "Dashboard",
+    title: pinFor === 'analytics' ? 'Analytics' : 'Dashboard',
     onOk: () => {
       setView(pinFor);
       setPinFor(null);
