@@ -16,7 +16,8 @@ function rowToOrder(row) {
     client: row.client,
     status: row.status,
     splitOf: row.split_of,
-    printRequest: row.print_request
+    printRequest: row.print_request,
+    printError: row.print_error
   };
 }
 

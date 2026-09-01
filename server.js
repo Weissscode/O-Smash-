@@ -421,7 +421,7 @@ function imprimer(printer, data, timeoutMs) {
   });
 }
 
-async function imprimerCuisineAvecRetry(data, orderNum) {
+async function imprimerAvecRetry(printer, data, label) {
   var delays = [0, 1000, 2000];
   for (var i = 0; i < delays.length; i++) {
     if (delays[i] > 0) {
@@ -429,12 +429,12 @@ async function imprimerCuisineAvecRetry(data, orderNum) {
     }
     try {
       var t = new Date().toLocaleTimeString('fr-FR');
-      console.log('[CUISINE] ' + t + ' | Tentative ' + (i+1) + '/3 | IP: ' + CUISINE.ip);
-      await imprimer(CUISINE, data, 12000);
-      console.log('[CUISINE] Tentative ' + (i+1) + ' OK');
+      console.log('[' + label + '] ' + t + ' | Tentative ' + (i+1) + '/3 | IP: ' + printer.ip);
+      await imprimer(printer, data, 12000);
+      console.log('[' + label + '] Tentative ' + (i+1) + ' OK');
       return { ok: true };
     } catch(e) {
-      console.error('[CUISINE] Tentative ' + (i+1) + ' ECHEC: ' + e.message);
+      console.error('[' + label + '] Tentative ' + (i+1) + ' ECHEC: ' + e.message);
       if (i === delays.length - 1) {
         return { ok: false, err: e.message };
       }
@@ -448,31 +448,27 @@ app.get('/status', function(req, res) {
 });
 
 // ── Logique d'impression partagee (endpoints HTTP + Realtime) ──
+// Chaque ticket est retente 3 fois (0s / 1s / 2s) avant d'etre considere en echec.
+// results.<clé> vaut 'ok', 'skip' (rien a imprimer), ou le message d'erreur final.
 async function doPrintFull(order) {
   var results = { caisse: 'ok', cuisine: 'ok', milkshake: 'skip' };
 
-  // 1. Ticket caisse client
-  try {
-    await imprimer(CAISSE, buildCaisse(order), 8000);
-    console.log('[CAISSE] #' + order.num + ' OK');
-  } catch(e) { results.caisse = e.message; console.error('[CAISSE] Erreur:', e.message); }
+  var rCaisse = await imprimerAvecRetry(CAISSE, buildCaisse(order), 'CAISSE');
+  if (!rCaisse.ok) results.caisse = rCaisse.err;
+  else console.log('[CAISSE] #' + order.num + ' OK');
 
-  // 2. Ticket milkshake caisse (si milkshakes)
   var mk = buildMilkshake(order);
   if (mk) {
-    try {
-      await imprimer(CAISSE, mk, 8000);
-      results.milkshake = 'ok';
-      console.log('[MILKSHAKE] #' + order.num + ' OK');
-    } catch(e) { results.milkshake = e.message; console.error('[MILKSHAKE] Erreur:', e.message); }
+    var rMk = await imprimerAvecRetry(CAISSE, mk, 'MILKSHAKE');
+    if (!rMk.ok) { results.milkshake = rMk.err; }
+    else { results.milkshake = 'ok'; console.log('[MILKSHAKE] #' + order.num + ' OK'); }
   }
 
-  // 3. Ticket cuisine (sans milkshakes, sans boissons)
   var cd = buildCuisine(order);
   if (cd) {
-    var r = await imprimerCuisineAvecRetry(cd, order.num);
-    if (!r.ok) {
-      results.cuisine = r.err;
+    var rCuisine = await imprimerAvecRetry(CUISINE, cd, 'CUISINE');
+    if (!rCuisine.ok) {
+      results.cuisine = rCuisine.err;
     } else {
       console.log('[CUISINE] #' + order.num + ' OK');
     }
@@ -489,17 +485,15 @@ async function doPrintCuisine(order) {
 
   var mk = buildMilkshake(order);
   if (mk) {
-    try {
-      await imprimer(CAISSE, mk, 8000);
-      results.milkshake = 'ok';
-    } catch(e) { results.milkshake = e.message; }
+    var rMk = await imprimerAvecRetry(CAISSE, mk, 'MILKSHAKE');
+    results.milkshake = rMk.ok ? 'ok' : rMk.err;
   }
 
   var cd = buildCuisine(order);
   if (cd) {
-    var r = await imprimerCuisineAvecRetry(cd, order.num);
-    if (!r.ok) {
-      results.cuisine = r.err;
+    var rCuisine = await imprimerAvecRetry(CUISINE, cd, 'CUISINE');
+    if (!rCuisine.ok) {
+      results.cuisine = rCuisine.err;
     } else {
       console.log('[CUISINE] TEL #' + order.num + ' OK');
     }
@@ -511,11 +505,28 @@ async function doPrintCuisine(order) {
 
 async function doPrintCaisse(order) {
   var results = { caisse: 'ok' };
-  try {
-    await imprimer(CAISSE, buildCaisse(order), 8000);
+  var rCaisse = await imprimerAvecRetry(CAISSE, buildCaisse(order), 'CAISSE');
+  if (!rCaisse.ok) {
+    results.caisse = rCaisse.err;
+    console.error('[CAISSE] TEL Erreur:', rCaisse.err);
+  } else {
     console.log('[CAISSE] TEL #' + order.num + ' OK');
-  } catch(e) { results.caisse = e.message; console.error('[CAISSE] TEL Erreur:', e.message); }
+  }
   return results;
+}
+
+// 'ok'/'skip' = succes ou rien a imprimer. Tout le reste = message d'erreur.
+function printResultsFailed(results) {
+  return Object.keys(results).some(function(k) {
+    return results[k] !== 'ok' && results[k] !== 'skip';
+  });
+}
+
+function printResultsSummary(results) {
+  return Object.keys(results)
+    .filter(function(k) { return results[k] !== 'ok' && results[k] !== 'skip'; })
+    .map(function(k) { return k + ': ' + results[k]; })
+    .join(' | ');
 }
 
 // ── /print : commande classique ──────────────────────────────
@@ -547,13 +558,7 @@ app.post('/test', async function(req, res) {
       { qty: 1, name: 'Coca-Cola 33cl', total: 2.0, pid: 'dr-coca', cust: null },
     ]
   };
-  var results = { caisse: 'ok', cuisine: 'ok', milkshake: 'skip' };
-  try { await imprimer(CAISSE, buildCaisse(order), 8000); } catch(e) { results.caisse = e.message; }
-  var mk = buildMilkshake(order);
-  if (mk) { try { await imprimer(CAISSE, mk, 8000); results.milkshake = 'ok'; } catch(e) { results.milkshake = e.message; } }
-  var cd = buildCuisine(order);
-  if (cd) { var r = await imprimerCuisineAvecRetry(cd, 'TEST'); if (!r.ok) results.cuisine = r.err; }
-  else { results.cuisine = 'skip'; }
+  var results = await doPrintFull(order);
   res.json({ success: true, results });
 });
 
@@ -566,7 +571,7 @@ app.post('/test-cuisine', async function(req, res) {
   var cd = buildCuisine(order);
   var r = { cuisine: 'skip' };
   if (cd) {
-    var res2 = await imprimerCuisineAvecRetry(cd, 'TEST-C');
+    var res2 = await imprimerAvecRetry(CUISINE, cd, 'CUISINE');
     r.cuisine = res2.ok ? 'ok' : res2.err;
   }
   res.json({ success: true, results: r });
@@ -608,15 +613,22 @@ function startRealtimePrinting() {
     var order = rowToPrintOrder(row);
     var kind = row.print_request;
     console.log('[REALTIME] Commande #' + order.num + ' -> impression ' + kind);
+    var printError = null;
     try {
-      if (kind === 'full') await doPrintFull(order);
-      else if (kind === 'cuisine') await doPrintCuisine(order);
-      else if (kind === 'caisse') await doPrintCaisse(order);
+      var results;
+      if (kind === 'full') results = await doPrintFull(order);
+      else if (kind === 'cuisine') results = await doPrintCuisine(order);
+      else if (kind === 'caisse') results = await doPrintCaisse(order);
+      if (results && printResultsFailed(results)) {
+        printError = printResultsSummary(results);
+        console.error('[REALTIME] Impression #' + order.num + ' incomplete: ' + printError);
+      }
     } catch (e) {
+      printError = e.message;
       console.error('[REALTIME] Erreur impression #' + order.num + ':', e.message);
     }
     try {
-      await supabaseAdmin.from('orders').update({ print_request: null }).eq('id', row.id);
+      await supabaseAdmin.from('orders').update({ print_request: null, print_error: printError }).eq('id', row.id);
     } catch (e) {
       console.error('[REALTIME] Erreur remise a zero print_request #' + order.num + ':', e.message);
     }
