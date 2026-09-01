@@ -121,6 +121,37 @@ export default function App({ restaurantId }) {
   const [burgerStartM, setBurgerStartM] = React.useState(null);
   const [confirmM, setConfirmM] = React.useState(false);
   const [successM, setSuccessM] = React.useState(null);
+  // Retour automatique a l'ecran d'accueil de la borne si le client
+  // s'eloigne en plein flow de commande (pas encore valide) : evite un
+  // panier abandonne qui bloque la borne pour le client suivant.
+  React.useEffect(() => {
+    if (!isKiosk || !kioskStarted) return;
+    const IDLE_MS = 60000;
+    let t;
+    const reset = () => {
+      clearTimeout(t);
+      t = setTimeout(() => {
+        setCart([]);
+        setClientName('');
+        setConfirmM(false);
+        setCustM(null);
+        setDrinkM(null);
+        setDuoM(null);
+        setEtudM(null);
+        setFritesM(null);
+        setBurgerStartM(null);
+        setKioskStarted(false);
+      }, IDLE_MS);
+    };
+    reset();
+    document.addEventListener('pointerdown', reset);
+    document.addEventListener('keydown', reset);
+    return () => {
+      clearTimeout(t);
+      document.removeEventListener('pointerdown', reset);
+      document.removeEventListener('keydown', reset);
+    };
+  }, [isKiosk, kioskStarted]);
   React.useEffect(() => {
     const ck = () => setMob(window.innerWidth < 1100);
     window.addEventListener('resize', ck);
@@ -449,13 +480,13 @@ export default function App({ restaurantId }) {
       style: {
         ...card(),
         borderRadius: 4,
-        padding: '16px 18px',
+        padding: isKiosk ? '22px 20px' : '16px 18px',
         cursor: out ? 'not-allowed' : 'pointer',
         textAlign: 'left',
         display: 'flex',
         flexDirection: 'column',
         gap: 5,
-        minHeight: 110,
+        minHeight: isKiosk ? 130 : 110,
         position: 'relative',
         overflow: 'hidden',
         opacity: out ? 0.38 : 1,
@@ -485,7 +516,7 @@ export default function App({ restaurantId }) {
       color: catObj?.color || T.primary
     }), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 15,
+        fontSize: isKiosk ? 17 : 15,
         fontWeight: 700,
         color: T.txt,
         lineHeight: 1.2,
@@ -503,7 +534,7 @@ export default function App({ restaurantId }) {
       }
     }, p.desc), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 18,
+        fontSize: isKiosk ? 21 : 18,
         fontWeight: 800,
         color: catObj?.color || T.primary
       }
@@ -920,11 +951,11 @@ export default function App({ restaurantId }) {
     key: cat.id,
     onClick: () => setSelCat(cat.id),
     style: {
-      padding: mob ? '9px 14px' : '10px 22px',
+      padding: isKiosk ? '14px 20px' : mob ? '9px 14px' : '10px 22px',
       borderRadius: 6,
       border: selCat === cat.id ? `2.5px solid ${cat.color}` : '2px solid transparent',
       cursor: 'pointer',
-      fontSize: mob ? 12 : 14,
+      fontSize: isKiosk ? 15 : mob ? 12 : 14,
       fontWeight: selCat === cat.id ? 700 : 500,
       whiteSpace: 'nowrap',
       background: selCat === cat.id ? `${cat.color}12` : T.bg,
