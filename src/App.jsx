@@ -1,6 +1,6 @@
 import React from 'react';
 import { T } from './data/theme.js';
-import { CATS, BURGERS, FORMULES, RIZ, SIDES, LOADED, CREP, MILKS, PMAP, CB } from './data/products.js';
+import { CATS, BURGERS, BAO, FORMULES, RIZ, SIDES, LOADED, CREP, MILKS, PMAP, CB } from './data/products.js';
 import { card, btn } from './utils/styles.js';
 import { fp, ft, fd, uid } from './utils/format.js';
 import { LS } from './utils/storage.js';
@@ -95,6 +95,7 @@ export default function App({ restaurantId }) {
   const [printSt, setPrintSt] = React.useState(null);
   const [clientName, setClientName] = React.useState('');
   const [custM, setCustM] = React.useState(null);
+  const [boissonYNM, setBoissonYNM] = React.useState(null);
   const [drinkM, setDrinkM] = React.useState(null);
   const [duoM, setDuoM] = React.useState(null);
   const [etudM, setEtudM] = React.useState(null);
@@ -270,11 +271,16 @@ export default function App({ restaurantId }) {
   const handleProd = (p, cat) => {
     if (stockOut.includes(p.id)) return;
     if (cat === 'burger') return setBurgerStartM(p);
-    if (cat === 'riz') return setCustM({
-      product: p,
-      type: 'riz',
-      needsDrink: !!p.needsDrink
-    });
+    if (cat === 'bao') return setBurgerStartM(p);
+    if (cat === 'riz') {
+      if (p.noType) return setBoissonYNM({
+        cb: withDrink => addCart(p.name, p.price + (withDrink ? 1 : 0), p.id, withDrink ? { boisson: true } : null)
+      });
+      return setCustM({
+        product: p,
+        type: 'riz'
+      });
+    }
     if (cat === 'formule') {
       if (p.isEtud) return setEtudM(p);
       if (p.isDuo) return setDuoM(p);
@@ -293,11 +299,14 @@ export default function App({ restaurantId }) {
       product: p,
       type: 'crepe'
     });
-    if (cat === 'loaded') return setCustM({
-      product: p,
-      type: 'loaded'
-    });
-    if (cat === 'sides' && p.hasSauce) return setFritesM(p);
+    if (cat === 'sides') {
+      if (p.id.startsWith('lo-')) return setCustM({
+        product: p,
+        type: 'loaded'
+      });
+      if (p.hasSauce) return setFritesM(p);
+      return addCart(p.name, p.price, p.id);
+    }
     if (cat === 'divers') return addCart(p.name, p.price, p.id);
     addCart(p.name, p.price, p.id);
   };
@@ -305,6 +314,14 @@ export default function App({ restaurantId }) {
     const b = BURGERS.find(x => x.id === item.pid);
     if (b) return setCustM({
       product: b,
+      type: 'burger',
+      editId: item.id,
+      initial: item.cust,
+      inMenu: !!item.cust?.inMenu
+    });
+    const bao = BAO.find(x => x.id === item.pid);
+    if (bao) return setCustM({
+      product: bao,
       type: 'burger',
       editId: item.id,
       initial: item.cust,
@@ -480,7 +497,7 @@ export default function App({ restaurantId }) {
       }))));
     }
     // Onglets peu remplis = cases plus grandes
-    const sparse = ['formule', 'riz', 'sides', 'loaded'].includes(selCat);
+    const sparse = ['bao', 'formule', 'riz', 'sides', 'desserts', 'boissons', 'milkshake', 'crepes'].includes(selCat);
     const minW = sparse ? mob ? 180 : 240 : mob ? 145 : 175;
     return /*#__PURE__*/React.createElement("div", {
       style: {
@@ -1009,22 +1026,32 @@ export default function App({ restaurantId }) {
         setCustM(null);
         return;
       }
-      if (custM.needsDrink) {
-        const rc = c,
-          pr = custM.product;
-        setCustM(null);
-        setDrinkM({
-          cb: d => addCart(pr.name + (d ? ` (${d})` : ''), pr.price, pr.id, {
-            ...rc,
-            drink: d
-          })
-        });
-      } else {
-        addCart(custM.product.name, custM.product.price, custM.product.id, c);
-        setCustM(null);
-      }
+      const pr = custM.product;
+      setCustM(null);
+      setBoissonYNM({
+        cb: withDrink => addCart(pr.name, pr.price + (withDrink ? 1 : 0), pr.id, {
+          ...c,
+          ...(withDrink ? { boisson: true } : {})
+        })
+      });
     }
-  }), custM?.type === 'loaded' && /*#__PURE__*/React.createElement(LoadedCust, {
+  }), boissonYNM && /*#__PURE__*/React.createElement(Modal, {
+    onClose: () => setBoissonYNM(null)
+  }, /*#__PURE__*/React.createElement("div", {
+    style: { ...card(), width: 'min(88vw,360px)', padding: 28, display: 'flex', flexDirection: 'column', gap: 20 }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: { fontSize: 18, fontWeight: 800, color: T.txt, textAlign: 'center' }
+  }, "Avec une boisson ?"), /*#__PURE__*/React.createElement("div", {
+    style: { fontSize: 14, color: T.txtSub, textAlign: 'center' }
+  }, "+1€"), /*#__PURE__*/React.createElement("div", {
+    style: { display: 'flex', gap: 12 }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => { boissonYNM.cb(false); setBoissonYNM(null); },
+    style: { ...btn(T.bgCard, T.txtSub, { flex: 1, border: `1px solid ${T.brd}` }) }
+  }, "Non"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => { boissonYNM.cb(true); setBoissonYNM(null); },
+    style: { ...btn(T.primary, T.white, { flex: 2 }) }
+  }, "Oui +1€")))), custM?.type === 'loaded' && /*#__PURE__*/React.createElement(LoadedCust, {
     product: custM.product,
     initial: custM.initial,
     onClose: () => setCustM(null),
