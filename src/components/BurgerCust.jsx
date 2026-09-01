@@ -91,7 +91,7 @@ export function BurgerCust({
       overflowY: 'auto',
       padding: '16px 22px'
     }
-  }, !product.id.includes('veg') && !product.id.includes('chik') && /*#__PURE__*/React.createElement("div", {
+  }, !product.id.includes('veg') && !product.id.includes('chik') && !product.id.startsWith('bao-') && !['b-avoc', 'b-mncc', 'b-mncb'].includes(product.id) && /*#__PURE__*/React.createElement("div", {
     style: {
       marginBottom: 18
     }

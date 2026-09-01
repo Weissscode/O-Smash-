@@ -3,6 +3,10 @@ export const CATS = [{
   name: 'Burgers',
   color: '#7C3AED'
 }, {
+  id: 'bao',
+  name: 'BAO',
+  color: '#E91E63'
+}, {
   id: 'formule',
   name: 'Formules',
   color: '#6D28D9'
@@ -14,10 +18,6 @@ export const CATS = [{
   id: 'sides',
   name: 'Sides',
   color: '#0891B2'
-}, {
-  id: 'loaded',
-  name: 'Loaded',
-  color: '#DC2626'
 }, {
   id: 'desserts',
   name: 'Desserts',
@@ -92,23 +92,29 @@ export const BURGERS = [{
   desc: 'Double steak, cheddar, raclette, bacon, parmesan',
   hasVersion: true
 }, {
-  id: 'b-macc',
-  name: 'Mac n Cheese Chicken Burger',
-  price: 9.5,
-  tag: 'SIGNATURE',
-  desc: 'Burger chicken sauce mac n cheese'
-}, {
-  id: 'b-macb',
-  name: 'Mac n Cheese Beef Burger',
-  price: 9.5,
-  tag: 'SIGNATURE',
-  desc: 'Burger beef sauce mac n cheese'
-}, {
   id: 'b-wrap',
   name: 'Wrap Chicken',
   price: 6.5,
   tag: 'WRAP',
   desc: 'Tortillas, crispy chicken, cheddar, salade, tomate'
+}, {
+  id: 'b-avoc',
+  name: "O'Smash Avocado",
+  price: 10.5,
+  tag: 'SIGNATURE',
+  desc: "Potato buns, double steak smashé, cheddar, avocat, salade, tomate, oignon, sauce avocado"
+}, {
+  id: 'b-mncc',
+  name: 'Mac n Cheese Chicken Burger',
+  price: 10.0,
+  tag: 'SIGNATURE',
+  desc: 'Potato buns, crispy chicken, cheddar, oignon, salade, tomate, sauce biggy ou spicy'
+}, {
+  id: 'b-mncb',
+  name: 'Mac n Cheese Beef Burger',
+  price: 10.0,
+  tag: 'SIGNATURE',
+  desc: 'Potato buns, double steak smashé, cheddar, oignon crispy, sauce biggy ou spicy'
 }];
 export const ETUD_CHOICES = [{
   id: 'b-orig',
@@ -158,12 +164,84 @@ export const RIZ = [{
   price: 9.0,
   desc: 'Riz, sauce thaï, oignon crispy, persil, crispy chicken'
 }, {
-  id: 'r-rizb',
-  name: 'Riz + Boisson',
+  id: 'r-cgrat',
+  name: 'Crousty Gratiné',
+  price: 10.5,
+  noType: true,
+  needsDrink: true,
+  desc: 'Riz, sauce thai maison, oignon crispy, persil, crispy chicken, mozza gratinée, sauce sucrée ou piquante'
+}, {
+  id: 'r-cgratb',
+  name: 'Crousty Gratiné Bourzin',
+  price: 12.0,
+  noType: true,
+  needsDrink: true,
+  desc: 'Riz, sauce thai maison, oignon crispy, persil, crispy chicken, mozza gratinée, boursin, sauce sucrée ou piquante'
+}];
+
+export const BAO = [{
+  id: 'bao-orig',
+  name: 'BAO Original',
+  price: 8.5,
+  tag: 'BAO',
+  desc: 'Bao, double steak smashé, cheddar, oignon crispy, cornichon, sauce moutarde ketchup ou biggy'
+}, {
+  id: 'bao-spicy',
+  name: 'BAO Spicy',
+  price: 10.9,
+  tag: 'BAO',
+  desc: 'Bao, double steak smashé, cheddar, salade, tomate, oignon crispy, bacon, jalapeños, sauce spicy'
+}, {
+  id: 'bao-chick',
+  name: 'BAO Chicken',
+  price: 8.5,
+  tag: 'BAO',
+  desc: 'Bao, double crispy chicken, cheddar, oignon, salade, tomate, sauce chicken'
+}, {
+  id: 'bao-cara',
+  name: 'BAO Caramel',
+  price: 11.5,
+  tag: 'BAO',
+  desc: 'Bao, double steak smashé, cheddar, salade, tomate, oignon caramélisé, sauce honey barbecue'
+}, {
+  id: 'bao-mnc',
+  name: 'Mac n Chicken Cheese Burger',
+  price: 9.0,
+  tag: 'BAO',
+  desc: 'Mac n cheese, crispy chicken, sauce cheddar, oignon crispy, persil'
+}, {
+  id: 'bao-mncb',
+  name: 'Mac n Cheese Beef Burger',
   price: 10.0,
-  needsDrink: true
+  tag: 'BAO',
+  desc: 'Potato buns, double steak smashé, cheddar, oignon crispy, sauce biggy ou spicy'
+}];
+export const LOADED = [{
+  id: 'lo-wing',
+  name: 'Wings x5 BBQ',
+  price: 6.9
+}, {
+  id: 'lo-cana',
+  name: 'Canadian Cheddar',
+  price: 7.9,
+  desc: 'Frites + oignon crispy + cheddar + chicken'
+}, {
+  id: 'lo-spic',
+  name: 'Canadian Spicy',
+  price: 7.9,
+  desc: 'Frites + cheddar + oignon crispy + sauce coréenne'
 }];
 export const SIDES = [{
+  id: 'si-mnch',
+  name: 'Mac n Cheese Pâte',
+  price: 4.5,
+  desc: 'Mac n cheese maison'
+}, {
+  id: 'si-mncp',
+  name: 'Mac n Chicken Pâte',
+  price: 9.0,
+  desc: 'Mac n cheese, crispy chicken, sauce cheddar, oignon crispy, persil'
+}, {
   id: 'si-frit',
   name: 'Frites Twister',
   price: 3.0,
@@ -181,26 +259,7 @@ export const SIDES = [{
   id: 'si-tend',
   name: 'Tenders x2',
   price: 4.0
-}, {
-  id: 'si-mac',
-  name: 'Pates Mac n Cheese',
-  price: 5.5
-}];
-export const LOADED = [{
-  id: 'lo-wing',
-  name: 'Wings x5 BBQ',
-  price: 6.9
-}, {
-  id: 'lo-cana',
-  name: 'Canadian Cheddar',
-  price: 7.9,
-  desc: 'Frites + oignon crispy + cheddar + chicken'
-}, {
-  id: 'lo-spic',
-  name: 'Canadian Spicy',
-  price: 7.9,
-  desc: 'Frites + cheddar + oignon crispy + sauce coréenne'
-}];
+}, ...LOADED];
 export const DESS = [{
   id: 'de-ore',
   name: 'Tiramisu Oreo',
@@ -355,10 +414,10 @@ export const CREP = [{
 }];
 export const PMAP = {
   burger: BURGERS,
+  bao: BAO,
   formule: FORMULES,
   riz: RIZ,
   sides: SIDES,
-  loaded: LOADED,
   desserts: DESS,
   boissons: DRINKS,
   milkshake: MILKS,
