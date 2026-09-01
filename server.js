@@ -19,6 +19,7 @@ app.use(express.static(path.join(__dirname)));
 
 const CAISSE  = { ip: '192.168.1.37', port: 9100 };
 const CUISINE = { ip: '192.168.1.38', port: 9100 };
+const KIOSK   = { ip: '192.168.1.39', port: 9100 }; // imprimante ticket client de la borne de commande — a adapter a l'IP reelle
 const HTTP_PORT = 3000;
 
 const SNACK_TEL     = '07 56 88 73 47';
@@ -402,6 +403,58 @@ function buildCuisine(order) {
   return Buffer.concat(b);
 }
 
+// ── TICKET BORNE (remis au client directement a la borne) ────
+function buildKiosk(order) {
+  var b = [];
+  b.push(cmd(E.INIT));
+  b.push(cmd(E.CT));
+
+  b.push(LOGO_ESC);
+  b.push(cmd(E.NRM));
+
+  b.push(cmd(E.DBL));  b.push(txt("O'SMASH"));
+  b.push(cmd(E.NRM));  b.push(txt('Commande borne'));
+
+  b.push(cmd(E.XBIG)); b.push(txt('#' + order.num));
+  b.push(cmd(E.NRM));
+
+  if (order.client) {
+    b.push(cmd(E.DBL));
+    b.push(txt(order.client.toUpperCase()));
+    b.push(cmd(E.NRM));
+  }
+
+  if (order.service) {
+    b.push(cmd(E.BON));
+    b.push(txt(order.service.toUpperCase()));
+    b.push(cmd(E.BOFF));
+  }
+
+  b.push(txt(fd(order.date) + '  ' + ft(order.date)));
+  b.push(cmd(E.LT));   b.push(txt('================================'));
+
+  order.items.forEach(function(item) {
+    b.push(txt(item.qty + 'x ' + item.name));
+  });
+
+  b.push(txt('================================'));
+  b.push(cmd(E.RT));
+  b.push(cmd(E.DBL));  b.push(txt('TOTAL ' + fp(order.total)));
+  b.push(cmd(E.NRM));
+
+  b.push(cmd(E.CT));
+  b.push(cmd(E.BON));
+  b.push(txt('MERCI !'));
+  b.push(txt('Presentez ce ticket en caisse'));
+  b.push(txt('pour regler et recuperer'));
+  b.push(txt('votre commande.'));
+  b.push(cmd(E.BOFF));
+
+  b.push(cmd([0x0A])); b.push(cmd([0x0A])); b.push(cmd([0x0A]));
+  b.push(cmd(E.CUT));
+  return Buffer.concat(b);
+}
+
 function imprimer(printer, data, timeoutMs) {
   timeoutMs = timeoutMs || 5000;
   return new Promise(function(resolve, reject) {
@@ -509,6 +562,40 @@ async function doPrintCuisine(order) {
   return results;
 }
 
+// Commande passee par le client lui-meme a la borne : ticket client
+// imprime a la borne + ticket cuisine (la cuisine part tout de suite,
+// exactement comme une commande telephone). Le ticket caisse (paiement)
+// est imprime plus tard, quand le client vient regler au comptoir.
+async function doPrintKiosk(order) {
+  var results = { kiosk: 'ok', cuisine: 'ok', milkshake: 'skip' };
+
+  try {
+    await imprimer(KIOSK, buildKiosk(order), 8000);
+    console.log('[BORNE] #' + order.num + ' OK');
+  } catch(e) { results.kiosk = e.message; console.error('[BORNE] Erreur:', e.message); }
+
+  var mk = buildMilkshake(order);
+  if (mk) {
+    try {
+      await imprimer(CAISSE, mk, 8000);
+      results.milkshake = 'ok';
+    } catch(e) { results.milkshake = e.message; }
+  }
+
+  var cd = buildCuisine(order);
+  if (cd) {
+    var r = await imprimerCuisineAvecRetry(cd, order.num);
+    if (!r.ok) {
+      results.cuisine = r.err;
+    } else {
+      console.log('[CUISINE] BORNE #' + order.num + ' OK');
+    }
+  } else {
+    results.cuisine = 'skip';
+  }
+  return results;
+}
+
 async function doPrintCaisse(order) {
   var results = { caisse: 'ok' };
   try {
@@ -533,6 +620,12 @@ app.post('/print-cuisine', async function(req, res) {
 // ── /print-caisse : client telephone qui vient payer ────────
 app.post('/print-caisse', async function(req, res) {
   var results = await doPrintCaisse(req.body);
+  res.json({ success: true, results });
+});
+
+// ── /print-kiosk : commande passee a la borne de commande ────
+app.post('/print-kiosk', async function(req, res) {
+  var results = await doPrintKiosk(req.body);
   res.json({ success: true, results });
 });
 
@@ -570,6 +663,16 @@ app.post('/test-cuisine', async function(req, res) {
     r.cuisine = res2.ok ? 'ok' : res2.err;
   }
   res.json({ success: true, results: r });
+});
+
+app.post('/test-kiosk', async function(req, res) {
+  var order = {
+    num: 'TEST-B', date: new Date().toISOString(), total: 8.5, client: 'Test',
+    service: 'Sur place',
+    items: [{ qty: 1, name: "O'Smash Smoke", total: 8.5, pid: 'b-test', cust: null }]
+  };
+  var results = await doPrintKiosk(order);
+  res.json({ success: true, results });
 });
 
 // ── IMPRESSION VIA SUPABASE REALTIME ─────────────────────────────────────────
@@ -612,6 +715,7 @@ function startRealtimePrinting() {
       if (kind === 'full') await doPrintFull(order);
       else if (kind === 'cuisine') await doPrintCuisine(order);
       else if (kind === 'caisse') await doPrintCaisse(order);
+      else if (kind === 'kiosk') await doPrintKiosk(order);
     } catch (e) {
       console.error('[REALTIME] Erreur impression #' + order.num + ':', e.message);
     }
@@ -644,6 +748,7 @@ app.listen(HTTP_PORT, '0.0.0.0', function() {
   console.log('==========================================');
   console.log('  Caisse  : ' + CAISSE.ip + ':' + CAISSE.port);
   console.log('  Cuisine : ' + CUISINE.ip + ':' + CUISINE.port);
+  console.log('  Borne   : ' + KIOSK.ip + ':' + KIOSK.port);
   console.log('  HTTP    : http://localhost:' + HTTP_PORT);
   if (SUPABASE_URL && SUPABASE_SECRET_KEY && RESTAURANT_ID) {
     console.log('  Realtime: active (restaurant ' + RESTAURANT_ID + ')');

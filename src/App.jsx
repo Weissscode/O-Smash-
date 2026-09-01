@@ -32,6 +32,25 @@ import { SplitModal } from './components/SplitModal.jsx';
 import { TelephoneView } from './components/TelephoneView.jsx';
 
 export default function App({ restaurantId }) {
+  // Mode borne de commande en libre-service : ?kiosk=1 dans l'URL.
+  // Reutilise tout le flow de commande existant (grille produits, modales
+  // de customisation, panier...) ; seuls l'ecran d'accueil, l'entete et la
+  // validation de commande changent (voir placeKioskOrder plus bas).
+  const isKiosk = React.useMemo(() => new URLSearchParams(window.location.search).get('kiosk') === '1', []);
+  const [kioskStarted, setKioskStarted] = React.useState(false);
+  const kioskTapRef = React.useRef({ count: 0, t: 0 });
+  const handleKioskLogoTap = () => {
+    if (!isKiosk) return;
+    const now = Date.now();
+    const ref = kioskTapRef.current;
+    if (now - ref.t > 2500) ref.count = 0;
+    ref.count += 1;
+    ref.t = now;
+    if (ref.count >= 7) {
+      ref.count = 0;
+      setPinFor('kiosk-exit');
+    }
+  };
   const [view, setView] = React.useState('pos');
   const [selCat, setSelCat] = React.useState('burger');
   const [cart, setCart] = React.useState([]);
@@ -205,6 +224,48 @@ export default function App({ restaurantId }) {
       setPrintSt(offline ? 'Impression des la reconnexion...' : 'Ticket envoyé a l’imprimante...');
       setTimeout(() => setPrintSt(null), 3000);
     }
+  };
+
+  // Commande passee en libre-service a la borne : pas de saisie de paiement,
+  // le client regle au comptoir. Meme file d'attente que les commandes
+  // telephone (status "en attente"), mais impression immediate du ticket
+  // cuisine + du ticket client de la borne (printRequest 'kiosk').
+  const placeKioskOrder = async service => {
+    const num = getNextOrderNum();
+    const o = {
+      id: uid(),
+      num,
+      date: new Date().toISOString(),
+      items: cart.map(c => ({
+        ...c
+      })),
+      total: cartTotal,
+      status: 'en attente',
+      client: clientName || null,
+      phone: null,
+      service,
+      payment: null,
+      printRequest: 'kiosk'
+    };
+    const { order: savedO, offline } = await insertOrder(restaurantId, o);
+    setSyncPending(offline || hasPendingSync());
+    setAllOrders(p => [savedO, ...p]);
+    setCart([]);
+    setClientName('');
+    setConfirmM(false);
+    setCartOpen(false);
+    setSuccessM({
+      ...savedO,
+      isKiosk: true
+    });
+    setPrintSt(offline ? 'Impression des la reconnexion...' : 'Ticket envoyé a l’imprimante...');
+    setTimeout(() => setPrintSt(null), 3000);
+    // Retour automatique a l'ecran d'accueil pour le client suivant si
+    // personne n'a appuye sur "Terminer" entre-temps.
+    setTimeout(() => {
+      setSuccessM(null);
+      setKioskStarted(false);
+    }, 15000);
   };
 
   // Paiement commande téléphone
@@ -653,6 +714,60 @@ export default function App({ restaurantId }) {
       boxShadow: `0 4px 14px ${T.ok}40`
     }
   }, "Valider la commande")));
+
+  // Ecran d'accueil de la borne : tant que le client n'a pas touche l'ecran,
+  // on n'affiche ni la caisse ni les onglets staff. Un tap sur le logo x7
+  // (geste discret) ouvre le code PIN pour repasser en caisse normale.
+  if (isKiosk && !kioskStarted) {
+    return /*#__PURE__*/React.createElement("div", {
+      onClick: () => {
+        setKioskStarted(true);
+        const el = document.documentElement;
+        if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+      },
+      style: {
+        height: '100vh',
+        width: '100vw',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 28,
+        background: T.bgGradient,
+        color: T.txt,
+        textAlign: 'center',
+        cursor: 'pointer',
+        userSelect: 'none',
+        padding: 24
+      }
+    }, /*#__PURE__*/React.createElement("div", {
+      onClick: e => {
+        e.stopPropagation();
+        handleKioskLogoTap();
+      }
+    }, /*#__PURE__*/React.createElement(Logo, {
+      size: 140
+    })), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 34,
+        fontWeight: 900,
+        color: T.txt
+      }
+    }, "Bienvenue chez O'SMASH"), /*#__PURE__*/React.createElement("div", {
+      style: {
+        fontSize: 20,
+        fontWeight: 700,
+        color: T.txtSub
+      }
+    }, "Touchez l'ecran pour commander"), pinFor === 'kiosk-exit' && /*#__PURE__*/React.createElement(PinModal, {
+      onClose: () => setPinFor(null),
+      title: 'Quitter le mode borne',
+      onOk: () => {
+        window.location.href = window.location.pathname;
+      }
+    }));
+  }
+
   return /*#__PURE__*/React.createElement("div", {
     style: {
       height: '100vh',
@@ -680,16 +795,18 @@ export default function App({ restaurantId }) {
       alignItems: 'center',
       gap: 18
     }
+  }, /*#__PURE__*/React.createElement("div", {
+    onClick: handleKioskLogoTap
   }, /*#__PURE__*/React.createElement(Logo, {
     size: mob ? 52 : 68
-  }), /*#__PURE__*/React.createElement("div", {
+  })), /*#__PURE__*/React.createElement("div", {
     style: {
       width: 1,
       height: 36,
       background: 'rgba(255,255,255,0.22)',
       margin: '0 4px'
     }
-  }), [{
+  }), (isKiosk ? [] : [{
     id: 'pos',
     l: 'Caisse'
   }, {
@@ -707,7 +824,7 @@ export default function App({ restaurantId }) {
     id: 'analytics',
     l: 'Analytics',
     pr: true
-  }].map(t => /*#__PURE__*/React.createElement("button", {
+  }]).map(t => /*#__PURE__*/React.createElement("button", {
     key: t.id,
     onClick: () => t.pr ? setPinFor(t.id) : setView(t.id),
     style: {
@@ -742,7 +859,7 @@ export default function App({ restaurantId }) {
       alignItems: 'center',
       gap: 12
     }
-  }, syncPending && /*#__PURE__*/React.createElement("div", {
+  }, !isKiosk && syncPending && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
       color: '#fff',
@@ -751,7 +868,7 @@ export default function App({ restaurantId }) {
       padding: '4px 12px',
       borderRadius: 6
     }
-  }, "Hors ligne - synchro en attente"), printSt && /*#__PURE__*/React.createElement("div", {
+  }, "Hors ligne - synchro en attente"), !isKiosk && printSt && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
       color: '#fff',
@@ -951,8 +1068,12 @@ export default function App({ restaurantId }) {
     }
   }), pinFor && /*#__PURE__*/React.createElement(PinModal, {
     onClose: () => setPinFor(null),
-    title: pinFor === 'analytics' ? 'Analytics' : 'Dashboard',
+    title: pinFor === 'analytics' ? 'Analytics' : pinFor === 'kiosk-exit' ? 'Quitter le mode borne' : 'Dashboard',
     onOk: () => {
+      if (pinFor === 'kiosk-exit') {
+        window.location.href = window.location.pathname;
+        return;
+      }
       setView(pinFor);
       setPinFor(null);
     }
@@ -1083,9 +1204,10 @@ export default function App({ restaurantId }) {
     cartTotal: cartTotal,
     clientName: clientName,
     setClientName: setClientName,
+    kiosk: isKiosk,
     onCancel: () => setConfirmM(false),
-    onValidate: placeOrder,
-    onSplit: (svc, pay) => {
+    onValidate: isKiosk ? placeKioskOrder : placeOrder,
+    onSplit: isKiosk ? undefined : (svc, pay) => {
       const num = getNextOrderNum();
       const o = {
         id: uid(),
@@ -1114,7 +1236,10 @@ export default function App({ restaurantId }) {
       await splitCartOrder(splitCartM, tickets);
     }
   }), successM && /*#__PURE__*/React.createElement(Modal, {
-    onClose: () => setSuccessM(null)
+    onClose: () => {
+      setSuccessM(null);
+      if (isKiosk) setKioskStarted(false);
+    }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       position: 'relative',
@@ -1144,11 +1269,11 @@ export default function App({ restaurantId }) {
       textTransform: 'uppercase',
       letterSpacing: 1
     }
-  }, successM.isTel ? '📞 Commande téléphone' : 'Commande envoyée'), /*#__PURE__*/React.createElement("div", {
+  }, successM.isTel ? '📞 Commande téléphone' : successM.isKiosk ? 'Commande enregistrée' : 'Commande envoyée'), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 60,
       fontWeight: 900,
-      color: successM.isTel ? '#2563EB' : T.primary,
+      color: successM.isTel ? '#2563EB' : successM.isKiosk ? T.ok : T.primary,
       margin: '4px 0',
       fontFamily: 'monospace'
     }
@@ -1162,7 +1287,17 @@ export default function App({ restaurantId }) {
       borderRadius: 6,
       marginBottom: 8
     }
-  }, "Ticket cuisine imprim\xE9. Le ticket caisse sera imprim\xE9 \xE0 l'arriv\xE9e du client."), successM.client && /*#__PURE__*/React.createElement("div", {
+  }, "Ticket cuisine imprim\xE9. Le ticket caisse sera imprim\xE9 \xE0 l'arriv\xE9e du client."), successM.isKiosk && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 14,
+      color: T.ok,
+      fontWeight: 700,
+      background: T.okL,
+      padding: '10px 16px',
+      borderRadius: 6,
+      marginBottom: 8
+    }
+  }, "Merci ! Presentez ce numero en caisse pour regler et recuperer votre commande."), successM.client && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 15,
       color: T.txtSub,
@@ -1218,7 +1353,7 @@ export default function App({ restaurantId }) {
       display: 'flex',
       gap: 10
     }
-  }, /*#__PURE__*/React.createElement("button", {
+  }, !isKiosk && /*#__PURE__*/React.createElement("button", {
     onClick: () => printTicket(successM),
     style: {
       ...btn(T.bg, T.txtSub, {
@@ -1227,7 +1362,7 @@ export default function App({ restaurantId }) {
         fontSize: 13
       })
     }
-  }, "Reimprimer"), /*#__PURE__*/React.createElement("button", {
+  }, "Reimprimer"), !isKiosk && /*#__PURE__*/React.createElement("button", {
     onClick: () => sendPrintCuisine(successM),
     style: {
       ...btn('#EFF6FF', '#2563EB', {
@@ -1237,13 +1372,16 @@ export default function App({ restaurantId }) {
       })
     }
   }, "Cuisine"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => setSuccessM(null),
+    onClick: () => {
+      setSuccessM(null);
+      if (isKiosk) setKioskStarted(false);
+    },
     style: {
       ...btn(T.primary, T.white, {
-        flex: 2,
+        flex: isKiosk ? 1 : 2,
         fontSize: 16,
         fontWeight: 700
       })
     }
-  }, "Nouvelle commande")))));
+  }, isKiosk ? 'Terminer' : 'Nouvelle commande')))));
 }

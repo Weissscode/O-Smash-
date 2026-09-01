@@ -13,13 +13,14 @@ export function ConfirmModal({
   setClientName,
   onCancel,
   onValidate,
-  onSplit
+  onSplit,
+  kiosk
 }) {
   const [phone, setPhone] = React.useState('');
   const [service, setService] = React.useState('');
   const [payment, setPayment] = React.useState('');
-  const isTel = isPhoneNumber(phone);
-  const valid = service && (payment || isTel);
+  const isTel = !kiosk && isPhoneNumber(phone);
+  const valid = kiosk ? !!service : service && (payment || isTel);
   return /*#__PURE__*/React.createElement(Modal, {
     onClose: onCancel
   }, /*#__PURE__*/React.createElement("div", {
@@ -44,7 +45,7 @@ export function ConfirmModal({
       fontWeight: 800,
       color: T.txt
     }
-  }, "Finaliser la commande"), /*#__PURE__*/React.createElement("div", {
+  }, kiosk ? 'Votre commande' : 'Finaliser la commande'), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
       color: T.txtSub,
@@ -74,10 +75,10 @@ export function ConfirmModal({
       outline: 'none',
       marginBottom: 12
     }
-  }), /*#__PURE__*/React.createElement(SL, {
+  }), !kiosk && /*#__PURE__*/React.createElement(SL, {
     title: "TELEPHONE",
     color: T.txtSub
-  }), /*#__PURE__*/React.createElement("input", {
+  }), !kiosk && /*#__PURE__*/React.createElement("input", {
     value: phone,
     onChange: e => setPhone(e.target.value),
     placeholder: "Telephone",
@@ -127,7 +128,18 @@ export function ConfirmModal({
       textAlign: 'center',
       boxShadow: service === s ? T.shMd : T.sh
     }
-  }, s))), !isTel && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(SL, {
+  }, s))), kiosk && /*#__PURE__*/React.createElement("div", {
+    style: {
+      fontSize: 12,
+      color: T.txtSub,
+      fontWeight: 600,
+      marginBottom: 18,
+      padding: '8px 10px',
+      background: T.bg,
+      borderRadius: 6,
+      textAlign: 'center'
+    }
+  }, "Le paiement se fait en caisse, apres validation."), !isTel && !kiosk && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(SL, {
     title: "MODE DE PAIEMENT",
     color: T.ok
   }), /*#__PURE__*/React.createElement("div", {
@@ -226,7 +238,7 @@ export function ConfirmModal({
         boxShadow: valid ? `0 4px 14px ${T.ok}40` : 'none'
       })
     }
-  }, valid ? 'Valider et imprimer' : 'Choisir service')), valid && !isTel && onSplit && /*#__PURE__*/React.createElement("div", {
+  }, valid ? kiosk ? 'Valider ma commande' : 'Valider et imprimer' : 'Choisir service')), valid && !isTel && !kiosk && onSplit && /*#__PURE__*/React.createElement("div", {
     style: {
       padding: '0 22px 14px',
       background: T.bg

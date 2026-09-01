@@ -48,3 +48,19 @@ export async function sendPrintCaisse(order) {
     };
   }
 }
+export async function sendPrintKiosk(order) {
+  try {
+    const r = await fetch(`${PRINT_SERVER}/print-kiosk`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(order)
+    });
+    return await r.json();
+  } catch (e) {
+    return {
+      success: false
+    };
+  }
+}
