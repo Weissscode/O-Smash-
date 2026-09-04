@@ -492,7 +492,24 @@ export default function App({ restaurantId }) {
         opacity: out ? 0.38 : 1,
         transition: 'transform .1s'
       }
-    }, out && /*#__PURE__*/React.createElement("div", {
+    }, /*#__PURE__*/React.createElement("img", {
+      src: `/products/${p.id}.jpg`,
+      alt: "",
+      loading: "lazy",
+      // Pas de photo pour ce produit (fichier absent dans public/products/) :
+      // on masque l'image, la carte retombe sur l'affichage texte seul.
+      onError: e => {
+        e.currentTarget.style.display = 'none';
+      },
+      style: {
+        width: '100%',
+        height: isKiosk ? 112 : 84,
+        objectFit: 'cover',
+        borderRadius: 4,
+        background: T.bg,
+        flexShrink: 0
+      }
+    }), out && /*#__PURE__*/React.createElement("div", {
       style: {
         position: 'absolute',
         inset: 0,
