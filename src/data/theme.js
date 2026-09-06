@@ -1,29 +1,52 @@
+// Palette neutre chaude. La couleur ne decore pas, elle porte une information :
+// vert = especes, bleu = carte, rouge = echec ou destructif, encre = action principale.
 export const T = {
-  primary: '#B48FE0',
-  primaryD: '#9370CC',
-  primaryL: '#F2ECFF',
-  primaryLL: '#FAF7FF',
-  accent: '#F5C842',
+  // Encre : actions principales, etats actifs, chiffres mis en avant
+  primary: '#23201D',
+  primaryD: '#12100E',
+  primaryL: '#EFECE7',
+  primaryLL: '#F7F5F2',
+
+  // Rouge de marque, reserve aux rares accents identitaires
+  accent: '#B0342C',
+
   white: '#FFFFFF',
-  bg: '#F8F5FF',
+
+  // Surfaces
+  bg: '#F4F2EF',
   bgCard: '#FFFFFF',
-  bgSide: '#F4F0FF',
-  txt: '#1A1028',
-  txtSub: '#6B7280',
-  txtMuted: '#9CA3AF',
-  brd: '#E8E0F5',
-  brdL: '#EEE8FF',
-  ok: '#10B981',
-  okL: '#D1FAE5',
-  no: '#EF4444',
-  noL: '#FEE2E2',
-  warn: '#F59E0B',
-  warnL: '#FEF3C7',
-  sh: '0 1px 4px rgba(180,143,224,0.10), 0 4px 14px rgba(180,143,224,0.08)',
-  shSoft: '0 2px 8px rgba(148,100,214,0.08), 0 10px 26px rgba(148,100,214,0.10)',
-  bgGradient: 'linear-gradient(165deg, #EFE5FF 0%, #F7F2FF 38%, #FFFFFF 78%)',
-  gradViolet: 'linear-gradient(135deg, #F6F0FF 0%, #EADCFF 100%)',
-  gradBlue: 'linear-gradient(135deg, #EAF3FF 0%, #D9E9FF 100%)',
-  gradGreen: 'linear-gradient(135deg, #E8FBF3 0%, #D3F5E5 100%)',
-  gradOrange: 'linear-gradient(135deg, #FFF4E4 0%, #FFE7C7 100%)'
+  bgSide: '#EDEAE5',
+
+  // Texte
+  txt: '#1A1815',
+  txtSub: '#57534E',
+  txtMuted: '#8A837C',
+
+  // Traits de separation, a la place des ombres
+  brd: '#DDD8D1',
+  brdL: '#EAE6E0',
+
+  // Semantique
+  ok: '#15703F',
+  okL: '#E6F0E9',
+  no: '#B3271E',
+  noL: '#F9E9E7',
+  warn: '#8A5A0B',
+  warnL: '#F5EDE0',
+  info: '#1F4E9C',
+  infoL: '#E8EEF7',
+
+  // Rayons hierarchises : vif sur les barres pleine largeur, doux sur les cartes,
+  // pilule uniquement sur les etiquettes.
+  rSm: 4,
+  rMd: 8,
+  rLg: 12,
+  rPill: 999,
+
+  // Une seule ombre dans toute l'app : celle des elements qui flottent reellement
+  // au dessus du contenu (modales).
+  shModal: '0 12px 32px rgba(20,18,16,0.18)',
+
+  // Chiffres alignes en colonne (paniers, tickets, tableaux)
+  fontMono: "'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace"
 };

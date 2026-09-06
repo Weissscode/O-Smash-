@@ -18,24 +18,23 @@ const MANAGER_TABS = [
 function ManagerTabSwitch({ tab, setTab }) {
   return /*#__PURE__*/React.createElement('div', {
     style: {
-      display: 'flex', gap: 4, margin: '12px 20px 0',
-      background: 'linear-gradient(135deg, #EDE4FA, #F4EFFF)',
-      padding: 4, borderRadius: 15,
-      border: '1px solid rgba(180,143,224,0.18)',
-      boxShadow: 'inset 0 1px 3px rgba(148,100,214,0.08)',
+      display: 'flex', margin: '12px 20px 0',
+      background: T.bgCard,
+      borderRadius: T.rMd, overflow: 'hidden',
+      border: `1px solid ${T.brd}`,
       flexShrink: 0
     }
   },
-    MANAGER_TABS.map(t => /*#__PURE__*/React.createElement('button', {
+    MANAGER_TABS.map((t, i) => /*#__PURE__*/React.createElement('button', {
       key: t.key,
       className: 'osm-btn-premium',
       onClick: () => setTab(t.key),
       style: {
-        flex: 1, padding: '10px 0', borderRadius: 11, border: 'none',
-        background: tab === t.key ? 'linear-gradient(135deg, #FFFFFF, #F7F1FF)' : 'transparent',
-        color: tab === t.key ? T.primaryD : T.txtSub,
-        fontWeight: 700, fontSize: 14, cursor: 'pointer',
-        boxShadow: tab === t.key ? '0 4px 12px rgba(148,100,214,0.18)' : 'none'
+        flex: 1, padding: '11px 0', border: 'none',
+        borderLeft: i === 0 ? 'none' : `1px solid ${T.brd}`,
+        background: tab === t.key ? T.primary : 'transparent',
+        color: tab === t.key ? T.white : T.txtSub,
+        fontWeight: 600, fontSize: 14, cursor: 'pointer'
       }
     }, t.label))
   );
@@ -59,15 +58,15 @@ export function ManagerDash({ restaurantId, restaurantName }) {
   const orders = allOrders.filter(o => o.status !== 'en attente');
 
   return /*#__PURE__*/React.createElement('div', {
-    style: { height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: T.bgGradient }
+    style: { height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: T.bg }
   },
     /*#__PURE__*/React.createElement('div', {
       className: 'osm-manager-header',
       style: {
-        background: 'linear-gradient(160deg, #4C3A7C 0%, #5F4A9B 55%, #3A2C63 100%)',
+        background: T.primaryD,
         padding: '12px 20px',
         flexShrink: 0,
-        boxShadow: '0 6px 20px rgba(30,15,55,0.3)'
+        borderBottom: `1px solid ${T.primary}`
       }
     },
       /*#__PURE__*/React.createElement('div', { className: 'osm-header-left' }),
@@ -77,14 +76,14 @@ export function ManagerDash({ restaurantId, restaurantName }) {
           style: { height: 60, width: 60, objectFit: 'contain' }
         }),
         /*#__PURE__*/React.createElement('div', {
-          style: { color: '#fff', fontWeight: 700, fontSize: 15, maxWidth: '50vw', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
+          style: { color: T.white, fontWeight: 600, fontSize: 15, maxWidth: '50vw', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
         }, restaurantName || '')
       ),
       /*#__PURE__*/React.createElement('div', { className: 'osm-header-right' },
         /*#__PURE__*/React.createElement('button', {
           className: 'osm-btn-premium',
           onClick: () => signOut(),
-          style: btn('rgba(255,255,255,0.16)', '#fff', { padding: '8px 14px', fontSize: 12, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.15)' })
+          style: btn('rgba(255,255,255,0.12)', '#fff', { padding: '8px 14px', fontSize: 12, borderRadius: T.rSm })
         }, 'Déconnexion')
       )
     ),

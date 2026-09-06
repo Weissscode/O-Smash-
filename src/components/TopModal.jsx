@@ -87,7 +87,7 @@ export function TopModal({
       ...p,
       glace: !p.glace
     })),
-    clr: "#8B5CF6"
+    clr: T.primary
   })), !isCrepe && /*#__PURE__*/React.createElement("div", {
     style: {
       marginBottom: 14
@@ -99,7 +99,7 @@ export function TopModal({
       ...p,
       chantilly: !p.chantilly
     })),
-    clr: "#DB2777"
+    clr: T.ok
   })), /*#__PURE__*/React.createElement(SL, {
     title: "REMARQUE",
     color: T.txtSub

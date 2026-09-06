@@ -62,7 +62,7 @@ export function BurgerCust({
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      background: `linear-gradient(135deg,${T.primaryL},#F0EAFF)`
+      background: T.primaryLL
     }
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -80,12 +80,13 @@ export function BurgerCust({
     style: {
       background: T.primary,
       color: T.white,
-      fontWeight: 700,
+      fontWeight: 600,
       padding: '7px 18px',
-      borderRadius: 10,
+      borderRadius: T.rSm,
       fontSize: 16
-    }
-  }, fp(product.price + ext))), /*#__PURE__*/React.createElement("div", {
+    },
+    className: 'osm-num'
+  }, fp(product.price + (inMenu ? 3 : 0) + ext))), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
       overflowY: 'auto',
@@ -97,7 +98,7 @@ export function BurgerCust({
     }
   }, /*#__PURE__*/React.createElement(SL, {
     title: "VERSION CHICKEN",
-    color: "#8B5CF6"
+    color: T.primary
   }), /*#__PURE__*/React.createElement("button", {
     onClick: () => setS(p => ({
       ...p,
@@ -107,12 +108,12 @@ export function BurgerCust({
       width: '100%',
       padding: 16,
       borderRadius: 6,
-      border: s.version === 'Chicken' ? `2.5px solid #8B5CF6` : `1.5px solid ${T.brd}`,
-      background: s.version === 'Chicken' ? '#8B5CF614' : T.bgCard,
+      border: s.version === 'Chicken' ? `2.5px solid ${T.primary}` : `1.5px solid ${T.brd}`,
+      background: s.version === 'Chicken' ? T.primaryL : T.bgCard,
       cursor: 'pointer',
       fontSize: 15,
       fontWeight: 700,
-      color: s.version === 'Chicken' ? '#8B5CF6' : T.txtSub,
+      color: s.version === 'Chicken' ? T.primary : T.txtSub,
       textAlign: 'center'
     }
   }, s.version === 'Chicken' ? 'Chicken' : 'Steak (defaut)')), /*#__PURE__*/React.createElement(SL, {
@@ -165,7 +166,7 @@ export function BurgerCust({
     clr: T.primary
   }))), inMenu && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(SL, {
     title: "SAUCE FRITES TWISTER",
-    color: "#0891B2"
+    color: T.primary
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'grid',
@@ -181,7 +182,7 @@ export function BurgerCust({
       ...p,
       twisterSauce: p.twisterSauce === s2 ? '' : s2
     })),
-    clr: "#0891B2"
+    clr: T.primary
   }))), /*#__PURE__*/React.createElement(SL, {
     title: "SUPPL\xC9MENTS TWISTER",
     color: T.ok

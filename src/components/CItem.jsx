@@ -68,7 +68,7 @@ export function CItem({
     }
   }, "Sauce : ", item.cust.sauce), item.cust.version && /*#__PURE__*/React.createElement("div", {
     style: {
-      color: '#8B5CF6',
+      color: T.primary,
       fontSize: 10
     }
   }, item.cust.version), item.cust.type && /*#__PURE__*/React.createElement("div", {
@@ -90,22 +90,22 @@ export function CItem({
     }
   }, "+ ", t)), item.cust.glace && /*#__PURE__*/React.createElement("div", {
     style: {
-      color: '#8B5CF6',
+      color: T.primary,
       fontSize: 10
     }
   }, "+ Glace"), item.cust.drink && /*#__PURE__*/React.createElement("div", {
     style: {
-      color: '#2563EB',
+      color: T.info,
       fontSize: 10
     }
   }, "Boisson : ", item.cust.drink), item.cust.fritesSauce && /*#__PURE__*/React.createElement("div", {
     style: {
-      color: '#0891B2',
+      color: T.primary,
       fontSize: 10
     }
   }, "Twister sauce : ", item.cust.fritesSauce), item.cust.twisterSauce && !item.cust.fritesSauce && /*#__PURE__*/React.createElement("div", {
     style: {
-      color: '#0891B2',
+      color: T.primary,
       fontSize: 10
     }
   }, "Twister sauce : ", item.cust.twisterSauce), item.cust.fritesSupps?.map((t, j) => /*#__PURE__*/React.createElement("div", {

@@ -36,7 +36,7 @@ export function ConfirmModal({
     style: {
       padding: '18px 22px',
       borderBottom: `1px solid ${T.brd}`,
-      background: `linear-gradient(135deg,${T.primaryL},#F0EAFF)`
+      background: T.primaryLL
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -85,7 +85,7 @@ export function ConfirmModal({
       width: '100%',
       padding: '12px 14px',
       borderRadius: 6,
-      border: `1.5px solid ${isTel ? '#2563EB' : T.brd}`,
+      border: `1.5px solid ${isTel ? T.info : T.brd}`,
       background: T.bg,
       color: T.txt,
       fontSize: 15,
@@ -95,11 +95,11 @@ export function ConfirmModal({
   }), isTel && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
-      color: '#2563EB',
+      color: T.info,
       fontWeight: 700,
       marginBottom: 14,
       padding: '6px 10px',
-      background: '#DBEAFE',
+      background: T.infoL,
       borderRadius: 6
     }
   }, "Commande telephone"), /*#__PURE__*/React.createElement(SL, {
@@ -124,8 +124,7 @@ export function ConfirmModal({
       fontSize: 15,
       fontWeight: 700,
       color: service === s ? T.warn : T.txtSub,
-      textAlign: 'center',
-      boxShadow: service === s ? T.shMd : T.sh
+      textAlign: 'center'
     }
   }, s))), !isTel && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(SL, {
     title: "MODE DE PAIEMENT",
@@ -149,8 +148,7 @@ export function ConfirmModal({
       fontSize: 15,
       fontWeight: 700,
       color: payment === p ? T.ok : T.txtSub,
-      textAlign: 'center',
-      boxShadow: payment === p ? T.shMd : T.sh
+      textAlign: 'center'
     }
   }, p)))), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -222,8 +220,7 @@ export function ConfirmModal({
     style: {
       ...btn(valid ? T.ok : T.brd, valid ? T.white : T.txtMuted, {
         flex: 2,
-        cursor: valid ? 'pointer' : 'not-allowed',
-        boxShadow: valid ? `0 4px 14px ${T.ok}40` : 'none'
+        cursor: valid ? 'pointer' : 'not-allowed'
       })
     }
   }, valid ? 'Valider et imprimer' : 'Choisir service')), valid && !isTel && onSplit && /*#__PURE__*/React.createElement("div", {
@@ -234,7 +231,7 @@ export function ConfirmModal({
   }, /*#__PURE__*/React.createElement("button", {
     onClick: () => onSplit(service, payment),
     style: {
-      ...btn('#F59E0B', T.white, {
+      ...btn(T.warn, T.white, {
         width: '100%',
         fontWeight: 700,
         fontSize: 14

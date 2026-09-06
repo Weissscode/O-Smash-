@@ -42,55 +42,59 @@ export function BurgerStartModal({
     }
   }, /*#__PURE__*/React.createElement("button", {
     onClick: () => onChoice('seul'),
+    className: 'osm-tap-card',
     style: {
       padding: '24px 16px',
-      borderRadius: 10,
-      border: `2px solid ${T.brd}`,
+      borderRadius: T.rMd,
+      border: `1px solid ${T.brd}`,
       background: T.bgCard,
       cursor: 'pointer',
       textAlign: 'center'
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 16,
-      fontWeight: 800,
-      color: T.primary,
-      marginBottom: 4
+      fontSize: 15,
+      fontWeight: 600,
+      color: T.txtSub,
+      marginBottom: 6
     }
   }, "Burger seul"), /*#__PURE__*/React.createElement("div", {
+    className: 'osm-num',
     style: {
-      fontSize: 18,
-      fontWeight: 900,
+      fontSize: 20,
+      fontWeight: 700,
       color: T.txt
     }
   }, fp(product.price))), /*#__PURE__*/React.createElement("button", {
     onClick: () => onChoice('menu'),
+    className: 'osm-tap-card',
     style: {
       padding: '24px 16px',
-      borderRadius: 10,
-      border: `2px solid #0891B2`,
-      background: '#0891B214',
+      borderRadius: T.rMd,
+      border: `1px solid ${T.primary}`,
+      background: T.primary,
       cursor: 'pointer',
       textAlign: 'center'
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 16,
-      fontWeight: 800,
-      color: '#0891B2',
-      marginBottom: 4
+      fontSize: 15,
+      fontWeight: 600,
+      color: T.white,
+      marginBottom: 2
     }
   }, "En menu (+3\u20AC)"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: T.txtSub,
-      marginBottom: 4
+      color: 'rgba(255,255,255,0.7)',
+      marginBottom: 6
     }
   }, "+ Frites Twister + Boisson"), /*#__PURE__*/React.createElement("div", {
+    className: 'osm-num',
     style: {
-      fontSize: 18,
-      fontWeight: 900,
-      color: T.txt
+      fontSize: 20,
+      fontWeight: 700,
+      color: T.white
     }
   }, fp(product.price + 3)))), /*#__PURE__*/React.createElement("button", {
     onClick: onClose,

@@ -52,7 +52,7 @@ export function LoadedCust({
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      background: `linear-gradient(135deg,${T.primaryL},#F0EAFF)`
+      background: T.primaryLL
     }
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {

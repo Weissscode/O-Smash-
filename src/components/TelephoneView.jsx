@@ -65,7 +65,7 @@ export function TelephoneView({
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       padding: '12px 16px',
-      background: `linear-gradient(135deg,#2563EB15,#1E40AF0A)`,
+      background: T.infoL,
       borderBottom: `1px solid ${T.brd}`,
       display: 'flex',
       justifyContent: 'space-between',
@@ -81,7 +81,7 @@ export function TelephoneView({
     style: {
       fontSize: 20,
       fontWeight: 900,
-      color: '#2563EB'
+      color: T.info
     }
   }, "#", order.num), /*#__PURE__*/React.createElement("div", null, order.client && /*#__PURE__*/React.createElement("div", {
     style: {
@@ -93,7 +93,7 @@ export function TelephoneView({
     style: {
       fontSize: 13,
       fontWeight: 700,
-      color: '#2563EB'
+      color: T.info
     }
   }, "\uD83D\uDCDE ", order.phone), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -118,7 +118,7 @@ export function TelephoneView({
     style: {
       fontSize: 16,
       fontWeight: 900,
-      color: '#2563EB'
+      color: T.info
     }
   }, fp(order.total)))), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -150,7 +150,7 @@ export function TelephoneView({
       setSelectedOrder(order);
     },
     style: {
-      ...btn('#2563EB', T.white, {
+      ...btn(T.info, T.white, {
         flex: 2,
         fontSize: 13
       })
@@ -161,10 +161,10 @@ export function TelephoneView({
       sendPrintCuisine(order);
     },
     style: {
-      ...btn('#EFF6FF', '#2563EB', {
+      ...btn(T.infoL, T.info, {
         flex: 1,
         fontSize: 12,
-        border: '1.5px solid #BFDBFE'
+        border: `1.5px solid ${T.info}33`
       })
     }
   }, "Cuisine"), /*#__PURE__*/React.createElement("button", {
@@ -173,7 +173,7 @@ export function TelephoneView({
       onStartAdd && onStartAdd(order);
     },
     style: {
-      ...btn('#16A34A', T.white, {
+      ...btn(T.ok, T.white, {
         flex: 1,
         fontSize: 12
       })

@@ -4,10 +4,10 @@ import { fp, fd } from '../utils/format.js';
 import {
   IconCash, IconCard, IconPhone, IconBag, IconReceipt,
   IconChevronLeft, IconChevronRight, IconCalendar,
-  IconTrendUp, IconTrendDown, IconSun, IconMoon
+  IconTrendUp, IconTrendDown, IconSun, IconMoon, IconChevronDown
 } from './icons.jsx';
 import {
-  CATEGORIES, StatTile, HeroRevenue, PaymentHeroCard, SectionLabel, WideStat,
+  CATEGORIES, StatTile, HeroRevenue, PaymentHeroCard, SectionLabel, StatRow,
   ServiceHourCharts, MIDI_CHART_THEME, SOIR_CHART_THEME
 } from './dashShared.jsx';
 
@@ -76,7 +76,6 @@ function distinctProducts(orders) {
   return Array.from(seen).sort((a, b) => a.localeCompare(b, 'fr'));
 }
 
-const MEDALS = ['🥇', '🥈', '🥉'];
 
 const PERIODS = [
   { key: 'jour', label: 'Journée' },
@@ -86,22 +85,21 @@ const PERIODS = [
 function PeriodTopSwitch({ period, setPeriod }) {
   return /*#__PURE__*/React.createElement('div', {
     style: {
-      display: 'flex', gap: 4, margin: '16px 20px 12px',
-      background: 'linear-gradient(160deg, #251A3D 0%, #2E2154 60%, #1B1330 100%)',
-      padding: 5, borderRadius: 16,
-      boxShadow: '0 6px 18px rgba(30,15,55,0.22)'
+      display: 'flex', margin: '16px 20px 12px',
+      background: T.bgCard,
+      border: `1px solid ${T.brd}`, borderRadius: T.rMd, overflow: 'hidden'
     }
   },
-    PERIODS.map(p => /*#__PURE__*/React.createElement('button', {
+    PERIODS.map((p, i) => /*#__PURE__*/React.createElement('button', {
       key: p.key,
       className: 'osm-btn-premium',
       onClick: () => setPeriod(p.key),
       style: {
-        flex: 1, padding: '11px 0', borderRadius: 12, border: 'none',
-        background: period === p.key ? 'linear-gradient(135deg, #C084FC, #9333EA)' : 'transparent',
-        color: period === p.key ? '#fff' : 'rgba(238,225,255,0.65)',
-        fontWeight: 800, fontSize: 14.5, cursor: 'pointer',
-        boxShadow: period === p.key ? '0 4px 14px rgba(147,51,234,0.45)' : 'none'
+        flex: 1, padding: '11px 0', border: 'none',
+        borderLeft: i === 0 ? 'none' : `1px solid ${T.brd}`,
+        background: period === p.key ? T.primary : 'transparent',
+        color: period === p.key ? T.white : T.txtSub,
+        fontWeight: 600, fontSize: 14.5, cursor: 'pointer'
       }
     }, p.label))
   );
@@ -123,19 +121,31 @@ function FilterSelect({ allLabel, value, onChange, options, active }) {
     ),
     /*#__PURE__*/React.createElement('div', {
       style: {
-        padding: '12px 14px', borderRadius: 12, textAlign: 'center',
-        background: active ? '#FFFFFF' : '#EEE9F5',
-        color: active ? T.primaryD : T.txtSub,
-        fontWeight: 700, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-        boxShadow: active ? T.shSoft : 'none', pointerEvents: 'none'
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
+        padding: '11px 14px', borderRadius: T.rMd,
+        background: T.bgCard,
+        border: `1px solid ${T.brd}`,
+        borderLeft: value ? `3px solid ${T.primary}` : `1px solid ${T.brd}`,
+        color: value ? T.txt : T.txtSub,
+        fontWeight: 600, fontSize: 13,
+        pointerEvents: 'none'
       }
-    }, displayLabel)
+    },
+      /*#__PURE__*/React.createElement('span', {
+        style: { whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }
+      }, displayLabel),
+      /*#__PURE__*/React.createElement('span', {
+        style: { display: 'flex', color: T.txtMuted, flexShrink: 0 }
+      }, /*#__PURE__*/React.createElement(IconChevronDown, { size: 15 }))
+    )
   );
 }
 
+// Deux menus deroulants independants : chacun garde l'apparence d'un menu, et
+// un liseré a gauche signale celui qui filtre reellement la page.
 function FilterBar({ filter, setFilter, categoryOptions, productOptions }) {
   return /*#__PURE__*/React.createElement('div', {
-    style: { display: 'flex', gap: 8, margin: '0 20px 20px', background: '#F4F0FA', padding: 6, borderRadius: 16 }
+    style: { display: 'flex', gap: 10, margin: '0 20px 20px' }
   },
     /*#__PURE__*/React.createElement(FilterSelect, {
       allLabel: 'Toutes les catégories',
@@ -158,7 +168,7 @@ function EmptyCard({ text }) {
   return /*#__PURE__*/React.createElement('div', {
     style: {
       margin: '0 20px 24px', padding: 32, textAlign: 'center', color: T.txtMuted, fontSize: 14,
-      background: T.gradViolet, borderRadius: 16, border: '1px solid rgba(180,143,224,0.16)', boxShadow: T.shSoft
+      background: T.bgCard, borderRadius: T.rMd, border: `1px solid ${T.brd}`
     }
   }, text);
 }
@@ -168,16 +178,16 @@ function PaymentSplitBar({ revEsp, revCB }) {
   const pctEsp = total > 0 ? Math.round((revEsp / total) * 100) : 50;
   const pctCB = 100 - pctEsp;
   return /*#__PURE__*/React.createElement('div', {
-    style: { margin: '0 20px 24px', background: T.gradViolet, borderRadius: 16, border: '1px solid rgba(180,143,224,0.16)', boxShadow: T.shSoft, padding: '14px 16px' }
+    style: { margin: '0 20px 24px', background: T.bgCard, borderRadius: T.rMd, border: `1px solid ${T.brd}`, padding: '14px 16px' }
   },
-    /*#__PURE__*/React.createElement('div', { style: { display: 'flex', height: 14, borderRadius: 999, overflow: 'hidden' } },
-      total > 0 && /*#__PURE__*/React.createElement('div', { style: { width: pctEsp + '%', background: 'linear-gradient(90deg, #34D399, #059669)', transition: 'width .5s ease' } }),
-      total > 0 && /*#__PURE__*/React.createElement('div', { style: { width: pctCB + '%', background: 'linear-gradient(90deg, #3B82F6, #1D4ED8)', transition: 'width .5s ease' } }),
+    /*#__PURE__*/React.createElement('div', { style: { display: 'flex', height: 10, overflow: 'hidden' } },
+      total > 0 && /*#__PURE__*/React.createElement('div', { style: { width: pctEsp + '%', background: T.ok } }),
+      total > 0 && /*#__PURE__*/React.createElement('div', { style: { width: pctCB + '%', background: T.info } }),
       total === 0 && /*#__PURE__*/React.createElement('div', { style: { width: '100%', background: T.brdL } })
     ),
     /*#__PURE__*/React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', marginTop: 10 } },
-      /*#__PURE__*/React.createElement('span', { style: { fontSize: 12.5, fontWeight: 700, color: '#059669' } }, 'Espèces ' + pctEsp + '%'),
-      /*#__PURE__*/React.createElement('span', { style: { fontSize: 12.5, fontWeight: 700, color: '#1D4ED8' } }, 'CB ' + pctCB + '%')
+      /*#__PURE__*/React.createElement('span', { style: { fontSize: 12.5, fontWeight: 600, color: T.ok } }, 'Espèces ' + pctEsp + '%'),
+      /*#__PURE__*/React.createElement('span', { style: { fontSize: 12.5, fontWeight: 600, color: T.info } }, 'CB ' + pctCB + '%')
     )
   );
 }
@@ -187,35 +197,59 @@ function NavArrow({ icon, onClick, disabled }) {
     className: 'osm-icon-btn',
     onClick, disabled,
     style: {
-      width: 40, height: 40, borderRadius: 12, border: 'none', background: 'transparent',
+      width: 40, height: 40, borderRadius: T.rSm, border: 'none', background: 'transparent',
       color: disabled ? T.txtMuted : T.txt, display: 'flex', alignItems: 'center', justifyContent: 'center',
       cursor: disabled ? 'default' : 'pointer', opacity: disabled ? 0.4 : 1
     }
   }, icon);
 }
 
+// Une seule feuille, une ligne par categorie : le tableau se lit d'un coup
+// d'oeil au lieu de s'etaler sur huit cartes separees.
+const listPanel = {
+  margin: '0 20px 24px',
+  background: T.bgCard,
+  border: `1px solid ${T.brd}`,
+  borderRadius: T.rMd,
+  overflow: 'hidden'
+};
+
+const listRow = idx => ({
+  display: 'flex',
+  alignItems: 'center',
+  padding: '11px 16px',
+  borderTop: idx === 0 ? 'none' : `1px solid ${T.brdL}`
+});
+
 function MonthlyCategoryList({ categoryStats, categoryTotal }) {
   const rows = CATEGORIES.map(cat => ({ ...cat, ...categoryStats[cat.key] })).sort((a, b) => b.revenue - a.revenue);
-  return /*#__PURE__*/React.createElement('div', {
-    style: { margin: '0 20px 24px', display: 'flex', flexDirection: 'column', gap: 8 }
-  },
-    rows.map(cat => {
+  return /*#__PURE__*/React.createElement('div', { style: listPanel },
+    rows.map((cat, idx) => {
       const pct = categoryTotal > 0 ? Math.round((cat.revenue / categoryTotal) * 100) : 0;
-      return /*#__PURE__*/React.createElement('div', {
-        key: cat.key,
-        style: { background: T.gradViolet, borderRadius: 14, border: '1px solid rgba(180,143,224,0.16)', boxShadow: T.shSoft, padding: '14px 16px' }
-      },
-        /*#__PURE__*/React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } },
-          /*#__PURE__*/React.createElement('span', { style: { fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', color: T.txt } }, cat.label),
-          /*#__PURE__*/React.createElement('span', { style: { fontWeight: 800, fontSize: 14, color: cat.tint } }, fp(cat.revenue))
+      return /*#__PURE__*/React.createElement('div', { key: cat.key, className: 'osm-cat-row', style: listRow(idx) },
+        /*#__PURE__*/React.createElement('span', {
+          style: { fontWeight: 600, fontSize: 13, color: T.txt, flex: '0 1 118px', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
+        }, cat.label),
+        /*#__PURE__*/React.createElement('span', {
+          className: 'osm-cat-bar',
+          style: { background: T.bgSide }
+        },
+          /*#__PURE__*/React.createElement('span', {
+            style: { display: 'block', height: '100%', width: pct + '%', background: cat.revenue > 0 ? cat.tint : 'transparent' }
+          })
         ),
-        /*#__PURE__*/React.createElement('div', { style: { height: 8, borderRadius: 999, background: cat.tint + '15', marginTop: 10, overflow: 'hidden' } },
-          /*#__PURE__*/React.createElement('div', { style: { height: '100%', width: pct + '%', background: cat.tint, borderRadius: 999, transition: 'width .5s ease' } })
-        ),
-        /*#__PURE__*/React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', marginTop: 6 } },
-          /*#__PURE__*/React.createElement('span', { style: { fontSize: 12, color: T.txtSub } }, cat.qty + ' vente' + (cat.qty !== 1 ? 's' : '')),
-          /*#__PURE__*/React.createElement('span', { style: { fontSize: 12, fontWeight: 700, color: cat.tint } }, pct + '%')
-        )
+        /*#__PURE__*/React.createElement('span', {
+          className: 'osm-cat-sales',
+          style: { fontSize: 12, color: T.txtSub }
+        }, cat.qty + ' vente' + (cat.qty !== 1 ? 's' : '')),
+        /*#__PURE__*/React.createElement('span', {
+          className: 'osm-num',
+          style: { fontSize: 12, fontWeight: 600, color: T.txtSub, minWidth: 34, marginLeft: 'auto', textAlign: 'right', flexShrink: 0 }
+        }, pct + '%'),
+        /*#__PURE__*/React.createElement('span', {
+          className: 'osm-num',
+          style: { fontWeight: 600, fontSize: 14, color: T.txt, textAlign: 'right', flexShrink: 0, whiteSpace: 'nowrap' }
+        }, fp(cat.revenue))
       );
     })
   );
@@ -223,52 +257,50 @@ function MonthlyCategoryList({ categoryStats, categoryTotal }) {
 
 function TopProductsCard({ topProducts }) {
   if (topProducts.length === 0) return /*#__PURE__*/React.createElement(EmptyCard, { text: 'Pas encore de ventes sur cette période' });
-  return /*#__PURE__*/React.createElement('div', {
-    style: { margin: '0 20px 24px', display: 'flex', flexDirection: 'column', gap: 8 }
-  },
+  return /*#__PURE__*/React.createElement('div', { style: listPanel },
     topProducts.map((p, i) => /*#__PURE__*/React.createElement('div', {
       key: p.name,
-      style: {
-        display: 'flex', alignItems: 'center', gap: 14, padding: '13px 16px',
-        background: 'linear-gradient(135deg, #FFFFFF, #FBF8FF)', border: '1px solid rgba(180,143,224,0.16)',
-        borderRadius: 14, boxShadow: T.shSoft
-      }
+      className: 'osm-cat-row',
+      style: listRow(i)
     },
       /*#__PURE__*/React.createElement('div', {
         style: {
-          width: 26, height: 26, borderRadius: 9, background: T.primaryL, color: T.primaryD,
-          fontWeight: 800, fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+          width: 26, height: 26, borderRadius: T.rSm, background: T.bgSide, color: T.txt,
+          fontWeight: 600, fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
         }
       }, i + 1),
       /*#__PURE__*/React.createElement('div', { style: { flex: 1, minWidth: 0 } },
-        /*#__PURE__*/React.createElement('div', { style: { fontWeight: 700, fontSize: 14, color: T.txt, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, p.name),
+        /*#__PURE__*/React.createElement('div', { style: { fontWeight: 600, fontSize: 14, color: T.txt, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, p.name),
         /*#__PURE__*/React.createElement('div', { style: { fontSize: 12, color: T.txtSub, marginTop: 2 } }, p.qty + ' vendu' + (p.qty !== 1 ? 's' : ''))
       ),
-      /*#__PURE__*/React.createElement('div', { style: { fontWeight: 800, fontSize: 15, color: T.primaryD, flexShrink: 0 } }, fp(p.revenue))
+      /*#__PURE__*/React.createElement('div', { className: 'osm-num', style: { fontWeight: 600, fontSize: 15, color: T.txt, flexShrink: 0 } }, fp(p.revenue))
     ))
   );
 }
 
 function MidiSoirCard({ label, icon, rev, count, avg, theme, winning }) {
   return /*#__PURE__*/React.createElement('div', {
-    style: { flex: 1, minWidth: 0, borderRadius: 20, padding: '18px 16px', position: 'relative', overflow: 'hidden', background: theme.bg, boxShadow: theme.shadow }
+    style: {
+      flex: 1, minWidth: 0, borderRadius: T.rMd, padding: '16px', position: 'relative',
+      background: T.bgCard, border: `1px solid ${T.brd}`, borderTop: `3px solid ${theme.accent}`
+    }
   },
     winning && /*#__PURE__*/React.createElement('div', {
-      style: { position: 'absolute', top: 10, right: 10, fontSize: 10.5, fontWeight: 800, color: theme.text, background: 'rgba(255,255,255,0.3)', padding: '3px 8px', borderRadius: 999 }
-    }, '🏆 Meilleur'),
+      style: { position: 'absolute', top: 14, right: 16, fontSize: 10.5, fontWeight: 600, letterSpacing: 0.4, textTransform: 'uppercase', color: theme.accent }
+    }, 'Meilleur service'),
     /*#__PURE__*/React.createElement('div', {
-      style: { width: 38, height: 38, borderRadius: 11, background: theme.iconBg, color: theme.iconColor, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }
+      style: { width: 32, height: 32, borderRadius: T.rSm, background: theme.iconBg, color: theme.accent, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }
     }, icon),
-    /*#__PURE__*/React.createElement('div', { style: { fontSize: 11, fontWeight: 700, letterSpacing: 0.6, textTransform: 'uppercase', color: theme.subText } }, label),
-    /*#__PURE__*/React.createElement('div', { style: { fontSize: 22, fontWeight: 800, color: theme.text, marginTop: 2 } }, fp(rev)),
-    /*#__PURE__*/React.createElement('div', { style: { display: 'flex', gap: 18, marginTop: 14 } },
+    /*#__PURE__*/React.createElement('div', { style: { fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, textTransform: 'uppercase', color: T.txtSub } }, label),
+    /*#__PURE__*/React.createElement('div', { className: 'osm-num', style: { fontSize: 22, fontWeight: 600, color: T.txt, marginTop: 2 } }, fp(rev)),
+    /*#__PURE__*/React.createElement('div', { style: { display: 'flex', gap: 20, marginTop: 14 } },
       /*#__PURE__*/React.createElement('div', null,
-        /*#__PURE__*/React.createElement('div', { style: { fontSize: 9.5, color: theme.subText, fontWeight: 700, textTransform: 'uppercase' } }, 'Commandes'),
-        /*#__PURE__*/React.createElement('div', { style: { fontSize: 14, fontWeight: 800, color: theme.text, marginTop: 2 } }, count)
+        /*#__PURE__*/React.createElement('div', { style: { fontSize: 10, color: T.txtMuted, fontWeight: 600, textTransform: 'uppercase' } }, 'Commandes'),
+        /*#__PURE__*/React.createElement('div', { className: 'osm-num', style: { fontSize: 14, fontWeight: 600, color: T.txt, marginTop: 2 } }, count)
       ),
       /*#__PURE__*/React.createElement('div', null,
-        /*#__PURE__*/React.createElement('div', { style: { fontSize: 9.5, color: theme.subText, fontWeight: 700, textTransform: 'uppercase' } }, 'Panier moy.'),
-        /*#__PURE__*/React.createElement('div', { style: { fontSize: 14, fontWeight: 800, color: theme.text, marginTop: 2 } }, fp(avg))
+        /*#__PURE__*/React.createElement('div', { style: { fontSize: 10, color: T.txtMuted, fontWeight: 600, textTransform: 'uppercase' } }, 'Panier moy.'),
+        /*#__PURE__*/React.createElement('div', { className: 'osm-num', style: { fontSize: 14, fontWeight: 600, color: T.txt, marginTop: 2 } }, fp(avg))
       )
     )
   );
@@ -280,11 +312,11 @@ function MidiSoirComparison({ midiRev, soirRev, midiCount, soirCount, midiAvg, s
     style: { margin: '0 20px 24px' }
   },
     /*#__PURE__*/React.createElement(MidiSoirCard, {
-      label: 'Service du midi', icon: /*#__PURE__*/React.createElement(IconSun, { size: 20 }),
+      label: 'Service du midi', icon: /*#__PURE__*/React.createElement(IconSun, { size: 18 }),
       rev: midiRev, count: midiCount, avg: midiAvg, theme: MIDI_CHART_THEME, winning: winningService === 'midi'
     }),
     /*#__PURE__*/React.createElement(MidiSoirCard, {
-      label: 'Service du soir', icon: /*#__PURE__*/React.createElement(IconMoon, { size: 18 }),
+      label: 'Service du soir', icon: /*#__PURE__*/React.createElement(IconMoon, { size: 16 }),
       rev: soirRev, count: soirCount, avg: soirAvg, theme: SOIR_CHART_THEME, winning: winningService === 'soir'
     })
   );
@@ -297,11 +329,11 @@ function ComparisonBadge({ label, curr, prev, isFirst }) {
   return /*#__PURE__*/React.createElement('div', {
     style: {
       flex: 1, display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center',
-      padding: '12px 8px', borderLeft: isFirst ? 'none' : '1px solid rgba(180,143,224,0.22)'
+      padding: '12px 8px', borderLeft: isFirst ? 'none' : `1px solid ${T.brd}`
     }
   },
-    /*#__PURE__*/React.createElement('div', { style: { fontSize: 10.5, fontWeight: 700, color: T.txtSub, textTransform: 'uppercase', letterSpacing: 0.4, textAlign: 'center' } }, label),
-    /*#__PURE__*/React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 4, color: up ? '#059669' : '#DC2626', fontWeight: 800, fontSize: 16, marginTop: 2 } },
+    /*#__PURE__*/React.createElement('div', { style: { fontSize: 10.5, fontWeight: 600, color: T.txtMuted, textTransform: 'uppercase', letterSpacing: 0.4, textAlign: 'center' } }, label),
+    /*#__PURE__*/React.createElement('div', { className: 'osm-num', style: { display: 'flex', alignItems: 'center', gap: 4, color: up ? T.ok : T.no, fontWeight: 600, fontSize: 16, marginTop: 2 } },
       /*#__PURE__*/React.createElement(up ? IconTrendUp : IconTrendDown, { size: 15 }),
       (up ? '+' : '') + pct + '%'
     )
@@ -311,8 +343,8 @@ function ComparisonBadge({ label, curr, prev, isFirst }) {
 function PeriodComparison({ rev, prevRev, count, prevCount, avgBasket, prevAvg }) {
   return /*#__PURE__*/React.createElement('div', {
     style: {
-      margin: '0 20px 20px', background: T.gradViolet, borderRadius: 18,
-      border: '1px solid rgba(180,143,224,0.18)', boxShadow: T.shSoft, display: 'flex'
+      margin: '0 20px 20px', background: T.bgCard, borderRadius: T.rMd,
+      border: `1px solid ${T.brd}`, display: 'flex'
     }
   },
     /*#__PURE__*/React.createElement(ComparisonBadge, { label: "Chiffre d'affaires", curr: rev, prev: prevRev, isFirst: true }),
@@ -327,8 +359,8 @@ function MonthlyTrendChart({ buckets, max, onSelectDay }) {
   const gap = 4;
   return /*#__PURE__*/React.createElement('div', {
     style: {
-      margin: '0 20px 24px', background: T.gradViolet, borderRadius: 20,
-      border: '1px solid rgba(180,143,224,0.18)', boxShadow: T.shSoft,
+      margin: '0 20px 24px', background: T.bgCard, borderRadius: T.rMd,
+      border: `1px solid ${T.brd}`,
       padding: '18px 16px 16px'
     }
   },
@@ -350,14 +382,12 @@ function MonthlyTrendChart({ buckets, max, onSelectDay }) {
             /*#__PURE__*/React.createElement('div', {
               title: b.date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) + ' : ' + fp(b.total),
               style: {
-                width: '100%', borderRadius: '4px 4px 2px 2px',
-                height: Math.max(3, (b.total / max) * 100),
-                background: isToday ? 'linear-gradient(180deg, #C084FC, #9333EA)' : 'linear-gradient(180deg, #B48FE0, #9370CC)',
-                boxShadow: b.total > 0 ? '0 4px 10px rgba(147,51,234,0.25)' : 'none',
-                transition: 'height .4s ease'
+                width: '100%', borderRadius: '2px 2px 0 0',
+                height: Math.max(2, (b.total / max) * 100),
+                background: b.total === 0 ? T.brdL : (isToday ? T.accent : T.primary)
               }
             }),
-            showLabel && /*#__PURE__*/React.createElement('div', { style: { fontSize: 9.5, color: T.txtMuted, fontWeight: 600 } }, b.day)
+            showLabel && /*#__PURE__*/React.createElement('div', { className: 'osm-num', style: { fontSize: 9.5, color: T.txtMuted, fontWeight: 500 } }, b.day)
           );
         })
       )
@@ -367,42 +397,48 @@ function MonthlyTrendChart({ buckets, max, onSelectDay }) {
 
 function TopDaysCard({ topDays, onSelectDay }) {
   if (topDays.length === 0) return /*#__PURE__*/React.createElement(EmptyCard, { text: 'Pas encore de données ce mois-ci' });
-  return /*#__PURE__*/React.createElement('div', {
-    style: { margin: '0 20px 24px', display: 'flex', flexDirection: 'column', gap: 8 }
-  },
+  return /*#__PURE__*/React.createElement('div', { style: listPanel },
     topDays.map((b, i) => /*#__PURE__*/React.createElement('button', {
       key: b.day,
       onClick: () => onSelectDay(b.date),
-      className: 'osm-tap-card osm-btn-premium',
+      className: 'osm-tap-card osm-btn-premium osm-cat-row',
       style: {
-        display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px',
-        background: i === 0 ? 'linear-gradient(135deg, #FFF4D6, #FFE9A8)' : 'linear-gradient(135deg, #FFFFFF, #FBF8FF)',
-        border: `1px solid ${i === 0 ? 'rgba(217,119,6,0.35)' : 'rgba(180,143,224,0.16)'}`,
-        borderRadius: 16, boxShadow: T.shSoft, cursor: 'pointer', textAlign: 'left', width: '100%'
+        ...listRow(i),
+        background: 'transparent',
+        border: 'none',
+        borderTop: i === 0 ? 'none' : `1px solid ${T.brdL}`,
+        cursor: 'pointer', textAlign: 'left', width: '100%'
       }
     },
-      /*#__PURE__*/React.createElement('div', { style: { fontSize: 22, width: 32, textAlign: 'center', flexShrink: 0 } }, MEDALS[i] || (i + 1) + '.'),
+      /*#__PURE__*/React.createElement('div', {
+        className: 'osm-num',
+        style: {
+          width: 26, height: 26, flexShrink: 0, borderRadius: T.rSm,
+          background: i === 0 ? T.primary : T.bgSide, color: i === 0 ? T.white : T.txt,
+          fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }
+      }, i + 1),
       /*#__PURE__*/React.createElement('div', { style: { flex: 1, minWidth: 0 } },
-        /*#__PURE__*/React.createElement('div', { style: { fontWeight: 700, fontSize: 14, color: T.txt, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, dayOfWeekLabel(b.date)),
+        /*#__PURE__*/React.createElement('div', { style: { fontWeight: 600, fontSize: 14, color: T.txt, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, dayOfWeekLabel(b.date)),
         /*#__PURE__*/React.createElement('div', { style: { fontSize: 12, color: T.txtSub, marginTop: 2 } }, b.count + ' commande' + (b.count !== 1 ? 's' : ''))
       ),
-      /*#__PURE__*/React.createElement('div', { style: { fontWeight: 800, fontSize: 16, color: T.primaryD, flexShrink: 0 } }, fp(b.total))
+      /*#__PURE__*/React.createElement('div', { className: 'osm-num', style: { fontWeight: 600, fontSize: 16, color: T.txt, flexShrink: 0 } }, fp(b.total))
     ))
   );
 }
 
 const CALENDAR_TIERS = [
-  ['#BBF7D0', 'Excellente'],
-  ['#FED7AA', 'Moyenne'],
-  ['#FECACA', 'Faible']
+  [T.okL, T.ok, 'Excellente'],
+  [T.warnL, T.warn, 'Moyenne'],
+  [T.noL, T.no, 'Faible']
 ];
 
 function tierStyle(bucket, maxDayRev) {
-  if (!bucket || bucket.total === 0) return { bg: T.gradViolet, border: 'rgba(180,143,224,0.14)', text: T.txtMuted };
+  if (!bucket || bucket.total === 0) return { bg: T.bgCard, border: T.brdL, text: T.txtMuted };
   const ratio = bucket.total / maxDayRev;
-  if (ratio >= 0.66) return { bg: 'linear-gradient(135deg, #DCFCE7, #BBF7D0)', border: 'rgba(5,150,105,0.3)', text: '#047857' };
-  if (ratio >= 0.33) return { bg: 'linear-gradient(135deg, #FFEDD5, #FED7AA)', border: 'rgba(217,119,6,0.3)', text: '#9A3412' };
-  return { bg: 'linear-gradient(135deg, #FEE2E2, #FECACA)', border: 'rgba(220,38,38,0.3)', text: '#991B1B' };
+  if (ratio >= 0.66) return { bg: T.okL, border: T.ok + '55', text: T.ok };
+  if (ratio >= 0.33) return { bg: T.warnL, border: T.warn + '55', text: T.warn };
+  return { bg: T.noL, border: T.no + '55', text: T.no };
 }
 
 function MonthCalendar({ month, dailyBuckets, maxDayRev, onSelectDay }) {
@@ -412,7 +448,7 @@ function MonthCalendar({ month, dailyBuckets, maxDayRev, onSelectDay }) {
   const now = new Date();
 
   return /*#__PURE__*/React.createElement('div', {
-    style: { margin: '0 20px 24px', background: T.bgCard, borderRadius: 20, border: '1px solid rgba(180,143,224,0.16)', boxShadow: T.shSoft, padding: 16 }
+    style: { margin: '0 20px 24px', background: T.bgCard, borderRadius: T.rMd, border: `1px solid ${T.brd}`, padding: 16 }
   },
     /*#__PURE__*/React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 4, marginBottom: 6 } },
       ['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) => /*#__PURE__*/React.createElement('div', {
@@ -430,16 +466,16 @@ function MonthCalendar({ month, dailyBuckets, maxDayRev, onSelectDay }) {
           onClick: () => b.total > 0 && onSelectDay(b.date),
           title: b.date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) + ' : ' + fp(b.total),
           style: {
-            aspectRatio: '1', borderRadius: 10, border: `1.5px solid ${isToday ? T.primary : c.border}`,
-            background: c.bg, color: c.text, fontWeight: 700, fontSize: 12.5,
+            aspectRatio: '1', borderRadius: T.rSm, border: `1.5px solid ${isToday ? T.primary : c.border}`,
+            background: c.bg, color: c.text, fontWeight: 600, fontSize: 12.5,
             cursor: b.total > 0 ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center'
           }
         }, b.day);
       })
     ),
     /*#__PURE__*/React.createElement('div', { style: { display: 'flex', gap: 14, marginTop: 14, justifyContent: 'center', flexWrap: 'wrap' } },
-      CALENDAR_TIERS.map(([color, label]) => /*#__PURE__*/React.createElement('div', { key: label, style: { display: 'flex', alignItems: 'center', gap: 5 } },
-        /*#__PURE__*/React.createElement('span', { style: { width: 10, height: 10, borderRadius: 3, background: color, display: 'inline-block' } }),
+      CALENDAR_TIERS.map(([bgc, bdc, label]) => /*#__PURE__*/React.createElement('div', { key: label, style: { display: 'flex', alignItems: 'center', gap: 5 } },
+        /*#__PURE__*/React.createElement('span', { style: { width: 10, height: 10, borderRadius: 2, background: bgc, border: `1px solid ${bdc}55`, display: 'inline-block' } }),
         /*#__PURE__*/React.createElement('span', { style: { fontSize: 11, color: T.txtSub, fontWeight: 600 } }, label)
       ))
     )
@@ -479,8 +515,8 @@ function DayNav({ selectedDate, setSelectedDate, isToday }) {
     /*#__PURE__*/React.createElement(NavArrow, { icon: /*#__PURE__*/React.createElement(IconChevronLeft, {}), onClick: () => shiftDate(-1) }),
     /*#__PURE__*/React.createElement('div', {
       style: {
-        display: 'flex', alignItems: 'center', gap: 8, padding: '9px 18px', borderRadius: 14,
-        background: 'linear-gradient(135deg, #FFFFFF, #F7F1FF)', border: '1px solid rgba(180,143,224,0.2)', boxShadow: T.shSoft
+        display: 'flex', alignItems: 'center', gap: 8, padding: '9px 18px', borderRadius: T.rMd,
+        background: T.bgCard, border: `1px solid ${T.brd}`
       }
     },
       /*#__PURE__*/React.createElement(IconCalendar, { size: 16 }),
@@ -511,20 +547,18 @@ function DayAnalysis({ filteredOrders, selectedDate, setSelectedDate, filterActi
     /*#__PURE__*/React.createElement(HeroRevenue, { value: fp(rev), tag: 'du jour' }),
     /*#__PURE__*/React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, margin: '0 20px 20px' } },
       /*#__PURE__*/React.createElement(PaymentHeroCard, {
-        icon: /*#__PURE__*/React.createElement(IconCash, { size: 20 }), label: 'Espèces', value: fp(revEsp),
-        bg: 'linear-gradient(160deg, #34D399, #059669)', shadow: '0 8px 20px rgba(5,150,105,0.28)', glow: 'rgba(167,243,208,0.4)'
+        icon: /*#__PURE__*/React.createElement(IconCash, { size: 18 }), label: 'Espèces', value: fp(revEsp),
+        tint: T.ok
       }),
       /*#__PURE__*/React.createElement(PaymentHeroCard, {
-        icon: /*#__PURE__*/React.createElement(IconCard, { size: 20 }), label: 'Carte bancaire', value: fp(revCB),
-        bg: 'linear-gradient(160deg, #3B82F6, #1D4ED8)', shadow: '0 8px 20px rgba(29,78,216,0.28)', glow: 'rgba(191,219,254,0.4)'
+        icon: /*#__PURE__*/React.createElement(IconCard, { size: 18 }), label: 'Carte bancaire', value: fp(revCB),
+        tint: T.info
       })
     ),
     /*#__PURE__*/React.createElement(PaymentSplitBar, { revEsp, revCB }),
-    /*#__PURE__*/React.createElement(WideStat, { icon: /*#__PURE__*/React.createElement(IconPhone, { size: 22 }), label: 'Par téléphone', value: String(telCount), tint: '#0EA5E9', gradient: T.gradBlue, size: 'lg' }),
-    /*#__PURE__*/React.createElement(WideStat, { icon: /*#__PURE__*/React.createElement(IconBag, { size: 18 }), label: 'Panier moyen', value: fp(avgBasket), tint: '#D97706', gradient: T.gradOrange, size: 'md' }),
-    /*#__PURE__*/React.createElement('div', { style: { padding: '0 20px 20px' } },
-      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconReceipt, {}), label: 'Commandes du jour', value: String(dayOrders.length), tint: '#7C3AED' })
-    ),
+    /*#__PURE__*/React.createElement(StatRow, {
+      count: dayOrders.length, countLabel: 'Commandes du jour', avgBasket, telCount
+    }),
     !filterActive && /*#__PURE__*/React.createElement(SectionLabel, null, 'Ventes par catégorie'),
     !filterActive && /*#__PURE__*/React.createElement(MonthlyCategoryList, { categoryStats, categoryTotal }),
     /*#__PURE__*/React.createElement(SectionLabel, null, 'Produits les plus vendus'),
@@ -589,7 +623,7 @@ function MonthAnalysis({ filteredOrders, month, setMonth, onSelectDay, filterAct
     /*#__PURE__*/React.createElement('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, padding: '4px 20px 4px' } },
       /*#__PURE__*/React.createElement(NavArrow, { icon: /*#__PURE__*/React.createElement(IconChevronLeft, {}), onClick: () => setMonth(m => addMonths(m, -1)) }),
       /*#__PURE__*/React.createElement('div', {
-        style: { display: 'flex', alignItems: 'center', gap: 8, padding: '9px 18px', borderRadius: 14, background: 'linear-gradient(135deg, #FFFFFF, #F7F1FF)', border: '1px solid rgba(180,143,224,0.2)', boxShadow: T.shSoft }
+        style: { display: 'flex', alignItems: 'center', gap: 8, padding: '9px 18px', borderRadius: T.rMd, background: T.bgCard, border: `1px solid ${T.brd}` }
       },
         /*#__PURE__*/React.createElement(IconCalendar, { size: 16 }),
         /*#__PURE__*/React.createElement('span', { style: { fontSize: 14.5, fontWeight: 700, color: T.txt, textTransform: 'capitalize' } }, monthLabel(month))
@@ -602,22 +636,19 @@ function MonthAnalysis({ filteredOrders, month, setMonth, onSelectDay, filterAct
 
     /*#__PURE__*/React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, margin: '0 20px 20px' } },
       /*#__PURE__*/React.createElement(PaymentHeroCard, {
-        icon: /*#__PURE__*/React.createElement(IconCash, { size: 20 }), label: 'Espèces', value: fp(revEsp),
-        bg: 'linear-gradient(160deg, #34D399, #059669)', shadow: '0 8px 20px rgba(5,150,105,0.28)', glow: 'rgba(167,243,208,0.4)'
+        icon: /*#__PURE__*/React.createElement(IconCash, { size: 18 }), label: 'Espèces', value: fp(revEsp),
+        tint: T.ok
       }),
       /*#__PURE__*/React.createElement(PaymentHeroCard, {
-        icon: /*#__PURE__*/React.createElement(IconCard, { size: 20 }), label: 'Carte bancaire', value: fp(revCB),
-        bg: 'linear-gradient(160deg, #3B82F6, #1D4ED8)', shadow: '0 8px 20px rgba(29,78,216,0.28)', glow: 'rgba(191,219,254,0.4)'
+        icon: /*#__PURE__*/React.createElement(IconCard, { size: 18 }), label: 'Carte bancaire', value: fp(revCB),
+        tint: T.info
       })
     ),
     /*#__PURE__*/React.createElement(PaymentSplitBar, { revEsp, revCB }),
 
-    /*#__PURE__*/React.createElement(WideStat, { icon: /*#__PURE__*/React.createElement(IconPhone, { size: 22 }), label: 'Par téléphone', value: String(telCount), tint: '#0EA5E9', gradient: T.gradBlue, size: 'lg' }),
-    /*#__PURE__*/React.createElement(WideStat, { icon: /*#__PURE__*/React.createElement(IconBag, { size: 18 }), label: 'Panier moyen', value: fp(avgBasket), tint: '#D97706', gradient: T.gradOrange, size: 'md' }),
-
-    /*#__PURE__*/React.createElement('div', { style: { padding: '0 20px 20px' } },
-      /*#__PURE__*/React.createElement(StatTile, { icon: /*#__PURE__*/React.createElement(IconReceipt, {}), label: 'Commandes du mois', value: String(count), tint: '#7C3AED' })
-    ),
+    /*#__PURE__*/React.createElement(StatRow, {
+      count, countLabel: 'Commandes du mois', avgBasket, telCount
+    }),
 
     /*#__PURE__*/React.createElement(SectionLabel, null, "Évolution du chiffre d'affaires"),
     /*#__PURE__*/React.createElement(MonthlyTrendChart, { buckets: dailyBuckets, max: maxDayRev, onSelectDay }),
@@ -656,7 +687,7 @@ export function Analytics({ orders }) {
   const goToDay = date => { setSelectedDate(date); setPeriod('jour'); };
 
   return /*#__PURE__*/React.createElement('div', {
-    style: { flex: 1, overflowY: 'auto', background: T.bgGradient }
+    style: { flex: 1, overflowY: 'auto', background: T.bg }
   },
     /*#__PURE__*/React.createElement(PeriodTopSwitch, { period, setPeriod }),
     /*#__PURE__*/React.createElement(FilterBar, { filter, setFilter, categoryOptions: CATEGORIES, productOptions }),

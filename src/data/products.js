@@ -1,39 +1,39 @@
 export const CATS = [{
   id: 'burger',
   name: 'Burgers',
-  color: '#7C3AED'
+  color: '#23201D'
 }, {
   id: 'bao',
   name: 'BAO',
-  color: '#E91E63'
+  color: '#23201D'
 }, {
   id: 'formule',
   name: 'Formules',
-  color: '#6D28D9'
+  color: '#23201D'
 }, {
   id: 'riz',
   name: 'Riz Crousty',
-  color: '#D97706'
+  color: '#23201D'
 }, {
   id: 'sides',
   name: 'Sides',
-  color: '#0891B2'
+  color: '#23201D'
 }, {
   id: 'desserts',
   name: 'Desserts',
-  color: '#DB2777'
+  color: '#23201D'
 }, {
   id: 'boissons',
   name: 'Boissons',
-  color: '#2563EB'
+  color: '#23201D'
 }, {
   id: 'milkshake',
   name: 'Milkshakes',
-  color: '#7C3AED'
+  color: '#23201D'
 }, {
   id: 'crepes',
   name: 'Crêpes',
-  color: '#B45309'
+  color: '#23201D'
 }];
 export const BURGERS = [{
   id: 'b-orig',

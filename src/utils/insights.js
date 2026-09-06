@@ -1,4 +1,5 @@
 import { fp } from './format.js';
+import { T } from '../data/theme.js';
 
 export function generateInsights(orders) {
   if (orders.length === 0) return [];
@@ -8,7 +9,7 @@ export function generateInsights(orders) {
   insights.push({
     label: 'Panier moyen',
     value: fp(avgBasket),
-    color: '#B48FE0'
+    color: T.primary
   });
   const hourTotals = {};
   orders.forEach(o => {
@@ -21,7 +22,7 @@ export function generateInsights(orders) {
       label: 'Rush n1',
       value: sortedHours[0][0] + 'h',
       sub: fp(sortedHours[0][1]),
-      color: '#F59E0B'
+      color: T.warn
     });
   }
   if (sortedHours.length > 1) {
@@ -29,7 +30,7 @@ export function generateInsights(orders) {
       label: 'Rush n2',
       value: sortedHours[1][0] + 'h',
       sub: fp(sortedHours[1][1]),
-      color: '#D97706'
+      color: T.txtSub
     });
   }
   return insights;

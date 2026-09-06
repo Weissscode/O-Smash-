@@ -379,7 +379,7 @@ export default function App({ restaurantId }) {
   const xCats = customProds.length > 0 ? [...CATS, {
     id: 'divers',
     name: 'Divers',
-    color: '#374151'
+    color: T.txtSub
   }] : CATS;
   const xMap = customProds.length > 0 ? {
     ...PMAP,
@@ -424,15 +424,15 @@ export default function App({ restaurantId }) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        background: 'rgba(254,242,242,0.88)'
+        background: 'rgba(249,233,231,0.9)'
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 13,
-        fontWeight: 700,
+        fontWeight: 600,
         color: T.no,
         padding: '4px 12px',
-        borderRadius: 6,
+        borderRadius: T.rSm,
         background: T.noL,
         border: `1px solid ${T.no}`
       }
@@ -442,7 +442,7 @@ export default function App({ restaurantId }) {
     }), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 15,
-        fontWeight: 700,
+        fontWeight: 600,
         color: T.txt,
         lineHeight: 1.2,
         flex: 1
@@ -458,10 +458,11 @@ export default function App({ restaurantId }) {
         WebkitBoxOrient: 'vertical'
       }
     }, p.desc), /*#__PURE__*/React.createElement("div", {
+      className: 'osm-num',
       style: {
         fontSize: 18,
-        fontWeight: 800,
-        color: catObj?.color || T.primary
+        fontWeight: 600,
+        color: T.txt
       }
     }, fp(p.price)));
   };
@@ -474,9 +475,9 @@ export default function App({ restaurantId }) {
           padding: pb
         }
       }, /*#__PURE__*/React.createElement("div", {
+        className: 'osm-burger-grid',
         style: {
           display: 'grid',
-          gridTemplateColumns: 'repeat(3,1fr)',
           gap: 9
         }
       }, prods.slice(0, 9).map(p => /*#__PURE__*/React.createElement(PCard, {
@@ -484,9 +485,9 @@ export default function App({ restaurantId }) {
         p: p,
         cat: "burger"
       }))), prods.length > 9 && /*#__PURE__*/React.createElement("div", {
+        className: 'osm-burger-grid',
         style: {
           display: 'grid',
-          gridTemplateColumns: 'repeat(3,1fr)',
           gap: 9,
           marginTop: 9
         }
@@ -617,7 +618,7 @@ export default function App({ restaurantId }) {
     }
   }, fp(cartTotal))), phoneAddCtx ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
-      background: '#F59E0B',
+      background: T.warn,
       color: '#fff',
       padding: '8px 12px',
       borderRadius: 6,
@@ -652,7 +653,7 @@ export default function App({ restaurantId }) {
       fontSize: 15,
       fontWeight: 700,
       cursor: 'pointer',
-      background: '#F59E0B',
+      background: T.warn,
       color: '#fff'
     }
   }, "Ajouter a commande #", phoneAddCtx.orderNum)) : /*#__PURE__*/React.createElement("button", {
@@ -667,7 +668,7 @@ export default function App({ restaurantId }) {
       cursor: 'pointer',
       background: T.ok,
       color: T.white,
-      boxShadow: `0 4px 14px ${T.ok}40`
+      letterSpacing: 0.2
     }
   }, "Valider la commande")));
   return /*#__PURE__*/React.createElement("div", {
@@ -687,9 +688,8 @@ export default function App({ restaurantId }) {
       justifyContent: 'space-between',
       padding: '0 24px',
       height: 84,
-      background: `linear-gradient(135deg,#6B35C2 0%,#5425A8 55%,#421890 100%)`,
-      flexShrink: 0,
-      boxShadow: '0 4px 24px rgba(84,37,168,0.35)'
+      background: T.primaryD,
+      flexShrink: 0
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -729,14 +729,13 @@ export default function App({ restaurantId }) {
     onClick: () => t.pr ? setPinFor(t.id) : setView(t.id),
     style: {
       padding: mob ? '7px 12px' : '8px 20px',
-      borderRadius: 6,
+      borderRadius: T.rSm,
       border: 'none',
       cursor: 'pointer',
       fontSize: mob ? 12 : 14,
-      fontWeight: view === t.id ? 700 : 500,
-      background: view === t.id ? 'rgba(255,255,255,0.22)' : 'transparent',
-      color: view === t.id ? '#fff' : 'rgba(255,255,255,0.7)',
-      transition: 'all .15s',
+      fontWeight: view === t.id ? 600 : 500,
+      background: view === t.id ? 'rgba(255,255,255,0.14)' : 'transparent',
+      color: view === t.id ? T.white : 'rgba(255,255,255,0.62)',
       position: 'relative'
     }
   }, t.l, t.badge > 0 && /*#__PURE__*/React.createElement("span", {
@@ -744,11 +743,11 @@ export default function App({ restaurantId }) {
       position: 'absolute',
       top: 2,
       right: 2,
-      background: '#EF4444',
-      color: '#fff',
-      borderRadius: 99,
+      background: T.no,
+      color: T.white,
+      borderRadius: T.rPill,
       fontSize: 10,
-      fontWeight: 900,
+      fontWeight: 600,
       padding: '1px 5px',
       minWidth: 16,
       textAlign: 'center'
@@ -762,20 +761,20 @@ export default function App({ restaurantId }) {
   }, syncPending && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: '#fff',
-      fontWeight: 700,
-      background: 'rgba(245,158,11,0.35)',
+      color: T.white,
+      fontWeight: 600,
+      background: 'rgba(255,255,255,0.16)',
       padding: '4px 12px',
-      borderRadius: 6
+      borderRadius: T.rSm
     }
   }, "Hors ligne - synchro en attente"), printSt && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: '#fff',
-      fontWeight: 700,
-      background: 'rgba(0,0,0,0.18)',
+      color: T.white,
+      fontWeight: 600,
+      background: 'rgba(255,255,255,0.16)',
       padding: '4px 12px',
-      borderRadius: 10
+      borderRadius: T.rSm
     }
   }, printSt), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -858,7 +857,7 @@ export default function App({ restaurantId }) {
       maxHeight: '52vh',
       display: 'flex',
       flexDirection: 'column',
-      boxShadow: '0 -6px 24px rgba(180,143,224,0.15)'
+      borderTop: `1px solid ${T.brd}`
     }
   }, /*#__PURE__*/React.createElement(CartPanel, {
     isDrawer: true
@@ -918,7 +917,7 @@ export default function App({ restaurantId }) {
       fontSize: 16,
       fontWeight: 700,
       cursor: 'pointer',
-      boxShadow: `0 4px 14px ${T.ok}40`
+      letterSpacing: 0.2
     }
   }, "Valider"))))), view === 'stock' && /*#__PURE__*/React.createElement(StockView, {
     stockOut: stockOut,
@@ -1171,20 +1170,20 @@ export default function App({ restaurantId }) {
       textTransform: 'uppercase',
       letterSpacing: 1
     }
-  }, successM.isTel ? '📞 Commande téléphone' : 'Commande envoyée'), /*#__PURE__*/React.createElement("div", {
+  }, successM.isTel ? 'Commande téléphone envoyée' : 'Commande envoyée'), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 60,
       fontWeight: 900,
-      color: successM.isTel ? '#2563EB' : T.primary,
+      color: successM.isTel ? T.info : T.primary,
       margin: '4px 0',
       fontFamily: 'monospace'
     }
   }, "#", successM.num), successM.isTel && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 13,
-      color: '#2563EB',
+      color: T.info,
       fontWeight: 700,
-      background: '#DBEAFE',
+      background: T.infoL,
       padding: '8px 16px',
       borderRadius: 6,
       marginBottom: 8
@@ -1216,9 +1215,9 @@ export default function App({ restaurantId }) {
   }, successM.service), successM.payment && /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 12,
-      color: successM.payment === 'CB' ? '#2563EB' : T.ok,
+      color: successM.payment === 'CB' ? T.info : T.ok,
       fontWeight: 700,
-      background: successM.payment === 'CB' ? '#DBEAFE' : T.okL,
+      background: successM.payment === 'CB' ? T.infoL : T.okL,
       padding: '4px 12px',
       borderRadius: 10
     }
@@ -1257,9 +1256,9 @@ export default function App({ restaurantId }) {
   }, "Reimprimer"), /*#__PURE__*/React.createElement("button", {
     onClick: () => sendPrintCuisine(successM),
     style: {
-      ...btn('#EFF6FF', '#2563EB', {
+      ...btn(T.infoL, T.info, {
         flex: 1,
-        border: '1.5px solid #BFDBFE',
+        border: `1.5px solid ${T.info}33`,
         fontSize: 13
       })
     }

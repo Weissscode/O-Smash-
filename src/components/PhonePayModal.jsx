@@ -27,7 +27,7 @@ export function PhonePayModal({
     style: {
       padding: '18px 22px',
       borderBottom: `1px solid ${T.brd}`,
-      background: `linear-gradient(135deg,${T.primaryL},#F0EAFF)`
+      background: T.primaryLL
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
@@ -139,7 +139,7 @@ export function PhonePayModal({
   }, valid ? 'Valider & Imprimer caisse' : 'Choisir paiement')), onSplit && /*#__PURE__*/React.createElement("button", {
     onClick: onSplit,
     style: {
-      ...btn('#F59E0B', T.white, {
+      ...btn(T.warn, T.white, {
         width: '100%',
         fontWeight: 700,
         fontSize: 14,
