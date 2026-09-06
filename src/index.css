@@ -1,94 +1,35 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
+* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body, #root { height: 100%; overflow: hidden; }
+body { font-family: 'Roboto', 'Segoe UI', Arial, sans-serif; background: #F6F6F4; color: #171717; }
+input, textarea, select, button { font-family: inherit; }
+button { touch-action: manipulation; }
+button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-visible { outline: 2px solid #75608B; outline-offset: 2px; }
+* { scrollbar-width: thin; scrollbar-color: #C8C9CA transparent; }
+::-webkit-scrollbar { width: 6px; height: 4px; }
+::-webkit-scrollbar-thumb { background: #C8C9CA; border-radius: 3px; }
+.osm-wordmark { font-size: 19px; font-weight: 600; letter-spacing: -0.6px; white-space: nowrap; }
+.osm-nav-tab, .osm-category { display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex-shrink: 0; min-height: 42px; padding: 9px 13px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: #686D73; font-size: 14px; font-weight: 500; white-space: nowrap; cursor: pointer; position: relative; }
+.osm-nav-tab[aria-current='page'], .osm-category[aria-pressed='true'] { background: #E8ECF3; color: #171717; }
+.osm-nav-tab[aria-current='page']::after, .osm-category[aria-pressed='true']::after { content: ''; position: absolute; bottom: 0; left: 12px; right: 12px; height: 2px; background: #7C838D; }
+.osm-product { min-width: 0; }
+.osm-product:active { background: #E8ECF3 !important; }
+.osm-product > div { max-width: 100%; }
+.osm-service-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.osm-manager-header { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; }
+.osm-manager-header .osm-header-center { display: flex; align-items: center; gap: 10px; justify-content: center; min-width: 0; }
+.osm-manager-header .osm-header-right { display: flex; justify-content: flex-end; }
+@media (max-width: 1100px) {
+  .osm-nav-tab { padding: 8px 9px; font-size: 13px; gap: 6px; }
+  .osm-category { padding: 8px 11px; }
 }
-html, body, #root {
-  height: 100%;
-  overflow: hidden;
-}
-body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  background: #F8F5FF;
-}
-::-webkit-scrollbar {
-  display: none;
-}
-input, textarea, select, button {
-  font-family: inherit;
-}
-.osm-tap-card {
-  transition: transform .12s ease, box-shadow .12s ease;
-}
-.osm-tap-card:active {
-  transform: scale(0.98);
-}
-.osm-service-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-@media (max-width: 680px) {
-  .osm-service-grid {
-    grid-template-columns: 1fr;
-  }
-}
-.osm-btn-premium {
-  transition: transform .15s ease, box-shadow .15s ease, filter .15s ease;
-}
-.osm-btn-premium:hover {
-  filter: brightness(1.04);
-  transform: translateY(-1px);
-}
-.osm-btn-premium:active {
-  transform: translateY(0) scale(0.97);
-  filter: brightness(0.98);
-}
-.osm-icon-btn {
-  transition: background .15s ease, transform .15s ease;
-}
-.osm-icon-btn:hover {
-  background: rgba(148,100,214,0.10);
-}
-.osm-icon-btn:active {
-  transform: scale(0.92);
-}
-.osm-card-glow {
-  transition: transform .18s ease, box-shadow .18s ease;
-}
-.osm-card-glow:active {
-  transform: scale(0.99);
-}
-.osm-manager-header {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 12px;
-}
-.osm-manager-header .osm-header-center {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  justify-content: center;
-  min-width: 0;
-}
-.osm-manager-header .osm-header-right {
-  display: flex;
-  justify-content: flex-end;
+@media (max-width: 760px) {
+  .osm-topbar { overflow-x: auto; gap: 16px; }
+  .osm-wordmark { font-size: 17px; }
+  .osm-nav-tab { font-size: 12px; }
+  .osm-service-grid { grid-template-columns: 1fr; }
 }
 @media (max-width: 520px) {
-  .osm-manager-header {
-    grid-template-columns: 1fr;
-    row-gap: 6px;
-    justify-items: center;
-    padding-top: 10px !important;
-    padding-bottom: 10px !important;
-  }
-  .osm-manager-header .osm-header-left {
-    display: none;
-  }
-  .osm-manager-header .osm-header-right {
-    justify-content: center;
-  }
+  .osm-manager-header { grid-template-columns: 1fr; row-gap: 6px; justify-items: center; }
+  .osm-manager-header .osm-header-left { display: none; }
+  .osm-manager-header .osm-header-right { justify-content: center; }
 }

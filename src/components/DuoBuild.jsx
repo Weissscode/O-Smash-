@@ -67,12 +67,12 @@ export function DuoBuild({
     style: {
       padding: '18px 22px',
       borderBottom: `1px solid ${T.brd}`,
-      background: `linear-gradient(135deg,${T.primaryL},#F0EAFF)`
+      background: T.bgCard
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 17,
-      fontWeight: 800,
+      fontWeight: 600,
       color: T.txt
     }
   }, formule.name, " \u2014 ", fp(formule.price)), /*#__PURE__*/React.createElement("div", {
@@ -114,14 +114,14 @@ export function DuoBuild({
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 14,
-      fontWeight: 700,
+      fontWeight: 600,
       color: T.txt,
       marginTop: 6
     }
   }, b.name), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 14,
-      fontWeight: 700,
+      fontWeight: 600,
       color: T.primary,
       marginTop: 4
     }

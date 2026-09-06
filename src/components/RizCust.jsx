@@ -37,12 +37,12 @@ export function RizCust({
     style: {
       padding: '18px 22px',
       borderBottom: `1px solid ${T.brd}`,
-      background: `linear-gradient(135deg,${T.primaryL},#F0EAFF)`
+      background: T.bgCard
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 18,
-      fontWeight: 800,
+      fontWeight: 600,
       color: T.txt
     }
   }, product.name)), /*#__PURE__*/React.createElement("div", {
@@ -74,7 +74,7 @@ export function RizCust({
       background: s.type === t ? T.warnL : T.bgCard,
       cursor: 'pointer',
       fontSize: 16,
-      fontWeight: 700,
+      fontWeight: 600,
       color: s.type === t ? T.warn : T.txtSub,
       textAlign: 'center'
     }

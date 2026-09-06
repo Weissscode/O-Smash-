@@ -31,7 +31,7 @@ export function PinModal({
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 13,
-      fontWeight: 700,
+      fontWeight: 600,
       color: T.txtSub,
       textTransform: 'uppercase',
       letterSpacing: 1,
@@ -40,7 +40,7 @@ export function PinModal({
   }, "Acc\xE8s Prot\xE9g\xE9"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 18,
-      fontWeight: 800,
+      fontWeight: 600,
       color: T.txt,
       marginBottom: 20
     }
@@ -62,7 +62,7 @@ export function PinModal({
       alignItems: 'center',
       justifyContent: 'center',
       fontSize: 22,
-      fontWeight: 800,
+      fontWeight: 600,
       color: T.primary,
       background: pin.length > i ? T.primaryL : T.bg
     }

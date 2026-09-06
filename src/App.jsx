@@ -1,3 +1,4 @@
+import { PosIcon } from './components/PosIcon.jsx';
 import React from 'react';
 import { T } from './data/theme.js';
 import { CATS, BURGERS, BAO, FORMULES, RIZ, SIDES, LOADED, CREP, MILKS, PMAP, CB } from './data/products.js';
@@ -91,7 +92,7 @@ export default function App({ restaurantId }) {
   const [now, setNow] = React.useState(new Date());
   const [pinFor, setPinFor] = React.useState(null);
   const [cartOpen, setCartOpen] = React.useState(false);
-  const [mob, setMob] = React.useState(window.innerWidth < 1100);
+  const [mob, setMob] = React.useState(window.innerWidth < 900);
   const [printSt, setPrintSt] = React.useState(null);
   const [clientName, setClientName] = React.useState('');
   const [custM, setCustM] = React.useState(null);
@@ -104,7 +105,7 @@ export default function App({ restaurantId }) {
   const [confirmM, setConfirmM] = React.useState(false);
   const [successM, setSuccessM] = React.useState(null);
   React.useEffect(() => {
-    const ck = () => setMob(window.innerWidth < 1100);
+    const ck = () => setMob(window.innerWidth < 900);
     window.addEventListener('resize', ck);
     return () => window.removeEventListener('resize', ck);
   }, []);
@@ -393,15 +394,8 @@ export default function App({ restaurantId }) {
     const out = stockOut.includes(p.id);
     return /*#__PURE__*/React.createElement("button", {
       onClick: () => !out && handleProd(p, cat),
-      onPointerDown: e => {
-        if (!out) e.currentTarget.style.transform = 'scale(0.96)';
-      },
-      onPointerUp: e => {
-        e.currentTarget.style.transform = 'scale(1)';
-      },
-      onPointerLeave: e => {
-        e.currentTarget.style.transform = 'scale(1)';
-      },
+      className: 'osm-product',
+      'aria-disabled': out,
       style: {
         ...card(),
         borderRadius: 4,
@@ -415,7 +409,7 @@ export default function App({ restaurantId }) {
         position: 'relative',
         overflow: 'hidden',
         opacity: out ? 0.38 : 1,
-        transition: 'transform .1s'
+        transition: 'none'
       }
     }, out && /*#__PURE__*/React.createElement("div", {
       style: {
@@ -429,7 +423,7 @@ export default function App({ restaurantId }) {
     }, /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 13,
-        fontWeight: 700,
+        fontWeight: 600,
         color: T.no,
         padding: '4px 12px',
         borderRadius: 6,
@@ -438,11 +432,11 @@ export default function App({ restaurantId }) {
       }
     }, "Rupture")), p.tag && /*#__PURE__*/React.createElement(Tag, {
       label: p.tag,
-      color: catObj?.color || T.primary
+      color: T.txt
     }), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 15,
-        fontWeight: 700,
+        fontWeight: 600,
         color: T.txt,
         lineHeight: 1.2,
         flex: 1
@@ -460,8 +454,8 @@ export default function App({ restaurantId }) {
     }, p.desc), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 18,
-        fontWeight: 800,
-        color: catObj?.color || T.primary
+        fontWeight: 600,
+        color: T.txt
       }
     }, fp(p.price)));
   };
@@ -476,7 +470,7 @@ export default function App({ restaurantId }) {
       }, /*#__PURE__*/React.createElement("div", {
         style: {
           display: 'grid',
-          gridTemplateColumns: 'repeat(3,1fr)',
+          gridTemplateColumns: 'repeat(3,minmax(0,1fr))',
           gap: 9
         }
       }, prods.slice(0, 9).map(p => /*#__PURE__*/React.createElement(PCard, {
@@ -486,7 +480,7 @@ export default function App({ restaurantId }) {
       }))), prods.length > 9 && /*#__PURE__*/React.createElement("div", {
         style: {
           display: 'grid',
-          gridTemplateColumns: 'repeat(3,1fr)',
+          gridTemplateColumns: 'repeat(3,minmax(0,1fr))',
           gap: 9,
           marginTop: 9
         }
@@ -532,10 +526,10 @@ export default function App({ restaurantId }) {
   }, /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 14,
-      fontWeight: 700,
+      fontWeight: 600,
       color: T.txt
     }
-  }, "Panier \xB7 ", cart.length, " article", cart.length !== 1 ? 's' : ''), /*#__PURE__*/React.createElement("div", {
+  }, "Panier \xB7 ", cart.length, " article", cart.length > 1 ? 's' : ''), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       gap: 8
@@ -612,7 +606,7 @@ export default function App({ restaurantId }) {
   }, "Total"), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 24,
-      fontWeight: 900,
+      fontWeight: 600,
       color: T.primary
     }
   }, fp(cartTotal))), phoneAddCtx ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
@@ -623,7 +617,7 @@ export default function App({ restaurantId }) {
       borderRadius: 6,
       marginBottom: 8,
       fontSize: 12,
-      fontWeight: 700,
+      fontWeight: 600,
       display: 'flex',
       justifyContent: 'space-between'
     }
@@ -650,7 +644,7 @@ export default function App({ restaurantId }) {
       borderRadius: 6,
       border: 'none',
       fontSize: 15,
-      fontWeight: 700,
+      fontWeight: 600,
       cursor: 'pointer',
       background: '#F59E0B',
       color: '#fff'
@@ -663,11 +657,11 @@ export default function App({ restaurantId }) {
       borderRadius: 6,
       border: 'none',
       fontSize: 15,
-      fontWeight: 700,
+      fontWeight: 600,
       cursor: 'pointer',
       background: T.ok,
       color: T.white,
-      boxShadow: `0 4px 14px ${T.ok}40`
+      boxShadow: 'none'
     }
   }, "Valider la commande")));
   return /*#__PURE__*/React.createElement("div", {
@@ -681,30 +675,29 @@ export default function App({ restaurantId }) {
       userSelect: 'none'
     }
   }, /*#__PURE__*/React.createElement("div", {
+    className: 'osm-topbar',
     style: {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      padding: '0 24px',
-      height: 84,
-      background: `linear-gradient(135deg,#6B35C2 0%,#5425A8 55%,#421890 100%)`,
+      padding: '0 16px',
+      height: 64,
+      background: T.bgCard,
       flexShrink: 0,
-      boxShadow: '0 4px 24px rgba(84,37,168,0.35)'
+      borderBottom: `1px solid ${T.brd}`
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       alignItems: 'center',
-      gap: 18
+      gap: 4
     }
-  }, /*#__PURE__*/React.createElement(Logo, {
-    size: mob ? 52 : 68
-  }), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement('span', {className: 'osm-wordmark'}, "O’SMASH"), /*#__PURE__*/React.createElement("div", {
     style: {
       width: 1,
       height: 36,
-      background: 'rgba(255,255,255,0.22)',
-      margin: '0 4px'
+      background: T.brd,
+      margin: '0 12px'
     }
   }), [{
     id: 'pos',
@@ -727,28 +720,18 @@ export default function App({ restaurantId }) {
   }].map(t => /*#__PURE__*/React.createElement("button", {
     key: t.id,
     onClick: () => t.pr ? setPinFor(t.id) : setView(t.id),
-    style: {
-      padding: mob ? '7px 12px' : '8px 20px',
-      borderRadius: 6,
-      border: 'none',
-      cursor: 'pointer',
-      fontSize: mob ? 12 : 14,
-      fontWeight: view === t.id ? 700 : 500,
-      background: view === t.id ? 'rgba(255,255,255,0.22)' : 'transparent',
-      color: view === t.id ? '#fff' : 'rgba(255,255,255,0.7)',
-      transition: 'all .15s',
-      position: 'relative'
-    }
-  }, t.l, t.badge > 0 && /*#__PURE__*/React.createElement("span", {
+    className: 'osm-nav-tab',
+    'aria-current': view === t.id ? 'page' : undefined
+  }, /*#__PURE__*/React.createElement(PosIcon, {name: t.id}), t.l, t.badge > 0 && /*#__PURE__*/React.createElement("span", {
     style: {
       position: 'absolute',
       top: 2,
       right: 2,
       background: '#EF4444',
       color: '#fff',
-      borderRadius: 99,
+      borderRadius: 6,
       fontSize: 10,
-      fontWeight: 900,
+      fontWeight: 600,
       padding: '1px 5px',
       minWidth: 16,
       textAlign: 'center'
@@ -762,8 +745,8 @@ export default function App({ restaurantId }) {
   }, syncPending && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: '#fff',
-      fontWeight: 700,
+      color: T.txt,
+      fontWeight: 600,
       background: 'rgba(245,158,11,0.35)',
       padding: '4px 12px',
       borderRadius: 6
@@ -771,11 +754,11 @@ export default function App({ restaurantId }) {
   }, "Hors ligne - synchro en attente"), printSt && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: '#fff',
-      fontWeight: 700,
-      background: 'rgba(0,0,0,0.18)',
+      color: T.txt,
+      fontWeight: 600,
+      background: T.primaryL,
       padding: '4px 12px',
-      borderRadius: 10
+      borderRadius: 6
     }
   }, printSt), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -784,13 +767,13 @@ export default function App({ restaurantId }) {
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 15,
-      fontWeight: 700,
-      color: '#fff'
+      fontWeight: 600,
+      color: T.txt
     }
   }, ft(now)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: 'rgba(255,255,255,0.6)'
+      color: T.txtSub
     }
   }, fd(now))))), view === 'pos' && /*#__PURE__*/React.createElement("div", {
     style: {
@@ -809,8 +792,8 @@ export default function App({ restaurantId }) {
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
-      gap: 5,
-      padding: '10px 14px',
+      gap: 4,
+      padding: '8px 14px',
       overflowX: 'auto',
       flexShrink: 0,
       borderBottom: `1px solid ${T.brd}`,
@@ -819,19 +802,9 @@ export default function App({ restaurantId }) {
   }, xCats.map(cat => /*#__PURE__*/React.createElement("button", {
     key: cat.id,
     onClick: () => setSelCat(cat.id),
-    style: {
-      padding: mob ? '9px 14px' : '10px 22px',
-      borderRadius: 6,
-      border: selCat === cat.id ? `2.5px solid ${cat.color}` : '2px solid transparent',
-      cursor: 'pointer',
-      fontSize: mob ? 12 : 14,
-      fontWeight: selCat === cat.id ? 700 : 500,
-      whiteSpace: 'nowrap',
-      background: selCat === cat.id ? `${cat.color}12` : T.bg,
-      color: selCat === cat.id ? cat.color : T.txtSub,
-      transition: 'all .12s'
-    }
-  }, cat.name))), /*#__PURE__*/React.createElement("div", {
+    className: 'osm-category',
+    'aria-pressed': selCat === cat.id
+  }, /*#__PURE__*/React.createElement(PosIcon, {name: cat.id}), cat.name))), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
       overflowY: 'auto',
@@ -839,7 +812,7 @@ export default function App({ restaurantId }) {
     }
   }, renderGrid())), !mob && /*#__PURE__*/React.createElement("div", {
     style: {
-      width: 310,
+      width: 320,
       display: 'flex',
       flexDirection: 'column',
       background: T.bgSide,
@@ -858,7 +831,7 @@ export default function App({ restaurantId }) {
       maxHeight: '52vh',
       display: 'flex',
       flexDirection: 'column',
-      boxShadow: '0 -6px 24px rgba(180,143,224,0.15)'
+      boxShadow: 'none'
     }
   }, /*#__PURE__*/React.createElement(CartPanel, {
     isDrawer: true
@@ -903,7 +876,7 @@ export default function App({ restaurantId }) {
   }, cart.length, " article", cart.length !== 1 ? 's' : ''), /*#__PURE__*/React.createElement("div", {
     style: {
       color: T.primary,
-      fontWeight: 800,
+      fontWeight: 600,
       fontSize: 17
     }
   }, fp(cartTotal))), /*#__PURE__*/React.createElement("button", {
@@ -916,9 +889,9 @@ export default function App({ restaurantId }) {
       background: T.ok,
       color: T.white,
       fontSize: 16,
-      fontWeight: 700,
+      fontWeight: 600,
       cursor: 'pointer',
-      boxShadow: `0 4px 14px ${T.ok}40`
+      boxShadow: 'none'
     }
   }, "Valider"))))), view === 'stock' && /*#__PURE__*/React.createElement(StockView, {
     stockOut: stockOut,
@@ -1040,7 +1013,7 @@ export default function App({ restaurantId }) {
   }, /*#__PURE__*/React.createElement("div", {
     style: { ...card(), width: 'min(88vw,360px)', padding: 28, display: 'flex', flexDirection: 'column', gap: 20 }
   }, /*#__PURE__*/React.createElement("div", {
-    style: { fontSize: 18, fontWeight: 800, color: T.txt, textAlign: 'center' }
+    style: { fontSize: 18, fontWeight: 600, color: T.txt, textAlign: 'center' }
   }, "Avec une boisson ?"), /*#__PURE__*/React.createElement("div", {
     style: { fontSize: 14, color: T.txtSub, textAlign: 'center' }
   }, "+1€"), /*#__PURE__*/React.createElement("div", {
@@ -1174,16 +1147,16 @@ export default function App({ restaurantId }) {
   }, successM.isTel ? '📞 Commande téléphone' : 'Commande envoyée'), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 60,
-      fontWeight: 900,
+      fontWeight: 600,
       color: successM.isTel ? '#2563EB' : T.primary,
       margin: '4px 0',
-      fontFamily: 'monospace'
+      fontFamily: 'inherit'
     }
   }, "#", successM.num), successM.isTel && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 13,
       color: '#2563EB',
-      fontWeight: 700,
+      fontWeight: 600,
       background: '#DBEAFE',
       padding: '8px 16px',
       borderRadius: 6,
@@ -1208,24 +1181,24 @@ export default function App({ restaurantId }) {
     style: {
       fontSize: 12,
       color: T.warn,
-      fontWeight: 700,
+      fontWeight: 600,
       background: T.warnL,
       padding: '4px 12px',
-      borderRadius: 10
+      borderRadius: 6
     }
   }, successM.service), successM.payment && /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 12,
       color: successM.payment === 'CB' ? '#2563EB' : T.ok,
-      fontWeight: 700,
+      fontWeight: 600,
       background: successM.payment === 'CB' ? '#DBEAFE' : T.okL,
       padding: '4px 12px',
-      borderRadius: 10
+      borderRadius: 6
     }
   }, successM.payment)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 28,
-      fontWeight: 800,
+      fontWeight: 600,
       color: T.primary,
       marginBottom: 16
     }
@@ -1236,7 +1209,7 @@ export default function App({ restaurantId }) {
       color: T.ok,
       padding: '5px 14px',
       background: T.okL,
-      borderRadius: 10,
+      borderRadius: 6,
       display: 'inline-block',
       marginBottom: 16
     }
@@ -1269,7 +1242,7 @@ export default function App({ restaurantId }) {
       ...btn(T.primary, T.white, {
         flex: 2,
         fontSize: 16,
-        fontWeight: 700
+        fontWeight: 600
       })
     }
   }, "Nouvelle commande")))));

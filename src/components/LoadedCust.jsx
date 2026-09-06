@@ -52,12 +52,12 @@ export function LoadedCust({
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      background: `linear-gradient(135deg,${T.primaryL},#F0EAFF)`
+      background: T.bgCard
     }
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 18,
-      fontWeight: 800,
+      fontWeight: 600,
       color: T.txt
     }
   }, product.name), /*#__PURE__*/React.createElement("div", {
@@ -70,9 +70,9 @@ export function LoadedCust({
     style: {
       background: T.primary,
       color: T.white,
-      fontWeight: 700,
+      fontWeight: 600,
       padding: '7px 18px',
-      borderRadius: 10,
+      borderRadius: 6,
       fontSize: 16
     }
   }, fp(product.price + ext))), /*#__PURE__*/React.createElement("div", {

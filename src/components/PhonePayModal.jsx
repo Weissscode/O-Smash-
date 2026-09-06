@@ -27,12 +27,12 @@ export function PhonePayModal({
     style: {
       padding: '18px 22px',
       borderBottom: `1px solid ${T.brd}`,
-      background: `linear-gradient(135deg,${T.primaryL},#F0EAFF)`
+      background: T.bgCard
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 17,
-      fontWeight: 800,
+      fontWeight: 600,
       color: T.txt
     }
   }, "Paiement \u2014 ", order.client), /*#__PURE__*/React.createElement("div", {
@@ -65,7 +65,7 @@ export function PhonePayModal({
       background: payment === p ? T.okL : T.bgCard,
       cursor: 'pointer',
       fontSize: 16,
-      fontWeight: 700,
+      fontWeight: 600,
       color: payment === p ? T.ok : T.txtSub,
       textAlign: 'center'
     }
@@ -93,7 +93,7 @@ export function PhonePayModal({
   }, item.qty, "x ", item.name), /*#__PURE__*/React.createElement("span", {
     style: {
       color: T.primary,
-      fontWeight: 700
+      fontWeight: 600
     }
   }, fp(item.total)))), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -105,12 +105,12 @@ export function PhonePayModal({
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontWeight: 700,
+      fontWeight: 600,
       color: T.txt
     }
   }, "Total"), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontWeight: 900,
+      fontWeight: 600,
       color: T.primary,
       fontSize: 17
     }
@@ -141,7 +141,7 @@ export function PhonePayModal({
     style: {
       ...btn('#F59E0B', T.white, {
         width: '100%',
-        fontWeight: 700,
+        fontWeight: 600,
         fontSize: 14,
         marginTop: 8
       })
