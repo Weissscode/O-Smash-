@@ -13,7 +13,6 @@ import { fetchOrders, insertOrder, insertOrders, updateOrder, deleteOrder, delet
 import { fetchStockOut, setStockStatus, resetStock, flushStockQueue, hasPendingStockSync } from './utils/stockApi.js';
 import { Logo } from './components/Logo.jsx';
 import { Modal } from './components/Modal.jsx';
-import { Tag } from './components/Tag.jsx';
 import { PinModal } from './components/PinModal.jsx';
 import { BurgerCust } from './components/BurgerCust.jsx';
 import { BurgerStartModal } from './components/BurgerStartModal.jsx';
@@ -386,7 +385,6 @@ export default function App({ restaurantId }) {
     ...PMAP,
     divers: customProds
   } : PMAP;
-  const catObj = xCats.find(c => c.id === selCat);
   const PCard = ({
     p,
     cat
@@ -399,13 +397,13 @@ export default function App({ restaurantId }) {
       style: {
         ...card(),
         borderRadius: 4,
-        padding: '16px 18px',
+        padding: '20px 22px',
         cursor: out ? 'not-allowed' : 'pointer',
         textAlign: 'left',
         display: 'flex',
         flexDirection: 'column',
-        gap: 5,
-        minHeight: 110,
+        gap: 9,
+        minHeight: 142,
         position: 'relative',
         overflow: 'hidden',
         opacity: out ? 0.38 : 1,
@@ -430,30 +428,26 @@ export default function App({ restaurantId }) {
         background: T.noL,
         border: `1px solid ${T.no}`
       }
-    }, "Rupture")), p.tag && /*#__PURE__*/React.createElement(Tag, {
-      label: p.tag,
-      color: T.txt
-    }), /*#__PURE__*/React.createElement("div", {
+    }, "Rupture")), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 15,
+        fontSize: 18,
         fontWeight: 600,
         color: T.txt,
-        lineHeight: 1.2,
-        flex: 1
+        lineHeight: 1.3
       }
     }, p.name), p.desc && /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 11,
+        fontSize: 12,
         color: T.txtMuted,
         lineHeight: 1.3,
         overflow: 'hidden',
-        display: '-webkit-box',
-        WebkitLineClamp: 1,
-        WebkitBoxOrient: 'vertical'
+        whiteSpace: 'nowrap',
+        textOverflow: 'ellipsis'
       }
     }, p.desc), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 18,
+        fontSize: 20,
+        marginTop: 'auto',
         fontWeight: 600,
         color: T.txt
       }
@@ -681,7 +675,7 @@ export default function App({ restaurantId }) {
       alignItems: 'center',
       justifyContent: 'space-between',
       padding: '0 16px',
-      height: 64,
+      height: 76,
       background: T.bgCard,
       flexShrink: 0,
       borderBottom: `1px solid ${T.brd}`
@@ -692,7 +686,7 @@ export default function App({ restaurantId }) {
       alignItems: 'center',
       gap: 4
     }
-  }, /*#__PURE__*/React.createElement('span', {className: 'osm-wordmark'}, "O’SMASH"), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(Logo, {size: 64, blendMode: 'normal'}), /*#__PURE__*/React.createElement("div", {
     style: {
       width: 1,
       height: 36,

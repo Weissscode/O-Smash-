@@ -7,9 +7,12 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 * { scrollbar-width: thin; scrollbar-color: #C8C9CA transparent; }
 ::-webkit-scrollbar { width: 6px; height: 4px; }
 ::-webkit-scrollbar-thumb { background: #C8C9CA; border-radius: 3px; }
-.osm-wordmark { font-size: 19px; font-weight: 600; letter-spacing: -0.6px; white-space: nowrap; }
+.osm-topbar img { display: block; border-radius: 4px; }
 .osm-nav-tab, .osm-category { display: inline-flex; align-items: center; justify-content: center; gap: 8px; flex-shrink: 0; min-height: 42px; padding: 9px 13px; border: 1px solid transparent; border-radius: 5px; background: transparent; color: #686D73; font-size: 14px; font-weight: 500; white-space: nowrap; cursor: pointer; position: relative; }
+.osm-category { min-height: 52px; padding: 12px 15px; gap: 9px; font-size: 15px; color: #343A40; opacity: .66; }
+.osm-category svg { width: 21px; height: 21px; }
 .osm-nav-tab[aria-current='page'], .osm-category[aria-pressed='true'] { background: #E8ECF3; color: #171717; }
+.osm-category[aria-pressed='true'] { background: #E1E6EE; opacity: 1; border-color: #CCD2DA; }
 .osm-nav-tab[aria-current='page']::after, .osm-category[aria-pressed='true']::after { content: ''; position: absolute; bottom: 0; left: 12px; right: 12px; height: 2px; background: #7C838D; }
 .osm-product { min-width: 0; }
 .osm-product:active { background: #E8ECF3 !important; }
@@ -20,11 +23,10 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
 .osm-manager-header .osm-header-right { display: flex; justify-content: flex-end; }
 @media (max-width: 1100px) {
   .osm-nav-tab { padding: 8px 9px; font-size: 13px; gap: 6px; }
-  .osm-category { padding: 8px 11px; }
+  .osm-category { padding: 12px 15px; }
 }
 @media (max-width: 760px) {
   .osm-topbar { overflow-x: auto; gap: 16px; }
-  .osm-wordmark { font-size: 17px; }
   .osm-nav-tab { font-size: 12px; }
   .osm-service-grid { grid-template-columns: 1fr; }
 }
@@ -33,3 +35,4 @@ button:focus-visible, input:focus-visible, textarea:focus-visible, select:focus-
   .osm-manager-header .osm-header-left { display: none; }
   .osm-manager-header .osm-header-right { justify-content: center; }
 }
+
