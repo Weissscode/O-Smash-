@@ -31,6 +31,10 @@ import { ConfirmModal } from './components/ConfirmModal.jsx';
 import { SplitModal } from './components/SplitModal.jsx';
 import { TelephoneView } from './components/TelephoneView.jsx';
 
+// Fonds pastel tres legers, en rotation sur les cartes produits : de quoi les
+// distinguer d'un coup d'oeil sans couleur vive ni logique metier derriere.
+const PRODUCT_TINTS = ['#F8F5EF', '#F2F6FB', '#F6F3FA', '#F4F8F2', '#FBF4F1'];
+
 export default function App({ restaurantId }) {
   const [view, setView] = React.useState('pos');
   const [selCat, setSelCat] = React.useState('burger');
@@ -387,23 +391,29 @@ export default function App({ restaurantId }) {
   } : PMAP;
   const PCard = ({
     p,
-    cat
+    cat,
+    i = 0
   }) => {
     const out = stockOut.includes(p.id);
+    // Nom court en carte : le nom complet (imprime, panier) n'est jamais touche.
+    const shortLabel = p.name.startsWith("O'Smash ") ? p.name.slice(8) : p.name;
     return /*#__PURE__*/React.createElement("button", {
       onClick: () => !out && handleProd(p, cat),
       className: 'osm-product',
       'aria-disabled': out,
       style: {
         ...card(),
+        background: PRODUCT_TINTS[i % PRODUCT_TINTS.length],
         borderRadius: 4,
-        padding: '20px 22px',
+        padding: '28px 20px',
         cursor: out ? 'not-allowed' : 'pointer',
-        textAlign: 'left',
+        textAlign: 'center',
         display: 'flex',
         flexDirection: 'column',
-        gap: 9,
-        minHeight: 142,
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 10,
+        minHeight: 176,
         position: 'relative',
         overflow: 'hidden',
         opacity: out ? 0.38 : 1,
@@ -430,25 +440,15 @@ export default function App({ restaurantId }) {
       }
     }, "Rupture")), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: 600,
         color: T.txt,
         lineHeight: 1.3
       }
-    }, p.name), p.desc && /*#__PURE__*/React.createElement("div", {
+    }, shortLabel), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 12,
-        color: T.txtMuted,
-        lineHeight: 1.3,
-        overflow: 'hidden',
-        whiteSpace: 'nowrap',
-        textOverflow: 'ellipsis'
-      }
-    }, p.desc), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 20,
-        marginTop: 'auto',
-        fontWeight: 600,
+        fontSize: 22,
+        fontWeight: 700,
         color: T.txt
       }
     }, fp(p.price)));
@@ -465,40 +465,43 @@ export default function App({ restaurantId }) {
         style: {
           display: 'grid',
           gridTemplateColumns: 'repeat(3,minmax(0,1fr))',
-          gap: 9
+          gap: 12
         }
-      }, prods.slice(0, 9).map(p => /*#__PURE__*/React.createElement(PCard, {
+      }, prods.slice(0, 9).map((p, i) => /*#__PURE__*/React.createElement(PCard, {
         key: p.id,
         p: p,
-        cat: "burger"
+        cat: "burger",
+        i: i
       }))), prods.length > 9 && /*#__PURE__*/React.createElement("div", {
         style: {
           display: 'grid',
           gridTemplateColumns: 'repeat(3,minmax(0,1fr))',
-          gap: 9,
-          marginTop: 9
+          gap: 12,
+          marginTop: 12
         }
-      }, prods.slice(9, 11).map(p => /*#__PURE__*/React.createElement(PCard, {
+      }, prods.slice(9, 11).map((p, i) => /*#__PURE__*/React.createElement(PCard, {
         key: p.id,
         p: p,
-        cat: "burger"
+        cat: "burger",
+        i: i + 9
       }))));
     }
     // Onglets peu remplis = cases plus grandes
     const sparse = ['bao', 'formule', 'riz', 'sides', 'desserts', 'boissons', 'milkshake', 'crepes'].includes(selCat);
-    const minW = sparse ? mob ? 180 : 240 : mob ? 145 : 175;
+    const minW = sparse ? mob ? 190 : 260 : mob ? 155 : 190;
     return /*#__PURE__*/React.createElement("div", {
       style: {
         padding: pb,
         display: 'grid',
         gridTemplateColumns: `repeat(auto-fill,minmax(${minW}px,1fr))`,
-        gap: sparse ? 12 : 9,
+        gap: sparse ? 14 : 12,
         alignContent: 'start'
       }
-    }, prods.map(p => /*#__PURE__*/React.createElement(PCard, {
+    }, prods.map((p, i) => /*#__PURE__*/React.createElement(PCard, {
       key: p.id,
       p: p,
-      cat: selCat
+      cat: selCat,
+      i: i
     })));
   };
   const CartPanel = ({
