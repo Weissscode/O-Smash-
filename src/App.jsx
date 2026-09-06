@@ -1,7 +1,7 @@
 import React from 'react';
 import { T } from './data/theme.js';
 import { CATS, BURGERS, BAO, FORMULES, RIZ, SIDES, LOADED, CREP, MILKS, PMAP, CB } from './data/products.js';
-import { card, btn } from './utils/styles.js';
+import { card, btn, segTab } from './utils/styles.js';
 import { fp, ft, fd, uid } from './utils/format.js';
 import { LS } from './utils/storage.js';
 import { isPhoneNumber } from './utils/phone.js';
@@ -11,6 +11,8 @@ import { printTicket } from './utils/ticketPrint.js';
 import { fetchOrders, insertOrder, insertOrders, updateOrder, deleteOrder, deleteOrdersForDate, flushQueue, hasPendingSync } from './utils/ordersApi.js';
 import { fetchStockOut, setStockStatus, resetStock, flushStockQueue, hasPendingStockSync } from './utils/stockApi.js';
 import { Logo } from './components/Logo.jsx';
+import { IconTill, IconBox, IconGrid, IconBars, IconPhone, IconReceipt } from './components/icons.jsx';
+import { CATEGORY_ICONS } from './components/categoryIcons.jsx';
 import { Modal } from './components/Modal.jsx';
 import { Tag } from './components/Tag.jsx';
 import { PinModal } from './components/PinModal.jsx';
@@ -686,63 +688,80 @@ export default function App({ restaurantId }) {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      padding: '0 24px',
-      height: 84,
-      background: T.primaryD,
+      padding: '0 18px',
+      height: mob ? 56 : 62,
+      background: T.bgCard,
+      borderBottom: `1px solid ${T.brd}`,
       flexShrink: 0
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       alignItems: 'center',
-      gap: 18
+      gap: 14,
+      minWidth: 0
     }
   }, /*#__PURE__*/React.createElement(Logo, {
-    size: mob ? 52 : 68
+    size: mob ? 30 : 36
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       width: 1,
-      height: 36,
-      background: 'rgba(255,255,255,0.22)',
-      margin: '0 4px'
+      height: 26,
+      background: T.brd,
+      margin: '0 2px',
+      flexShrink: 0
     }
-  }), [{
+  }), /*#__PURE__*/React.createElement("div", {
+    style: {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 2,
+      overflowX: 'auto'
+    }
+  }, [{
     id: 'pos',
-    l: 'Caisse'
+    l: 'Caisse',
+    icon: IconTill
   }, {
     id: 'telephone',
     l: 'Téléphone',
+    icon: IconPhone,
     badge: phoneOrders.length
   }, {
     id: 'stock',
-    l: 'Stock'
+    l: 'Stock',
+    icon: IconBox
   }, {
     id: 'dashboard',
     l: 'Dashboard',
+    icon: IconGrid,
     pr: true
   }, {
     id: 'analytics',
     l: 'Analytics',
+    icon: IconBars,
     pr: true
   }].map(t => /*#__PURE__*/React.createElement("button", {
     key: t.id,
+    className: 'osm-btn-premium',
     onClick: () => t.pr ? setPinFor(t.id) : setView(t.id),
     style: {
-      padding: mob ? '7px 12px' : '8px 20px',
-      borderRadius: T.rSm,
-      border: 'none',
-      cursor: 'pointer',
-      fontSize: mob ? 12 : 14,
-      fontWeight: view === t.id ? 600 : 500,
-      background: view === t.id ? 'rgba(255,255,255,0.14)' : 'transparent',
-      color: view === t.id ? T.white : 'rgba(255,255,255,0.62)',
+      ...segTab(view === t.id, {
+        display: 'flex',
+        alignItems: 'center',
+        gap: 7,
+        padding: mob ? '7px 10px' : '8px 14px',
+        whiteSpace: 'nowrap',
+        flexShrink: 0
+      }),
+      fontSize: mob ? 12 : 13.5,
       position: 'relative'
     }
-  }, t.l, t.badge > 0 && /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement(t.icon, { size: 17 }), !mob && t.l, t.badge > 0 && /*#__PURE__*/React.createElement("span", {
     style: {
       position: 'absolute',
-      top: 2,
-      right: 2,
+      top: 1,
+      right: 1,
       background: T.no,
       color: T.white,
       borderRadius: T.rPill,
@@ -752,44 +771,48 @@ export default function App({ restaurantId }) {
       minWidth: 16,
       textAlign: 'center'
     }
-  }, t.badge)))), /*#__PURE__*/React.createElement("div", {
+  }, t.badge))))), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
       alignItems: 'center',
-      gap: 12
+      gap: 8,
+      flexShrink: 0
     }
   }, syncPending && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: T.white,
+      color: T.warn,
       fontWeight: 600,
-      background: 'rgba(255,255,255,0.16)',
-      padding: '4px 12px',
-      borderRadius: T.rSm
+      background: T.warnL,
+      padding: '4px 10px',
+      borderRadius: T.rSm,
+      whiteSpace: 'nowrap'
     }
   }, "Hors ligne - synchro en attente"), printSt && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: T.white,
+      color: T.info,
       fontWeight: 600,
-      background: 'rgba(255,255,255,0.16)',
-      padding: '4px 12px',
-      borderRadius: T.rSm
+      background: T.infoL,
+      padding: '4px 10px',
+      borderRadius: T.rSm,
+      whiteSpace: 'nowrap'
     }
   }, printSt), /*#__PURE__*/React.createElement("div", {
     style: {
       textAlign: 'right'
     }
   }, /*#__PURE__*/React.createElement("div", {
+    className: 'osm-num',
     style: {
       fontSize: 15,
       fontWeight: 700,
-      color: '#fff'
+      color: T.txt
     }
   }, ft(now)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      color: 'rgba(255,255,255,0.6)'
+      color: T.txtSub
     }
   }, fd(now))))), view === 'pos' && /*#__PURE__*/React.createElement("div", {
     style: {
@@ -808,29 +831,35 @@ export default function App({ restaurantId }) {
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
-      gap: 5,
-      padding: '10px 14px',
+      gap: 2,
+      padding: '8px 14px',
       overflowX: 'auto',
       flexShrink: 0,
       borderBottom: `1px solid ${T.brd}`,
-      background: T.bgCard
+      background: T.bgCard,
+      // Fondu au bord droit : indique que la ligne se poursuit au scroll,
+      // sans fleche ni pastille decorative.
+      WebkitMaskImage: 'linear-gradient(to right, black 94%, transparent 100%)',
+      maskImage: 'linear-gradient(to right, black 94%, transparent 100%)'
     }
-  }, xCats.map(cat => /*#__PURE__*/React.createElement("button", {
-    key: cat.id,
-    onClick: () => setSelCat(cat.id),
-    style: {
-      padding: mob ? '9px 14px' : '10px 22px',
-      borderRadius: 6,
-      border: selCat === cat.id ? `2.5px solid ${cat.color}` : '2px solid transparent',
-      cursor: 'pointer',
-      fontSize: mob ? 12 : 14,
-      fontWeight: selCat === cat.id ? 700 : 500,
-      whiteSpace: 'nowrap',
-      background: selCat === cat.id ? `${cat.color}12` : T.bg,
-      color: selCat === cat.id ? cat.color : T.txtSub,
-      transition: 'all .12s'
-    }
-  }, cat.name))), /*#__PURE__*/React.createElement("div", {
+  }, xCats.map(cat => {
+    const CatIcon = CATEGORY_ICONS[cat.id] || IconReceipt;
+    return /*#__PURE__*/React.createElement("button", {
+      key: cat.id,
+      className: 'osm-btn-premium',
+      onClick: () => setSelCat(cat.id),
+      style: {
+        ...segTab(selCat === cat.id, {
+          display: 'flex',
+          alignItems: 'center',
+          gap: 7,
+          padding: mob ? '8px 12px' : '9px 16px',
+          whiteSpace: 'nowrap'
+        }),
+        fontSize: mob ? 12 : 13.5
+      }
+    }, /*#__PURE__*/React.createElement(CatIcon, { size: mob ? 17 : 18 }), cat.name);
+  })), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
       overflowY: 'auto',

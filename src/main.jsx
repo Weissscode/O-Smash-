@@ -1,12 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { AuthGate } from './AuthGate.jsx';
-import '@fontsource/ibm-plex-sans/400.css';
-import '@fontsource/ibm-plex-sans/500.css';
-import '@fontsource/ibm-plex-sans/600.css';
-import '@fontsource/ibm-plex-sans/700.css';
-import '@fontsource/ibm-plex-mono/500.css';
-import '@fontsource/ibm-plex-mono/600.css';
+// Roboto : proche de la typographie Android/POS du logiciel concurrent pris
+// pour reference, sobre et tres lisible en caisse.
+import '@fontsource/roboto/400.css';
+import '@fontsource/roboto/500.css';
+import '@fontsource/roboto/700.css';
 // Anton et Permanent Marker restent : ce sont les polices du logo Vice Code.
 import '@fontsource/anton';
 import '@fontsource/permanent-marker';

@@ -28,8 +28,8 @@ export function exportPDF(orders) {
   w.document.write(`<!DOCTYPE html><html><head><meta charset="utf-8"><title>Recap ${today}</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
-body{font-family:'IBM Plex Sans',system-ui,-apple-system,sans-serif;padding:28px;max-width:720px;margin:0 auto;color:#1A1815;}
-.num{font-family:'IBM Plex Mono',ui-monospace,SFMono-Regular,monospace;font-variant-numeric:tabular-nums;}
+body{font-family:'Roboto',system-ui,-apple-system,sans-serif;padding:28px;max-width:720px;margin:0 auto;color:#171717;}
+.num{font-variant-numeric:tabular-nums;font-weight:500;}
 h1{font-size:22px;font-weight:700;color:#1A1815;letter-spacing:-0.01em;margin-bottom:4px;}
 .sub{font-size:12px;color:#57534E;margin-bottom:22px;padding-bottom:14px;border-bottom:2px solid #1A1815;}
 h2{font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin:26px 0 10px;padding-bottom:6px;color:#1A1815;border-bottom:1px solid #DDD8D1;}
@@ -41,7 +41,7 @@ h2.soir{border-bottom-color:#2E4B7A;}
 .ca.soir{border-left-color:#2E4B7A;}
 .ca.esp{border-left-color:#15703F;}
 .ca.cb{border-left-color:#1F4E9C;}
-.ca-v{font-size:24px;font-weight:600;color:#1A1815;font-family:'IBM Plex Mono',ui-monospace,monospace;font-variant-numeric:tabular-nums;}
+.ca-v{font-size:24px;font-weight:600;color:#171717;font-variant-numeric:tabular-nums;}
 .ca-l{font-size:10px;color:#57534E;letter-spacing:0.04em;text-transform:uppercase;margin-bottom:4px;}
 .ca-l+.ca-v+.ca-l{margin:4px 0 0;text-transform:none;letter-spacing:0;}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#EAE6E0;border:1px solid #EAE6E0;margin-bottom:16px;}

@@ -109,3 +109,103 @@ export const IconTrophy = ({ size = 20, strokeWidth = 2 }) => /*#__PURE__*/React
   /*#__PURE__*/React.createElement('path', { d: 'M7 5H4a3 3 0 0 0 3 4M17 5h3a3 3 0 0 1-3 4' }),
   /*#__PURE__*/React.createElement('path', { d: 'M12 14v3M9 20h6M9 17.5h6' })
 );
+
+// --- Navigation principale (header) --------------------------------------
+
+// Caisse : silhouette de caisse enregistreuse (tiroir + afficheur).
+export const IconTill = ({ size = 18, strokeWidth = 2 }) => /*#__PURE__*/React.createElement('svg', base(size, strokeWidth),
+  /*#__PURE__*/React.createElement('rect', { x: 4, y: 10.5, width: 16, height: 8.5, rx: 1.4 }),
+  /*#__PURE__*/React.createElement('path', { d: 'M6.5 10.5V7a1.4 1.4 0 0 1 1.4-1.4h8.2A1.4 1.4 0 0 1 17.5 7v3.5' }),
+  /*#__PURE__*/React.createElement('rect', { x: 9, y: 7.4, width: 6, height: 2.2, rx: 0.5 }),
+  /*#__PURE__*/React.createElement('path', { d: 'M7.5 14.5h9M9.5 17.2h5' })
+);
+
+// Stock : carton ouvert.
+export const IconBox = ({ size = 18, strokeWidth = 2 }) => /*#__PURE__*/React.createElement('svg', base(size, strokeWidth),
+  /*#__PURE__*/React.createElement('path', { d: 'M4 9.5l8-4 8 4-8 4-8-4z' }),
+  /*#__PURE__*/React.createElement('path', { d: 'M4 9.5V17l8 4 8-4V9.5' }),
+  /*#__PURE__*/React.createElement('path', { d: 'M12 13.5V21' })
+);
+
+// Dashboard : vue d'ensemble en quadrants.
+export const IconGrid = ({ size = 18, strokeWidth = 2 }) => /*#__PURE__*/React.createElement('svg', base(size, strokeWidth),
+  /*#__PURE__*/React.createElement('rect', { x: 4, y: 4, width: 7, height: 7, rx: 1 }),
+  /*#__PURE__*/React.createElement('rect', { x: 13, y: 4, width: 7, height: 7, rx: 1 }),
+  /*#__PURE__*/React.createElement('rect', { x: 4, y: 13, width: 7, height: 7, rx: 1 }),
+  /*#__PURE__*/React.createElement('rect', { x: 13, y: 13, width: 7, height: 7, rx: 1 })
+);
+
+// Analytics : barres de progression dans le temps.
+export const IconBars = ({ size = 18, strokeWidth = 2 }) => /*#__PURE__*/React.createElement('svg', base(size, strokeWidth),
+  /*#__PURE__*/React.createElement('path', { d: 'M4 20V4M4 20h16' }),
+  /*#__PURE__*/React.createElement('path', { d: 'M7.5 16.5v-4M11.5 16.5v-7M15.5 16.5v-2.5M19.5 16.5V9' })
+);
+
+// --- Categories produits ---------------------------------------------------
+
+// Burgers : bun, steak, bun.
+export const IconBurger = ({ size = 18, strokeWidth = 2 }) => /*#__PURE__*/React.createElement('svg', base(size, strokeWidth),
+  /*#__PURE__*/React.createElement('path', { d: 'M4.5 10.5C4.5 7 8 4.5 12 4.5s7.5 2.5 7.5 6' }),
+  /*#__PURE__*/React.createElement('path', { d: 'M3.5 12.2h17' }),
+  /*#__PURE__*/React.createElement('path', { d: 'M3.5 15.3h17' }),
+  /*#__PURE__*/React.createElement('path', { d: 'M4 17.6a1.4 1.4 0 0 0 1.4 1.4h13.2A1.4 1.4 0 0 0 20 17.6' })
+);
+
+// BAO : bun vapeur avec pli au sommet.
+export const IconBao = ({ size = 18, strokeWidth = 2 }) => /*#__PURE__*/React.createElement('svg', base(size, strokeWidth),
+  /*#__PURE__*/React.createElement('path', { d: 'M4 13.5C4 9 7.6 6 12 6s8 3 8 7.5' }),
+  /*#__PURE__*/React.createElement('path', { d: 'M3.5 13.5h17c0 3.3-3.8 5.8-8.5 5.8s-8.5-2.5-8.5-5.8z' }),
+  /*#__PURE__*/React.createElement('path', { d: 'M10 6.3q2-1.6 4 0' })
+);
+
+// Formules : plateau repas a deux compartiments.
+export const IconTray = ({ size = 18, strokeWidth = 2 }) => /*#__PURE__*/React.createElement('svg', base(size, strokeWidth),
+  /*#__PURE__*/React.createElement('rect', { x: 3.5, y: 6, width: 17, height: 13, rx: 1.6 }),
+  /*#__PURE__*/React.createElement('path', { d: 'M12 6v13' }),
+  /*#__PURE__*/React.createElement('path', { d: 'M7 9.5h2.2M14.8 9.5H17' })
+);
+
+// Riz Crousty : bol avec vapeur.
+export const IconRiceBowl = ({ size = 18, strokeWidth = 2 }) => /*#__PURE__*/React.createElement('svg', base(size, strokeWidth),
+  /*#__PURE__*/React.createElement('path', { d: 'M3.5 12h17a8.5 4.6 0 0 1-17 0z' }),
+  /*#__PURE__*/React.createElement('path', { d: 'M4.5 12a7.5 3.6 0 0 1 15 0' }),
+  /*#__PURE__*/React.createElement('path', { d: 'M10 4.5q.8 1-.2 2M14.2 4.5q.8 1-.2 2' })
+);
+
+// Sides : cornet de frites.
+export const IconFries = ({ size = 18, strokeWidth = 2 }) => /*#__PURE__*/React.createElement('svg', base(size, strokeWidth),
+  /*#__PURE__*/React.createElement('path', { d: 'M6.5 10h11l-1.3 9.3a1.4 1.4 0 0 1-1.4 1.2H9.2a1.4 1.4 0 0 1-1.4-1.2L6.5 10z' }),
+  /*#__PURE__*/React.createElement('path', { d: 'M8 10V5.8M11 10V4.5M13 10V4.5M16 10V5.8' })
+);
+
+// Desserts : part de gateau.
+export const IconDessert = ({ size = 18, strokeWidth = 2 }) => /*#__PURE__*/React.createElement('svg', base(size, strokeWidth),
+  /*#__PURE__*/React.createElement('path', { d: 'M4 19l8-13 8 13z' }),
+  /*#__PURE__*/React.createElement('path', { d: 'M4 19h16' }),
+  /*#__PURE__*/React.createElement('path', { d: 'M8.8 11.5h6.4' }),
+  /*#__PURE__*/React.createElement('circle', { cx: 12, cy: 5, r: 1 })
+);
+
+// Boissons : gobelet et paille.
+export const IconCup = ({ size = 18, strokeWidth = 2 }) => /*#__PURE__*/React.createElement('svg', base(size, strokeWidth),
+  /*#__PURE__*/React.createElement('path', { d: 'M6.5 8h11l-1.1 11.2A1.5 1.5 0 0 1 14.9 20H9.1a1.5 1.5 0 0 1-1.5-1.8L6.5 8z' }),
+  /*#__PURE__*/React.createElement('path', { d: 'M5.5 8h13' }),
+  /*#__PURE__*/React.createElement('path', { d: 'M14.5 8l1-4.5' })
+);
+
+// Milkshakes : gobelet dome avec paille coudee.
+// Dome bombe (contrairement au gobelet a bord plat des boissons) + tourbillon,
+// pour rester lisible a 18px sans se confondre avec IconCup.
+export const IconMilkshake = ({ size = 18, strokeWidth = 2 }) => /*#__PURE__*/React.createElement('svg', base(size, strokeWidth),
+  /*#__PURE__*/React.createElement('path', { d: 'M7.3 10.2h9.4l-1 8.6a1.4 1.4 0 0 1-1.4 1.2H9.7a1.4 1.4 0 0 1-1.4-1.2l-1-8.6z' }),
+  /*#__PURE__*/React.createElement('path', { d: 'M6.2 10.2a5.8 3 0 0 1 11.6 0z' }),
+  /*#__PURE__*/React.createElement('path', { d: 'M9.6 6.6q1.2-1.1 2.4 0t2.4 0' }),
+  /*#__PURE__*/React.createElement('path', { d: 'M13.6 6.8l1.2-3.4' })
+);
+
+// Crepes : demi-cercle plie avec filet de garniture.
+export const IconCrepe = ({ size = 18, strokeWidth = 2 }) => /*#__PURE__*/React.createElement('svg', base(size, strokeWidth),
+  /*#__PURE__*/React.createElement('path', { d: 'M4 12a8 8 0 0 1 16 0z' }),
+  /*#__PURE__*/React.createElement('path', { d: 'M4 12h16' }),
+  /*#__PURE__*/React.createElement('path', { d: 'M8 9.3q2-1.2 4 0t4 0' })
+);

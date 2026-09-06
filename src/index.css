@@ -9,10 +9,11 @@ html, body, #root {
   overflow: hidden;
 }
 body {
-  font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
-  background: #F4F2EF;
-  color: #1A1815;
-  /* Chiffres de meme largeur : les prix restent alignes en colonne */
+  font-family: 'Roboto', 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #F6F6F4;
+  color: #171717;
+  /* Chiffres de meme largeur : les prix restent alignes en colonne, sans
+     passer par une police monospace (Roboto garde ses chiffres). */
   font-variant-numeric: tabular-nums;
   -webkit-font-smoothing: antialiased;
 }
@@ -24,10 +25,11 @@ input, textarea, select, button {
   font-variant-numeric: inherit;
 }
 
-/* Chiffres en chasse fixe : panier, tickets, tableaux d'analyse */
+/* Chiffres alignes en colonne (panier, tickets, tableaux d'analyse), dans la
+   meme police que le reste : pas de monospace, juste des chiffres tabulaires. */
 .osm-num {
-  font-family: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
   font-variant-numeric: tabular-nums;
+  font-weight: 500;
 }
 
 /* Retour tactile a l'appui. Pas d'effet au survol : l'app tourne sur tablette. */

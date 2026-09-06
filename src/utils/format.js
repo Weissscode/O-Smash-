@@ -1,5 +1,7 @@
 export const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
-export const fp = p => `${p.toFixed(2).replace('.', ',')}€`;
+// Espace insecable avant l'euro : "6,50 €" comme sur un vrai ticket de caisse,
+// jamais colle et jamais coupe en fin de ligne.
+export const fp = p => `${p.toFixed(2).replace('.', ',')} €`;
 export const ft = d => new Date(d).toLocaleTimeString('fr-FR', {
   hour: '2-digit',
   minute: '2-digit'

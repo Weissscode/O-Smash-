@@ -1,30 +1,35 @@
-// Palette neutre chaude. La couleur ne decore pas, elle porte une information :
-// vert = especes, bleu = carte, rouge = echec ou destructif, encre = action principale.
+// Palette neutre, proche d'un vrai logiciel de caisse : la couleur ne decore
+// pas, elle porte une information (vert = especes, bleu = carte, rouge =
+// echec ou destructif, encre = action principale, gris-bleu = etat selectionne).
 export const T = {
   // Encre : actions principales, etats actifs, chiffres mis en avant
-  primary: '#23201D',
-  primaryD: '#12100E',
-  primaryL: '#EFECE7',
-  primaryLL: '#F7F5F2',
+  primary: '#171717',
+  primaryD: '#0F0F0F',
+  primaryL: '#ECECEA',
+  primaryLL: '#F7F7F6',
 
-  // Rouge de marque, reserve aux rares accents identitaires
+  // Rouge de marque, reserve aux rares accents identitaires (ex: jour courant)
   accent: '#B0342C',
 
   white: '#FFFFFF',
 
   // Surfaces
-  bg: '#F4F2EF',
+  bg: '#F6F6F4',
   bgCard: '#FFFFFF',
-  bgSide: '#EDEAE5',
+  bgSide: '#EFEEEC',
+
+  // Fond legerement teinte des onglets/filtres selectionnes : nav principale,
+  // categories, periodes. Jamais un remplissage plein.
+  active: '#E8ECF3',
 
   // Texte
-  txt: '#1A1815',
-  txtSub: '#57534E',
-  txtMuted: '#8A837C',
+  txt: '#171717',
+  txtSub: '#6B6B6B',
+  txtMuted: '#9A9A97',
 
   // Traits de separation, a la place des ombres
-  brd: '#DDD8D1',
-  brdL: '#EAE6E0',
+  brd: '#E1DFDB',
+  brdL: '#EBEAE7',
 
   // Semantique
   ok: '#15703F',
@@ -36,17 +41,14 @@ export const T = {
   info: '#1F4E9C',
   infoL: '#E8EEF7',
 
-  // Rayons hierarchises : vif sur les barres pleine largeur, doux sur les cartes,
-  // pilule uniquement sur les etiquettes.
+  // Rayons hierarchises, jamais au-dela de 8px : dense et sobre plutot que
+  // "arrondi app mobile".
   rSm: 4,
-  rMd: 8,
-  rLg: 12,
+  rMd: 6,
+  rLg: 8,
   rPill: 999,
 
   // Une seule ombre dans toute l'app : celle des elements qui flottent reellement
   // au dessus du contenu (modales).
-  shModal: '0 12px 32px rgba(20,18,16,0.18)',
-
-  // Chiffres alignes en colonne (paniers, tickets, tableaux)
-  fontMono: "'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace"
+  shModal: '0 12px 32px rgba(20,18,16,0.18)'
 };

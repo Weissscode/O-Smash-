@@ -1,6 +1,7 @@
 import React from 'react';
 import { T } from '../data/theme.js';
 import { fp, fd } from '../utils/format.js';
+import { segTab } from '../utils/styles.js';
 import {
   IconCash, IconCard, IconPhone, IconBag, IconReceipt,
   IconChevronLeft, IconChevronRight, IconCalendar,
@@ -85,22 +86,16 @@ const PERIODS = [
 function PeriodTopSwitch({ period, setPeriod }) {
   return /*#__PURE__*/React.createElement('div', {
     style: {
-      display: 'flex', margin: '16px 20px 12px',
+      display: 'flex', gap: 2, margin: '16px 20px 12px',
       background: T.bgCard,
-      border: `1px solid ${T.brd}`, borderRadius: T.rMd, overflow: 'hidden'
+      border: `1px solid ${T.brd}`, borderRadius: T.rMd, padding: 3
     }
   },
-    PERIODS.map((p, i) => /*#__PURE__*/React.createElement('button', {
+    PERIODS.map(p => /*#__PURE__*/React.createElement('button', {
       key: p.key,
       className: 'osm-btn-premium',
       onClick: () => setPeriod(p.key),
-      style: {
-        flex: 1, padding: '11px 0', border: 'none',
-        borderLeft: i === 0 ? 'none' : `1px solid ${T.brd}`,
-        background: period === p.key ? T.primary : 'transparent',
-        color: period === p.key ? T.white : T.txtSub,
-        fontWeight: 600, fontSize: 14.5, cursor: 'pointer'
-      }
+      style: segTab(period === p.key, { flex: 1, padding: '9px 0', fontSize: 14.5 })
     }, p.label))
   );
 }
@@ -121,13 +116,12 @@ function FilterSelect({ allLabel, value, onChange, options, active }) {
     ),
     /*#__PURE__*/React.createElement('div', {
       style: {
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
-        padding: '11px 14px', borderRadius: T.rMd,
-        background: T.bgCard,
-        border: `1px solid ${T.brd}`,
-        borderLeft: value ? `3px solid ${T.primary}` : `1px solid ${T.brd}`,
-        color: value ? T.txt : T.txtSub,
-        fontWeight: 600, fontSize: 13,
+        ...segTab(!!value, {
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
+          padding: '11px 14px',
+          border: `1px solid ${T.brd}`
+        }),
+        fontSize: 13,
         pointerEvents: 'none'
       }
     },

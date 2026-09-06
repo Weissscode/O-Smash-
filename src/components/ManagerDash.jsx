@@ -1,6 +1,6 @@
 import React from 'react';
 import { T } from '../data/theme.js';
-import { btn } from '../utils/styles.js';
+import { btn, segTab } from '../utils/styles.js';
 import { fd } from '../utils/format.js';
 import { LS } from '../utils/storage.js';
 import { fetchOrders, updateOrder, deleteOrder, deleteOrdersForDate } from '../utils/ordersApi.js';
@@ -18,24 +18,19 @@ const MANAGER_TABS = [
 function ManagerTabSwitch({ tab, setTab }) {
   return /*#__PURE__*/React.createElement('div', {
     style: {
-      display: 'flex', margin: '12px 20px 0',
+      display: 'flex', gap: 2, margin: '12px 20px 0',
       background: T.bgCard,
-      borderRadius: T.rMd, overflow: 'hidden',
+      borderRadius: T.rMd,
       border: `1px solid ${T.brd}`,
+      padding: 3,
       flexShrink: 0
     }
   },
-    MANAGER_TABS.map((t, i) => /*#__PURE__*/React.createElement('button', {
+    MANAGER_TABS.map(t => /*#__PURE__*/React.createElement('button', {
       key: t.key,
       className: 'osm-btn-premium',
       onClick: () => setTab(t.key),
-      style: {
-        flex: 1, padding: '11px 0', border: 'none',
-        borderLeft: i === 0 ? 'none' : `1px solid ${T.brd}`,
-        background: tab === t.key ? T.primary : 'transparent',
-        color: tab === t.key ? T.white : T.txtSub,
-        fontWeight: 600, fontSize: 14, cursor: 'pointer'
-      }
+      style: segTab(tab === t.key, { flex: 1, padding: '9px 0', fontSize: 14 })
     }, t.label))
   );
 }

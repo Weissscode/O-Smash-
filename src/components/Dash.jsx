@@ -2,6 +2,7 @@ import React from 'react';
 import { T } from '../data/theme.js';
 import { fp, ft, fd } from '../utils/format.js';
 import { Modal } from './Modal.jsx';
+import { segTab } from '../utils/styles.js';
 import {
   IconReceipt, IconBag, IconCash, IconCard, IconPhone,
   IconClock, IconClose, IconChevronLeft, IconChevronRight,
@@ -86,26 +87,16 @@ const PERIODS = [
 function PeriodSwitch({ period, setPeriod }) {
   return /*#__PURE__*/React.createElement('div', {
     style: {
-      display: 'flex', margin: '0 20px 16px',
-      border: `1px solid ${T.brd}`, borderRadius: T.rMd, overflow: 'hidden',
-      background: T.bgCard
+      display: 'flex', gap: 2, margin: '0 20px 16px',
+      border: `1px solid ${T.brd}`, borderRadius: T.rMd,
+      background: T.bgCard, padding: 3
     }
   },
-    PERIODS.map((p, i) => /*#__PURE__*/React.createElement('button', {
+    PERIODS.map(p => /*#__PURE__*/React.createElement('button', {
       key: p.key,
       className: 'osm-btn-premium',
       onClick: () => setPeriod(p.key),
-      style: {
-        flex: 1,
-        padding: '11px 0',
-        border: 'none',
-        borderLeft: i === 0 ? 'none' : `1px solid ${T.brd}`,
-        background: period === p.key ? T.primary : 'transparent',
-        color: period === p.key ? T.white : T.txtSub,
-        fontWeight: 600,
-        fontSize: 14,
-        cursor: 'pointer'
-      }
+      style: segTab(period === p.key, { flex: 1, padding: '9px 0', fontSize: 14 })
     }, p.label))
   );
 }

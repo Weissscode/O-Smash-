@@ -9,8 +9,7 @@ export function Logo({
     style: {
       height: size,
       width: 'auto',
-      flexShrink: 0,
-      mixBlendMode: 'screen'
+      flexShrink: 0
     },
     alt: "O'Smash"
   });
