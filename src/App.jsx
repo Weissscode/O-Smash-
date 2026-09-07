@@ -30,7 +30,7 @@ import { CItem } from './components/CItem.jsx';
 import { ConfirmModal } from './components/ConfirmModal.jsx';
 import { SplitModal } from './components/SplitModal.jsx';
 import { TelephoneView } from './components/TelephoneView.jsx';
-import { KioskOrderUI } from './components/KioskOrderUI.jsx';
+import { KioskOrderUI, KioskWelcome, KioskConfirm, KioskSuccess } from './components/KioskOrderUI.jsx';
 
 export default function App({ restaurantId }) {
   // Mode borne de commande en libre-service : ?kiosk=1 dans l'URL.
@@ -768,63 +768,22 @@ export default function App({ restaurantId }) {
   // on n'affiche ni la caisse ni les onglets staff. Un tap sur le logo x7
   // (geste discret) ouvre le code PIN pour repasser en caisse normale.
   if (isKiosk && !kioskStarted) {
-    return /*#__PURE__*/React.createElement("div", {
-      onClick: () => {
-        setKioskStarted(true);
-        const el = document.documentElement;
-        if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
-      },
-      style: {
-        height: '100vh',
-        width: '100vw',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        gap: 28,
-        background: T.bgGradient,
-        color: T.txt,
-        textAlign: 'center',
-        cursor: 'pointer',
-        userSelect: 'none',
-        padding: 24
-      }
-    }, /*#__PURE__*/React.createElement("div", {
-      onClick: e => {
-        e.stopPropagation();
-        handleKioskLogoTap();
-      },
-      style: {
-        width: 172,
-        height: 172,
-        borderRadius: 44,
-        background: 'linear-gradient(135deg,#6B35C2 0%,#5425A8 55%,#421890 100%)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        boxShadow: '0 14px 34px rgba(84,37,168,0.3)'
-      }
-    }, /*#__PURE__*/React.createElement(Logo, {
-      size: 124
-    })), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 34,
-        fontWeight: 900,
-        color: T.txt
-      }
-    }, "Bienvenue chez O'SMASH"), /*#__PURE__*/React.createElement("div", {
-      style: {
-        fontSize: 20,
-        fontWeight: 700,
-        color: T.txtSub
-      }
-    }, "Touchez l'ecran pour commander"), pinFor === 'kiosk-exit' && /*#__PURE__*/React.createElement(PinModal, {
-      onClose: () => setPinFor(null),
-      title: 'Quitter le mode borne',
-      onOk: () => {
-        window.location.href = window.location.pathname;
-      }
-    }));
+    return (
+      <KioskWelcome
+        onStart={() => {
+          setKioskStarted(true);
+          const el = document.documentElement;
+          if (el.requestFullscreen) el.requestFullscreen().catch(() => {});
+        }}
+        onLogoTap={handleKioskLogoTap}
+      >
+        {pinFor === 'kiosk-exit' && /*#__PURE__*/React.createElement(PinModal, {
+          onClose: () => setPinFor(null),
+          title: 'Quitter le mode borne',
+          onOk: () => { window.location.href = window.location.pathname; }
+        })}
+      </KioskWelcome>
+    );
   }
 
   // Ecran de prise de commande de la borne (une fois demarree). Habillage
@@ -859,44 +818,25 @@ export default function App({ restaurantId }) {
           onPay={() => setConfirmM(true)}
           onLogoTap={handleKioskLogoTap}
         />
-        {confirmM && /*#__PURE__*/React.createElement(ConfirmModal, {
-          cart: cart,
-          cartTotal: cartTotal,
-          clientName: clientName,
-          setClientName: setClientName,
-          kiosk: true,
-          onCancel: () => setConfirmM(false),
-          onValidate: placeKioskOrder
-        })}
-        {successM && /*#__PURE__*/React.createElement(Modal, {
-          onClose: () => {
-            setSuccessM(null);
-            setKioskStarted(false);
-          }
-        }, /*#__PURE__*/React.createElement("div", {
-          style: { position: 'relative', ...card(), width: 'min(85vw,400px)', padding: 28, textAlign: 'center' }
-        }, /*#__PURE__*/React.createElement("div", {
-          style: {
-            width: 68, height: 68, borderRadius: '50%', background: T.okL, border: `3px solid ${T.ok}`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: 32
-          }
-        }, "✓"), /*#__PURE__*/React.createElement("div", {
-          style: { fontSize: 13, fontWeight: 600, color: T.txtSub, textTransform: 'uppercase', letterSpacing: 1 }
-        }, "Commande enregistr\xE9e"), /*#__PURE__*/React.createElement("div", {
-          style: { fontSize: 60, fontWeight: 900, color: T.ok, margin: '4px 0', fontFamily: 'monospace' }
-        }, "#", successM.num), /*#__PURE__*/React.createElement("div", {
-          style: { fontSize: 14, color: T.ok, fontWeight: 700, background: T.okL, padding: '10px 16px', borderRadius: 6, marginBottom: 8 }
-        }, "Merci ! Presentez ce num\xE9ro en caisse pour r\xE9gler et r\xE9cup\xE9rer votre commande."), successM.service && /*#__PURE__*/React.createElement("div", {
-          style: { fontSize: 12, color: T.warn, fontWeight: 700, background: T.warnL, padding: '4px 12px', borderRadius: 10, display: 'inline-block', marginBottom: 8 }
-        }, successM.service), /*#__PURE__*/React.createElement("div", {
-          style: { fontSize: 28, fontWeight: 800, color: T.primary, marginBottom: 16 }
-        }, fp(successM.total)), /*#__PURE__*/React.createElement("button", {
-          onClick: () => {
-            setSuccessM(null);
-            setKioskStarted(false);
-          },
-          style: { ...btn(T.primary, T.white, { width: '100%', fontSize: 16, fontWeight: 700 }) }
-        }, "Terminer")))}
+        {confirmM && (
+          <KioskConfirm
+            cart={cart}
+            cartTotal={cartTotal}
+            clientName={clientName}
+            setClientName={setClientName}
+            onCancel={() => setConfirmM(false)}
+            onValidate={placeKioskOrder}
+          />
+        )}
+        {successM && (
+          <KioskSuccess
+            order={successM}
+            onDone={() => {
+              setSuccessM(null);
+              setKioskStarted(false);
+            }}
+          />
+        )}
         {pinFor === 'kiosk-exit' && /*#__PURE__*/React.createElement(PinModal, {
           onClose: () => setPinFor(null),
           title: 'Quitter le mode borne',
