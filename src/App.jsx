@@ -689,7 +689,7 @@ export default function App({ restaurantId }) {
       alignItems: 'center',
       gap: 4
     }
-  }, /*#__PURE__*/React.createElement(Logo, {size: 64, blendMode: 'normal'}), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(Logo, {size: 64}), /*#__PURE__*/React.createElement("div", {
     style: {
       width: 1,
       height: 36,
