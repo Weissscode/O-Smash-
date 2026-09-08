@@ -152,9 +152,7 @@ function Icon({ name, size = 24, stroke = 1.8, color = 'currentColor', style }) 
 
 // Photo d'un produit ou d'une categorie, repli sur une icone si le fichier
 // n'existe pas encore dans public/.
-// Les photos sont des detourages (fond transparent) : on les affiche
-// entieres (contain) avec une petite marge, jamais recadrees.
-function Photo({ src, icon, size, radius, fill, pad = '6%' }) {
+function Photo({ src, icon, size, radius, fill }) {
   const [ok, setOk] = React.useState(true);
   const dim = fill ? '100%' : size;
   return (
@@ -176,7 +174,7 @@ function Photo({ src, icon, size, radius, fill, pad = '6%' }) {
           alt=""
           loading="lazy"
           onError={() => setOk(false)}
-          style={{ width: '100%', height: '100%', objectFit: 'contain', padding: pad, display: 'block' }}
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
         />
       ) : (
         <Icon name={icon} size={fill ? 56 : Math.round(size * 0.5)} stroke={1.4} />
@@ -219,7 +217,7 @@ function ProductCard({ p, catIcon, out, onClick }) {
       }}
     >
       <div style={{ position: 'relative', width: '100%', aspectRatio: '1 / 1' }}>
-        <Photo src={`/products/${p.id}.webp`} icon={catIcon} fill radius={6} />
+        <Photo src={`/products/${p.id}.jpg`} icon={catIcon} fill radius={6} />
         <div style={{
           position: 'absolute',
           top: 8,
@@ -304,7 +302,7 @@ function CategoryRail({ cats, selCat, onSelect }) {
               background: C.surface,
               color: active ? C.accent : C.ink
             }}>
-              <Photo src={`/categories/${c.id}.webp`} icon={c.id} size={46} radius={6} pad="4%" />
+              <Photo src={`/categories/${c.id}.jpg`} icon={c.id} size={46} radius={6} />
             </div>
             <div style={{
               fontSize: 10.5,
@@ -346,7 +344,7 @@ function ProductGrid({ catName, prods, catIcon, stockOut, onPick }) {
               key={p.id}
               p={p}
               catIcon={catIcon}
-              out={stockOut.includes(p.menuOf || p.id)}
+              out={stockOut.includes(p.id)}
               onClick={() => onPick(p)}
             />
           ))}
@@ -414,7 +412,7 @@ function CartScreen({ cart, onEdit, onQty, onRemove, onBack }) {
               <div style={{ fontFamily: F.display, fontSize: 22, fontWeight: 700, color: C.ink, width: 30, flexShrink: 0 }}>
                 {item.qty}x
               </div>
-              <Photo src={`/products/${item.pid}.webp`} icon="plate" size={64} radius={6} />
+              <Photo src={`/products/${item.pid}.jpg`} icon="plate" size={64} radius={6} />
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{
                   fontSize: 16, fontWeight: 600, color: C.ink,
