@@ -4,6 +4,7 @@ import { fp } from '../utils/format.js';
 import { IconMoney, IconSun, IconMoon } from './icons.jsx';
 
 export const CATEGORIES = [
+  { key: 'bao', label: 'BAO', tint: '#E91E63', test: pid => pid.startsWith('bao-') },
   { key: 'burgers', label: 'Burgers', tint: '#D97706', test: pid => pid.startsWith('b-') },
   { key: 'menus', label: 'Menus', tint: '#7C3AED', test: pid => pid.startsWith('f-') },
   { key: 'riz', label: 'Riz Crousty', tint: T.primary, test: pid => pid.startsWith('r-') },

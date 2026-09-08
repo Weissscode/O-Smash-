@@ -1,7 +1,6 @@
 import React from 'react';
-import { T } from '../data/theme.js';
+import { useProductStyles } from './useProductStyles.js';
 import { CR } from '../data/products.js';
-import { card, btn } from '../utils/styles.js';
 import { Modal } from './Modal.jsx';
 import { Chip } from './Chip.jsx';
 import { SL } from './SL.jsx';
@@ -12,6 +11,7 @@ export function RizCust({
   onOk,
   onClose
 }) {
+  const { T, card, btn } = useProductStyles();
   const def = {
     type: '',
     retraits: [],
@@ -37,11 +37,11 @@ export function RizCust({
     style: {
       padding: '18px 22px',
       borderBottom: `1px solid ${T.brd}`,
-      background: `linear-gradient(135deg,${T.primaryL},#F0EAFF)`
+      background: T.kiosk ? T.bg : `linear-gradient(135deg,${T.primaryL},#F0EAFF)`
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 18,
+      fontSize: T.kiosk ? 18 : 18,
       fontWeight: 800,
       color: T.txt
     }
@@ -73,7 +73,7 @@ export function RizCust({
       border: s.type === t ? `2.5px solid ${T.warn}` : `1.5px solid ${T.brd}`,
       background: s.type === t ? T.warnL : T.bgCard,
       cursor: 'pointer',
-      fontSize: 16,
+      fontSize: T.kiosk ? 18 : 16,
       fontWeight: 700,
       color: s.type === t ? T.warn : T.txtSub,
       textAlign: 'center'
@@ -114,7 +114,7 @@ export function RizCust({
       border: `1.5px solid ${T.brd}`,
       background: T.bg,
       color: T.txt,
-      fontSize: 14,
+      fontSize: T.kiosk ? 18 : 14,
       resize: 'vertical',
       minHeight: 44,
       outline: 'none'

@@ -1,6 +1,5 @@
 import React from 'react';
-import { T } from '../data/theme.js';
-import { card, btn } from '../utils/styles.js';
+import { useProductStyles } from './useProductStyles.js';
 import { fp } from '../utils/format.js';
 import { Modal } from './Modal.jsx';
 
@@ -9,6 +8,7 @@ export function BurgerStartModal({
   onChoice,
   onClose
 }) {
+  const { T, card, btn } = useProductStyles();
   return /*#__PURE__*/React.createElement(Modal, {
     onClose: onClose
   }, /*#__PURE__*/React.createElement("div", {
@@ -20,7 +20,7 @@ export function BurgerStartModal({
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 18,
+      fontSize: T.kiosk ? 18 : 18,
       fontWeight: 800,
       color: T.txt,
       marginBottom: 4,
@@ -28,7 +28,7 @@ export function BurgerStartModal({
     }
   }, product.name), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 13,
+      fontSize: T.kiosk ? 18 : 13,
       color: T.txtSub,
       marginBottom: 20,
       textAlign: 'center'
@@ -52,14 +52,14 @@ export function BurgerStartModal({
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 16,
+      fontSize: T.kiosk ? 18 : 16,
       fontWeight: 800,
       color: T.primary,
       marginBottom: 4
     }
   }, "Burger seul"), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 18,
+      fontSize: T.kiosk ? 18 : 18,
       fontWeight: 900,
       color: T.txt
     }
@@ -68,27 +68,27 @@ export function BurgerStartModal({
     style: {
       padding: '24px 16px',
       borderRadius: 10,
-      border: `2px solid #0891B2`,
-      background: '#0891B214',
+      border: T.kiosk ? `2px solid ${T.primary}` : `2px solid #0891B2`,
+      background: (T.kiosk ? T.primaryL : '#0891B214'),
       cursor: 'pointer',
       textAlign: 'center'
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 16,
+      fontSize: T.kiosk ? 18 : 16,
       fontWeight: 800,
-      color: '#0891B2',
+      color: (T.kiosk ? T.primary : '#0891B2'),
       marginBottom: 4
     }
   }, "En menu (+3\u20AC)"), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 11,
+      fontSize: T.kiosk ? 18 : 11,
       color: T.txtSub,
       marginBottom: 4
     }
   }, "+ Frites Twister + Boisson"), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 18,
+      fontSize: T.kiosk ? 18 : 18,
       fontWeight: 900,
       color: T.txt
     }

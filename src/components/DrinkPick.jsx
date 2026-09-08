@@ -1,13 +1,13 @@
 import React from 'react';
-import { T } from '../data/theme.js';
+import { useProductStyles } from './useProductStyles.js';
 import { DRINKS } from '../data/products.js';
-import { card, btn } from '../utils/styles.js';
 import { Modal } from './Modal.jsx';
 
 export function DrinkPick({
   onPick,
   onClose
 }) {
+  const { T, card, btn } = useProductStyles();
   return /*#__PURE__*/React.createElement(Modal, {
     onClose: onClose
   }, /*#__PURE__*/React.createElement("div", {
@@ -24,11 +24,11 @@ export function DrinkPick({
     style: {
       padding: '18px 22px',
       borderBottom: `1px solid ${T.brd}`,
-      background: `linear-gradient(135deg,${T.primaryL},#F0EAFF)`
+      background: T.kiosk ? T.bg : `linear-gradient(135deg,${T.primaryL},#F0EAFF)`
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 18,
+      fontSize: T.kiosk ? 18 : 18,
       fontWeight: 800,
       color: T.txt
     }
@@ -53,7 +53,7 @@ export function DrinkPick({
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 13,
+      fontSize: T.kiosk ? 18 : 13,
       fontWeight: 600,
       color: T.txt
     }

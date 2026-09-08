@@ -1,5 +1,6 @@
 import React from 'react';
 import { T } from '../data/theme.js';
+import { useProductStyles } from './useProductStyles.js';
 
 export function Chip({
   label,
@@ -7,6 +8,8 @@ export function Chip({
   onClick,
   clr = T.primary
 }) {
+  const { T: theme } = useProductStyles();
+  if (theme.kiosk) return <button aria-pressed={!!active} onClick={onClick} className="k-option">{label}</button>;
   return /*#__PURE__*/React.createElement("button", {
     onClick: onClick,
     style: {

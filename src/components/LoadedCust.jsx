@@ -1,7 +1,6 @@
 import React from 'react';
-import { T } from '../data/theme.js';
+import { useProductStyles } from './useProductStyles.js';
 import { LOADED_RETRAITS, LOADED_SUPPS } from '../data/products.js';
-import { card, btn } from '../utils/styles.js';
 import { fp } from '../utils/format.js';
 import { Modal } from './Modal.jsx';
 import { Chip } from './Chip.jsx';
@@ -13,6 +12,7 @@ export function LoadedCust({
   onOk,
   onClose
 }) {
+  const { T, card, btn } = useProductStyles();
   const def = {
     retraits: [],
     supplements: [],
@@ -52,17 +52,17 @@ export function LoadedCust({
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      background: `linear-gradient(135deg,${T.primaryL},#F0EAFF)`
+      background: T.kiosk ? T.bg : `linear-gradient(135deg,${T.primaryL},#F0EAFF)`
     }
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 18,
+      fontSize: T.kiosk ? 18 : 18,
       fontWeight: 800,
       color: T.txt
     }
   }, product.name), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 12,
+      fontSize: T.kiosk ? 18 : 12,
       color: T.txtSub,
       marginTop: 2
     }
@@ -73,7 +73,7 @@ export function LoadedCust({
       fontWeight: 700,
       padding: '7px 18px',
       borderRadius: 10,
-      fontSize: 16
+      fontSize: T.kiosk ? 18 : 16
     }
   }, fp(product.price + ext))), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -130,7 +130,7 @@ export function LoadedCust({
       border: `1.5px solid ${T.brd}`,
       background: T.bg,
       color: T.txt,
-      fontSize: 14,
+      fontSize: T.kiosk ? 18 : 14,
       resize: 'vertical',
       minHeight: 44,
       outline: 'none'

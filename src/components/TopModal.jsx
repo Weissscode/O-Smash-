@@ -1,7 +1,6 @@
 import React from 'react';
-import { T } from '../data/theme.js';
+import { useProductStyles } from './useProductStyles.js';
 import { TOPS } from '../data/products.js';
-import { card, btn } from '../utils/styles.js';
 import { fp } from '../utils/format.js';
 import { Modal } from './Modal.jsx';
 import { Chip } from './Chip.jsx';
@@ -14,6 +13,7 @@ export function TopModal({
   onOk,
   onClose
 }) {
+  const { T, card, btn } = useProductStyles();
   const def = {
     toppings: [],
     glace: false,
@@ -47,7 +47,7 @@ export function TopModal({
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 17,
+      fontSize: T.kiosk ? 18 : 17,
       fontWeight: 800,
       color: T.txt
     }
@@ -58,7 +58,7 @@ export function TopModal({
       fontWeight: 700,
       padding: '5px 16px',
       borderRadius: 10,
-      fontSize: 14
+      fontSize: T.kiosk ? 18 : 14
     }
   }, fp(product.price + ext))), /*#__PURE__*/React.createElement(SL, {
     title: "TOPPINGS (+0,50)",
@@ -87,7 +87,7 @@ export function TopModal({
       ...p,
       glace: !p.glace
     })),
-    clr: "#8B5CF6"
+    clr: (T.kiosk ? T.primary : '#8B5CF6')
   })), !isCrepe && /*#__PURE__*/React.createElement("div", {
     style: {
       marginBottom: 14
@@ -99,7 +99,7 @@ export function TopModal({
       ...p,
       chantilly: !p.chantilly
     })),
-    clr: "#DB2777"
+    clr: (T.kiosk ? T.primary : '#DB2777')
   })), /*#__PURE__*/React.createElement(SL, {
     title: "REMARQUE",
     color: T.txtSub
@@ -117,7 +117,7 @@ export function TopModal({
       border: `1.5px solid ${T.brd}`,
       background: T.bg,
       color: T.txt,
-      fontSize: 14,
+      fontSize: T.kiosk ? 18 : 14,
       resize: 'vertical',
       minHeight: 40,
       outline: 'none',

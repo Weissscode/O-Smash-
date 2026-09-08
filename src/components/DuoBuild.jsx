@@ -1,7 +1,6 @@
 import React from 'react';
-import { T } from '../data/theme.js';
+import { useProductStyles } from './useProductStyles.js';
 import { BURGERS } from '../data/products.js';
-import { card, btn } from '../utils/styles.js';
 import { fp } from '../utils/format.js';
 import { Modal } from './Modal.jsx';
 import { Tag } from './Tag.jsx';
@@ -12,6 +11,7 @@ export function DuoBuild({
   onAdd,
   onClose
 }) {
+  const { T, card, btn } = useProductStyles();
   const pool = formule.duoType === 'simple' ? BURGERS.filter(b => ['SIMPLE', 'WRAP', 'VEGGY'].includes(b.tag)) : BURGERS;
   const [step, setStep] = React.useState(0);
   const [b1, setB1] = React.useState(null);
@@ -67,17 +67,17 @@ export function DuoBuild({
     style: {
       padding: '18px 22px',
       borderBottom: `1px solid ${T.brd}`,
-      background: `linear-gradient(135deg,${T.primaryL},#F0EAFF)`
+      background: T.kiosk ? T.bg : `linear-gradient(135deg,${T.primaryL},#F0EAFF)`
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 17,
+      fontSize: T.kiosk ? 18 : 17,
       fontWeight: 800,
       color: T.txt
     }
   }, formule.name, " \u2014 ", fp(formule.price)), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 12,
+      fontSize: T.kiosk ? 18 : 12,
       color: T.txtSub,
       marginTop: 3
     }
@@ -113,14 +113,14 @@ export function DuoBuild({
     color: T.primary
   }), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 14,
+      fontSize: T.kiosk ? 18 : 14,
       fontWeight: 700,
       color: T.txt,
       marginTop: 6
     }
   }, b.name), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 14,
+      fontSize: T.kiosk ? 18 : 14,
       fontWeight: 700,
       color: T.primary,
       marginTop: 4

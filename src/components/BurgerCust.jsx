@@ -1,9 +1,8 @@
 import React from 'react';
-import { T } from '../data/theme.js';
+import { useProductStyles } from './useProductStyles.js';
 import { CB } from '../data/products.js';
 import { FRITES_SAUCES } from '../data/products.js';
 import { TWISTER_SUPPS } from '../data/products.js';
-import { card, btn } from '../utils/styles.js';
 import { fp } from '../utils/format.js';
 import { Modal } from './Modal.jsx';
 import { Chip } from './Chip.jsx';
@@ -16,6 +15,7 @@ export function BurgerCust({
   onOk,
   onClose
 }) {
+  const { T, card, btn } = useProductStyles();
   const def = {
     retraits: [],
     supplements: [],
@@ -62,17 +62,17 @@ export function BurgerCust({
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      background: `linear-gradient(135deg,${T.primaryL},#F0EAFF)`
+      background: T.kiosk ? T.bg : `linear-gradient(135deg,${T.primaryL},#F0EAFF)`
     }
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 18,
+      fontSize: T.kiosk ? 18 : 18,
       fontWeight: 800,
       color: T.txt
     }
   }, product.name, inMenu ? ' (en menu)' : ''), /*#__PURE__*/React.createElement("div", {
     style: {
-      fontSize: 12,
+      fontSize: T.kiosk ? 18 : 12,
       color: T.txtSub,
       marginTop: 2
     }
@@ -83,21 +83,21 @@ export function BurgerCust({
       fontWeight: 700,
       padding: '7px 18px',
       borderRadius: 10,
-      fontSize: 16
+      fontSize: T.kiosk ? 18 : 16
     }
-  }, fp(product.price + ext))), /*#__PURE__*/React.createElement("div", {
+  }, fp(product.price + ext + (T.kiosk && inMenu ? 3 : 0)))), /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
       overflowY: 'auto',
       padding: '16px 22px'
     }
-  }, !product.id.includes('veg') && !product.id.includes('chik') && /*#__PURE__*/React.createElement("div", {
+  }, !product.id.includes('veg') && !product.id.includes('chik') && !(T.kiosk && product.id.startsWith('bao-')) && /*#__PURE__*/React.createElement("div", {
     style: {
       marginBottom: 18
     }
   }, /*#__PURE__*/React.createElement(SL, {
     title: "VERSION CHICKEN",
-    color: "#8B5CF6"
+    color: (T.kiosk ? T.primary : '#8B5CF6')
   }), /*#__PURE__*/React.createElement("button", {
     onClick: () => setS(p => ({
       ...p,
@@ -108,11 +108,11 @@ export function BurgerCust({
       padding: 16,
       borderRadius: 6,
       border: s.version === 'Chicken' ? `2.5px solid #8B5CF6` : `1.5px solid ${T.brd}`,
-      background: s.version === 'Chicken' ? '#8B5CF614' : T.bgCard,
+      background: s.version === 'Chicken' ? (T.kiosk ? T.primaryL : '#8B5CF614') : T.bgCard,
       cursor: 'pointer',
-      fontSize: 15,
+      fontSize: T.kiosk ? 18 : 15,
       fontWeight: 700,
-      color: s.version === 'Chicken' ? '#8B5CF6' : T.txtSub,
+      color: s.version === 'Chicken' ? (T.kiosk ? T.primary : '#8B5CF6') : T.txtSub,
       textAlign: 'center'
     }
   }, s.version === 'Chicken' ? 'Chicken' : 'Steak (defaut)')), /*#__PURE__*/React.createElement(SL, {
@@ -165,7 +165,7 @@ export function BurgerCust({
     clr: T.primary
   }))), inMenu && /*#__PURE__*/React.createElement(React.Fragment, null, /*#__PURE__*/React.createElement(SL, {
     title: "SAUCE FRITES TWISTER",
-    color: "#0891B2"
+    color: (T.kiosk ? T.primary : '#0891B2')
   }), /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'grid',
@@ -181,7 +181,7 @@ export function BurgerCust({
       ...p,
       twisterSauce: p.twisterSauce === s2 ? '' : s2
     })),
-    clr: "#0891B2"
+    clr: (T.kiosk ? T.primary : '#0891B2')
   }))), /*#__PURE__*/React.createElement(SL, {
     title: "SUPPL\xC9MENTS TWISTER",
     color: T.ok
@@ -215,7 +215,7 @@ export function BurgerCust({
       border: `1.5px solid ${T.brd}`,
       background: T.bg,
       color: T.txt,
-      fontSize: 14,
+      fontSize: T.kiosk ? 18 : 14,
       resize: 'vertical',
       minHeight: 48,
       outline: 'none'
