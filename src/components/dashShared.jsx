@@ -5,6 +5,7 @@ import { IconMoney, IconSun, IconMoon } from './icons.jsx';
 
 export const CATEGORIES = [
   { key: 'burgers', label: 'Burgers', tint: '#D97706', test: pid => pid.startsWith('b-') },
+  { key: 'bao', label: 'BAO', tint: '#E91E63', test: pid => pid.startsWith('bao-') },
   { key: 'menus', label: 'Menus', tint: '#7C3AED', test: pid => pid.startsWith('f-') },
   { key: 'riz', label: 'Riz Crousty', tint: T.primary, test: pid => pid.startsWith('r-') },
   { key: 'sides', label: 'Sides', tint: '#0EA5E9', test: pid => pid.startsWith('si-') || pid.startsWith('lo-') },
