@@ -31,6 +31,7 @@ import { ConfirmModal } from './components/ConfirmModal.jsx';
 import { SplitModal } from './components/SplitModal.jsx';
 import { TelephoneView } from './components/TelephoneView.jsx';
 import { KioskOrderUI, KioskWelcome, KioskConfirm, KioskSuccess } from './components/KioskOrderUI.jsx';
+import { KIOSK_CATS, kioskProducts } from './data/kioskCatalog.js';
 
 export default function App({ restaurantId }) {
   // Mode borne de commande en libre-service : ?kiosk=1 dans l'URL.
@@ -363,6 +364,17 @@ export default function App({ restaurantId }) {
   };
   const handleProd = (p, cat) => {
     if (stockOut.includes(p.id)) return;
+    // Categorie "Menus" de la borne : un burger/BAO en menu ouvre directement
+    // la personnalisation en mode menu (meme flow que "En menu" a la caisse) ;
+    // les formules suivent le chemin habituel.
+    if (cat === 'menus') {
+      if (p.menuOf) {
+        const base = [...BURGERS, ...BAO].find(x => x.id === p.menuOf);
+        if (!base || stockOut.includes(base.id)) return;
+        return setCustM({ product: base, type: 'burger', inMenu: true });
+      }
+      cat = 'formule';
+    }
     if (cat === 'burger') return setBurgerStartM(p);
     if (cat === 'bao') return setBurgerStartM(p);
     if (cat === 'riz') {
@@ -781,6 +793,142 @@ export default function App({ restaurantId }) {
     }
   }, "Valider la commande")));
 
+  // Modales produit (burger seul/menu, personnalisation, boisson, formules,
+  // sauces). Rendues a la fois par la caisse et par la borne.
+  const productModals = /*#__PURE__*/React.createElement(React.Fragment, null, burgerStartM && /*#__PURE__*/React.createElement(BurgerStartModal, {
+    product: burgerStartM,
+    onClose: () => setBurgerStartM(null),
+    onChoice: mode => {
+      const p = burgerStartM;
+      setBurgerStartM(null);
+      setCustM({
+        product: p,
+        type: 'burger',
+        inMenu: mode === 'menu'
+      });
+    }
+  }), custM?.type === 'burger' && /*#__PURE__*/React.createElement(BurgerCust, {
+    product: custM.product,
+    initial: custM.initial,
+    inMenu: custM.inMenu,
+    onClose: () => setCustM(null),
+    onOk: (c, ext) => {
+      if (custM.editId) {
+        editCC(custM.editId, c, ext, custM.product.price + (custM.inMenu ? 3 : 0));
+        setCustM(null);
+        return;
+      }
+      const h = c.retraits.length || c.supplements.length || c.sauces.length || c.version || c.note || c.twisterSauce || c.twisterSupps?.length;
+      const basePrice = custM.product.price + (custM.inMenu ? 3 : 0);
+      if (custM.inMenu) {
+        // Demander la boisson
+        const cb = drink => addCart(custM.product.name + ' (en menu)', basePrice + ext, custM.product.id, {
+          ...c,
+          drink,
+          inMenu: true,
+          fritesSauce: c.twisterSauce,
+          fritesSupps: c.twisterSupps
+        });
+        setCustM(null);
+        setDrinkM({
+          cb
+        });
+      } else {
+        addCart(custM.product.name, basePrice + ext, custM.product.id, h ? c : null);
+        setCustM(null);
+      }
+    }
+  }), custM?.type === 'riz' && /*#__PURE__*/React.createElement(RizCust, {
+    product: custM.product,
+    initial: custM.initial,
+    onClose: () => setCustM(null),
+    onOk: c => {
+      if (custM.editId) {
+        editCC(custM.editId, c, 0, custM.product.price);
+        setCustM(null);
+        return;
+      }
+      const pr = custM.product;
+      setCustM(null);
+      setBoissonYNM({
+        cb: withDrink => addCart(pr.name, pr.price + (withDrink ? 1 : 0), pr.id, {
+          ...c,
+          ...(withDrink ? { boisson: true } : {})
+        })
+      });
+    }
+  }), boissonYNM && /*#__PURE__*/React.createElement(Modal, {
+    onClose: () => setBoissonYNM(null)
+  }, /*#__PURE__*/React.createElement("div", {
+    style: { ...card(), width: 'min(88vw,360px)', padding: 28, display: 'flex', flexDirection: 'column', gap: 20 }
+  }, /*#__PURE__*/React.createElement("div", {
+    style: { fontSize: 18, fontWeight: 800, color: T.txt, textAlign: 'center' }
+  }, "Avec une boisson ?"), /*#__PURE__*/React.createElement("div", {
+    style: { fontSize: 14, color: T.txtSub, textAlign: 'center' }
+  }, "+1€"), /*#__PURE__*/React.createElement("div", {
+    style: { display: 'flex', gap: 12 }
+  }, /*#__PURE__*/React.createElement("button", {
+    onClick: () => { boissonYNM.cb(false); setBoissonYNM(null); },
+    style: { ...btn(T.bgCard, T.txtSub, { flex: 1, border: `1px solid ${T.brd}` }) }
+  }, "Non"), /*#__PURE__*/React.createElement("button", {
+    onClick: () => { boissonYNM.cb(true); setBoissonYNM(null); },
+    style: { ...btn(T.primary, T.white, { flex: 2 }) }
+  }, "Oui +1€")))), custM?.type === 'loaded' && /*#__PURE__*/React.createElement(LoadedCust, {
+    product: custM.product,
+    initial: custM.initial,
+    onClose: () => setCustM(null),
+    onOk: (c, ext) => {
+      if (custM.editId) editCC(custM.editId, c, ext, custM.product.price);else {
+        const h = c.retraits.length || c.supplements.length || c.note;
+        addCart(custM.product.name, custM.product.price + ext, custM.product.id, h ? c : null);
+      }
+      setCustM(null);
+    }
+  }), (custM?.type === 'milk' || custM?.type === 'crepe') && /*#__PURE__*/React.createElement(TopModal, {
+    product: custM.product,
+    isCrepe: custM.type === 'crepe',
+    initial: custM.initial,
+    onClose: () => setCustM(null),
+    onOk: (c, ext) => {
+      if (custM.editId) editCC(custM.editId, c, ext, custM.product.price);else {
+        const h = c.toppings.length || c.glace || c.chantilly || c.note;
+        addCart(custM.product.name, custM.product.price + ext, custM.product.id, h ? c : null);
+      }
+      setCustM(null);
+    }
+  }), drinkM && /*#__PURE__*/React.createElement(DrinkPick, {
+    onClose: () => setDrinkM(null),
+    onPick: d => {
+      drinkM.cb(d);
+      setDrinkM(null);
+    }
+  }), duoM && /*#__PURE__*/React.createElement(DuoBuild, {
+    formule: duoM,
+    onClose: () => setDuoM(null),
+    onAdd: item => {
+      addCart(item.name, item.price, duoM.id, item.cust);
+      setDuoM(null);
+    }
+  }), etudM && /*#__PURE__*/React.createElement(MenuEtud, {
+    formule: etudM,
+    onClose: () => setEtudM(null),
+    onAdd: item => {
+      addCart(item.name, item.price, etudM.id, item.cust);
+      setEtudM(null);
+    }
+  }), fritesM && /*#__PURE__*/React.createElement(FritesSauce, {
+    product: fritesM,
+    initial: fritesM.initial,
+    onClose: () => setFritesM(null),
+    onOk: (c, ext) => {
+      if (fritesM.editId) editCC(fritesM.editId, c, ext, fritesM.price);else {
+        const has = c.sauce || c.supps.length;
+        addCart(fritesM.name, fritesM.price + ext, fritesM.id, has ? c : null);
+      }
+      setFritesM(null);
+    }
+  }));
+
   // Ecran d'accueil de la borne : tant que le client n'a pas touche l'ecran,
   // on n'affiche ni la caisse ni les onglets staff. Un tap sur le logo x7
   // (geste discret) ouvre le code PIN pour repasser en caisse normale.
@@ -816,8 +964,8 @@ export default function App({ restaurantId }) {
           cartTotal={cartTotal}
           selCat={selCat}
           setSelCat={setSelCat}
-          cats={xCats}
-          prods={xMap[selCat] || []}
+          cats={KIOSK_CATS}
+          prods={kioskProducts(selCat, xMap)}
           stockOut={stockOut}
           onPick={p => handleProd(p, selCat)}
           onEdit={handleEdit}
@@ -835,6 +983,7 @@ export default function App({ restaurantId }) {
           onPay={() => setConfirmM(true)}
           onLogoTap={handleKioskLogoTap}
         />
+        {productModals}
         {confirmM && (
           <KioskConfirm
             cart={cart}
@@ -1172,139 +1321,7 @@ export default function App({ restaurantId }) {
       setView(pinFor);
       setPinFor(null);
     }
-  }), burgerStartM && /*#__PURE__*/React.createElement(BurgerStartModal, {
-    product: burgerStartM,
-    onClose: () => setBurgerStartM(null),
-    onChoice: mode => {
-      const p = burgerStartM;
-      setBurgerStartM(null);
-      setCustM({
-        product: p,
-        type: 'burger',
-        inMenu: mode === 'menu'
-      });
-    }
-  }), custM?.type === 'burger' && /*#__PURE__*/React.createElement(BurgerCust, {
-    product: custM.product,
-    initial: custM.initial,
-    inMenu: custM.inMenu,
-    onClose: () => setCustM(null),
-    onOk: (c, ext) => {
-      if (custM.editId) {
-        editCC(custM.editId, c, ext, custM.product.price + (custM.inMenu ? 3 : 0));
-        setCustM(null);
-        return;
-      }
-      const h = c.retraits.length || c.supplements.length || c.sauces.length || c.version || c.note || c.twisterSauce || c.twisterSupps?.length;
-      const basePrice = custM.product.price + (custM.inMenu ? 3 : 0);
-      if (custM.inMenu) {
-        // Demander la boisson
-        const cb = drink => addCart(custM.product.name + ' (en menu)', basePrice + ext, custM.product.id, {
-          ...c,
-          drink,
-          inMenu: true,
-          fritesSauce: c.twisterSauce,
-          fritesSupps: c.twisterSupps
-        });
-        setCustM(null);
-        setDrinkM({
-          cb
-        });
-      } else {
-        addCart(custM.product.name, basePrice + ext, custM.product.id, h ? c : null);
-        setCustM(null);
-      }
-    }
-  }), custM?.type === 'riz' && /*#__PURE__*/React.createElement(RizCust, {
-    product: custM.product,
-    initial: custM.initial,
-    onClose: () => setCustM(null),
-    onOk: c => {
-      if (custM.editId) {
-        editCC(custM.editId, c, 0, custM.product.price);
-        setCustM(null);
-        return;
-      }
-      const pr = custM.product;
-      setCustM(null);
-      setBoissonYNM({
-        cb: withDrink => addCart(pr.name, pr.price + (withDrink ? 1 : 0), pr.id, {
-          ...c,
-          ...(withDrink ? { boisson: true } : {})
-        })
-      });
-    }
-  }), boissonYNM && /*#__PURE__*/React.createElement(Modal, {
-    onClose: () => setBoissonYNM(null)
-  }, /*#__PURE__*/React.createElement("div", {
-    style: { ...card(), width: 'min(88vw,360px)', padding: 28, display: 'flex', flexDirection: 'column', gap: 20 }
-  }, /*#__PURE__*/React.createElement("div", {
-    style: { fontSize: 18, fontWeight: 800, color: T.txt, textAlign: 'center' }
-  }, "Avec une boisson ?"), /*#__PURE__*/React.createElement("div", {
-    style: { fontSize: 14, color: T.txtSub, textAlign: 'center' }
-  }, "+1€"), /*#__PURE__*/React.createElement("div", {
-    style: { display: 'flex', gap: 12 }
-  }, /*#__PURE__*/React.createElement("button", {
-    onClick: () => { boissonYNM.cb(false); setBoissonYNM(null); },
-    style: { ...btn(T.bgCard, T.txtSub, { flex: 1, border: `1px solid ${T.brd}` }) }
-  }, "Non"), /*#__PURE__*/React.createElement("button", {
-    onClick: () => { boissonYNM.cb(true); setBoissonYNM(null); },
-    style: { ...btn(T.primary, T.white, { flex: 2 }) }
-  }, "Oui +1€")))), custM?.type === 'loaded' && /*#__PURE__*/React.createElement(LoadedCust, {
-    product: custM.product,
-    initial: custM.initial,
-    onClose: () => setCustM(null),
-    onOk: (c, ext) => {
-      if (custM.editId) editCC(custM.editId, c, ext, custM.product.price);else {
-        const h = c.retraits.length || c.supplements.length || c.note;
-        addCart(custM.product.name, custM.product.price + ext, custM.product.id, h ? c : null);
-      }
-      setCustM(null);
-    }
-  }), (custM?.type === 'milk' || custM?.type === 'crepe') && /*#__PURE__*/React.createElement(TopModal, {
-    product: custM.product,
-    isCrepe: custM.type === 'crepe',
-    initial: custM.initial,
-    onClose: () => setCustM(null),
-    onOk: (c, ext) => {
-      if (custM.editId) editCC(custM.editId, c, ext, custM.product.price);else {
-        const h = c.toppings.length || c.glace || c.chantilly || c.note;
-        addCart(custM.product.name, custM.product.price + ext, custM.product.id, h ? c : null);
-      }
-      setCustM(null);
-    }
-  }), drinkM && /*#__PURE__*/React.createElement(DrinkPick, {
-    onClose: () => setDrinkM(null),
-    onPick: d => {
-      drinkM.cb(d);
-      setDrinkM(null);
-    }
-  }), duoM && /*#__PURE__*/React.createElement(DuoBuild, {
-    formule: duoM,
-    onClose: () => setDuoM(null),
-    onAdd: item => {
-      addCart(item.name, item.price, duoM.id, item.cust);
-      setDuoM(null);
-    }
-  }), etudM && /*#__PURE__*/React.createElement(MenuEtud, {
-    formule: etudM,
-    onClose: () => setEtudM(null),
-    onAdd: item => {
-      addCart(item.name, item.price, etudM.id, item.cust);
-      setEtudM(null);
-    }
-  }), fritesM && /*#__PURE__*/React.createElement(FritesSauce, {
-    product: fritesM,
-    initial: fritesM.initial,
-    onClose: () => setFritesM(null),
-    onOk: (c, ext) => {
-      if (fritesM.editId) editCC(fritesM.editId, c, ext, fritesM.price);else {
-        const has = c.sauce || c.supps.length;
-        addCart(fritesM.name, fritesM.price + ext, fritesM.id, has ? c : null);
-      }
-      setFritesM(null);
-    }
-  }), confirmM && /*#__PURE__*/React.createElement(ConfirmModal, {
+  }), productModals, confirmM && /*#__PURE__*/React.createElement(ConfirmModal, {
     cart: cart,
     cartTotal: cartTotal,
     clientName: clientName,

@@ -6,10 +6,14 @@ charge automatiquement `/products/<id-du-produit>.jpg` — si le fichier
 n'existe pas, la carte reste comme aujourd'hui (nom + prix, pas de photo,
 pas de trou dans la mise en page).
 
-**Format** : `<id>.jpg` (jpg conseillé pour le poids ; `.png` marche aussi
-mais il faut alors ajuster l'extension dans `PCard` sur `src/App.jsx`).
-Photo carrée ou proche (ratio ~4:3), au moins 400×300px, la carte la
-recadre automatiquement (`object-fit: cover`).
+**Format borne** : `<id>.webp`, produit détouré sur fond transparent,
+rogné au plus près, 640 px max de côté. La borne l'affiche entier
+(`object-fit: contain`), jamais recadré. Les fichiers présents ont été
+générés depuis les photos déposées à la racine de `public/` ; les menus
+(`m-<id>.webp`) sont les burgers et BAO "en menu". Les images de
+catégories sont dans `public/categories/<id>.webp`.
+
+La caisse staff, elle, lit `<id>.jpg` (voir `PCard` dans `src/App.jsx`).
 
 **Astuce** : pas besoin de tout fournir d'un coup — ajoute les photos au
 fur et à mesure, produit par produit.
