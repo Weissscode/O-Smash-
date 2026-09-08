@@ -48,7 +48,7 @@ export function FritesSauce({
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 18,
-      fontWeight: 800,
+      fontWeight: 600,
       color: T.txt
     }
   }, "Frites Twister"), /*#__PURE__*/React.createElement("div", {
@@ -61,9 +61,9 @@ export function FritesSauce({
     style: {
       background: T.primary,
       color: T.white,
-      fontWeight: 700,
+      fontWeight: 600,
       padding: '5px 16px',
-      borderRadius: 10,
+      borderRadius: 6,
       fontSize: 14
     }
   }, fp((product?.price || 3) + ext))), /*#__PURE__*/React.createElement(SL, {

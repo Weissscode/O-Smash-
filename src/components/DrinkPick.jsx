@@ -24,12 +24,12 @@ export function DrinkPick({
     style: {
       padding: '18px 22px',
       borderBottom: `1px solid ${T.brd}`,
-      background: `linear-gradient(135deg,${T.primaryL},#F0EAFF)`
+      background: T.bgCard
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 18,
-      fontWeight: 800,
+      fontWeight: 600,
       color: T.txt
     }
   }, "Choisir une boisson")), /*#__PURE__*/React.createElement("div", {

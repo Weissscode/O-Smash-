@@ -19,7 +19,7 @@ export function Modal({
       position: 'absolute',
       inset: 0,
       zIndex: 0,
-      background: 'rgba(26,16,40,0.55)'
+      background: 'rgba(23,23,23,0.38)'
     }
   }), /*#__PURE__*/React.createElement("div", {
     style: {

@@ -90,7 +90,7 @@ export function AuthScreen({ onAuthed }) {
       style: { display: 'flex', justifyContent: 'center', marginBottom: 8 }
     }, /*#__PURE__*/React.createElement(ViceCodeLogo, { scale: 0.7 })),
     /*#__PURE__*/React.createElement('h1', {
-      style: { fontSize: 20, fontWeight: 800, textAlign: 'center', color: T.txt, marginBottom: 4 }
+      style: { fontSize: 20, fontWeight: 600, textAlign: 'center', color: T.txt, marginBottom: 4 }
     }, mode === 'login' ? 'Connexion' : 'Créer mon compte restaurant'),
     /*#__PURE__*/React.createElement('p', {
       style: { fontSize: 13, color: T.txtSub, textAlign: 'center', marginBottom: 24 }
@@ -98,7 +98,7 @@ export function AuthScreen({ onAuthed }) {
 
     mode === 'signup' && /*#__PURE__*/React.createElement('div', { style: { marginBottom: 14 } },
       /*#__PURE__*/React.createElement('label', {
-        style: { fontSize: 12, fontWeight: 700, color: T.txtSub, display: 'block', marginBottom: 6 }
+        style: { fontSize: 12, fontWeight: 600, color: T.txtSub, display: 'block', marginBottom: 6 }
       }, 'Nom du restaurant'),
       /*#__PURE__*/React.createElement('input', {
         type: 'text',
@@ -112,7 +112,7 @@ export function AuthScreen({ onAuthed }) {
 
     /*#__PURE__*/React.createElement('div', { style: { marginBottom: 14 } },
       /*#__PURE__*/React.createElement('label', {
-        style: { fontSize: 12, fontWeight: 700, color: T.txtSub, display: 'block', marginBottom: 6 }
+        style: { fontSize: 12, fontWeight: 600, color: T.txtSub, display: 'block', marginBottom: 6 }
       }, 'Email'),
       /*#__PURE__*/React.createElement('input', {
         type: 'email',
@@ -127,7 +127,7 @@ export function AuthScreen({ onAuthed }) {
 
     /*#__PURE__*/React.createElement('div', { style: { marginBottom: 20 } },
       /*#__PURE__*/React.createElement('label', {
-        style: { fontSize: 12, fontWeight: 700, color: T.txtSub, display: 'block', marginBottom: 6 }
+        style: { fontSize: 12, fontWeight: 600, color: T.txtSub, display: 'block', marginBottom: 6 }
       }, 'Mot de passe'),
       /*#__PURE__*/React.createElement('input', {
         type: 'password',
@@ -184,7 +184,7 @@ export function AuthScreen({ onAuthed }) {
           setInfo('');
           setMode(mode === 'login' ? 'signup' : 'login');
         },
-        style: { color: T.primary, fontWeight: 700, textDecoration: 'none' }
+        style: { color: T.primary, fontWeight: 600, textDecoration: 'none' }
       }, mode === 'login' ? 'Crée-le ici' : 'Connecte-toi'))
   ));
 }

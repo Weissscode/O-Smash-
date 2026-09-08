@@ -91,7 +91,7 @@ export function StockView({
       style: {
         color: T.white,
         fontSize: 10,
-        fontWeight: 800
+        fontWeight: 600
       }
     }, "X")));
   };
@@ -113,7 +113,7 @@ export function StockView({
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 18,
-      fontWeight: 800,
+      fontWeight: 600,
       color: T.txt
     }
   }, "Gestion des stocks"), /*#__PURE__*/React.createElement("div", {
@@ -129,7 +129,7 @@ export function StockView({
         fontSize: 10.5,
         padding: '6px 10px',
         borderRadius: 4,
-        fontWeight: 700
+        fontWeight: 600
       })
     }
   }, "Tout remettre")), /*#__PURE__*/React.createElement("div", {
@@ -149,7 +149,7 @@ export function StockView({
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 13,
-      fontWeight: 700,
+      fontWeight: 600,
       color: T.primary,
       marginBottom: 10
     }
@@ -191,7 +191,7 @@ export function StockView({
       ...btn(T.primary, T.white, {
         padding: '9px 14px',
         fontSize: 13,
-        fontWeight: 700
+        fontWeight: 600
       })
     }
   }, "+")), customProds.length > 0 && /*#__PURE__*/React.createElement("div", {
@@ -213,7 +213,7 @@ export function StockView({
   }, /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 12,
-      fontWeight: 700
+      fontWeight: 600
     }
   }, p.name), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -236,7 +236,7 @@ export function StockView({
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
-      fontWeight: 700,
+      fontWeight: 600,
       color: T.txtMuted,
       marginBottom: 7,
       textTransform: 'uppercase',
