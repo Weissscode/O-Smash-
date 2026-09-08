@@ -30,7 +30,8 @@ import { CItem } from './components/CItem.jsx';
 import { ConfirmModal } from './components/ConfirmModal.jsx';
 import { SplitModal } from './components/SplitModal.jsx';
 import { TelephoneView } from './components/TelephoneView.jsx';
-import { KioskOrderUI, KioskWelcome, KioskConfirm, KioskSuccess } from './components/KioskOrderUI.jsx';
+import { KioskOrderUI, KioskWelcome, KioskConfirm, KioskSuccess, KioskUpsell } from './components/KioskOrderUI.jsx';
+import { kioskUpsellFor } from './data/kioskUpsell.js';
 
 export default function App({ restaurantId }) {
   // Mode borne de commande en libre-service : ?kiosk=1 dans l'URL.
@@ -120,6 +121,7 @@ export default function App({ restaurantId }) {
   const [etudM, setEtudM] = React.useState(null);
   const [fritesM, setFritesM] = React.useState(null);
   const [burgerStartM, setBurgerStartM] = React.useState(null);
+  const [upsellM, setUpsellM] = React.useState(null);
   const [confirmM, setConfirmM] = React.useState(false);
   const [successM, setSuccessM] = React.useState(null);
   // Retour automatique a l'ecran d'accueil de la borne si le client
@@ -141,6 +143,7 @@ export default function App({ restaurantId }) {
         setEtudM(null);
         setFritesM(null);
         setBurgerStartM(null);
+        setUpsellM(null);
         setKioskStarted(false);
       }, IDLE_MS);
     };
@@ -179,7 +182,7 @@ export default function App({ restaurantId }) {
     setStockOut(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
     setStockStatus(restaurantId, id, willBeOut).then(r => setSyncPending(r.offline || hasPendingSync() || hasPendingStockSync()));
   };
-  const addCart = (name, price, pid, cust = null) => setCart(p => [...p, {
+  const mkItem = (name, price, pid, cust = null) => ({
     id: uid(),
     pid,
     name,
@@ -187,7 +190,21 @@ export default function App({ restaurantId }) {
     qty: 1,
     total: price,
     cust
-  }]);
+  });
+  const addCart = (name, price, pid, cust = null) => {
+    const item = mkItem(name, price, pid, cust);
+    // Borne : apres un plat principal (burger, menu, riz), on propose des
+    // extras avant l'ajout au panier (regles dans src/data/kioskUpsell.js).
+    // Caisse staff : comportement inchange.
+    if (isKiosk && !upsellM) {
+      const suggestions = kioskUpsellFor(item, stockOut);
+      if (suggestions.length) {
+        setUpsellM({ pending: item, suggestions });
+        return;
+      }
+    }
+    setCart(p => [...p, item]);
+  };
   const updQty = (cid, d) => setCart(p => p.map(i => i.id !== cid ? i : {
     ...i,
     qty: Math.max(1, i.qty + d),
@@ -764,6 +781,132 @@ export default function App({ restaurantId }) {
     }
   }, "Valider la commande")));
 
+  // Modales produit (burger seul/menu, personnalisation, boisson, formules,
+  // sauces). Rendues a la fois par la caisse et par la borne.
+  const productModals = /*#__PURE__*/React.createElement(React.Fragment, null, burgerStartM && /*#__PURE__*/React.createElement(BurgerStartModal, {
+    product: burgerStartM,
+    onClose: () => setBurgerStartM(null),
+    onChoice: mode => {
+      const p = burgerStartM;
+      setBurgerStartM(null);
+      setCustM({
+        product: p,
+        type: 'burger',
+        inMenu: mode === 'menu'
+      });
+    }
+  }), custM?.type === 'burger' && /*#__PURE__*/React.createElement(BurgerCust, {
+    product: custM.product,
+    initial: custM.initial,
+    inMenu: custM.inMenu,
+    onClose: () => setCustM(null),
+    onOk: (c, ext) => {
+      if (custM.editId) {
+        editCC(custM.editId, c, ext, custM.product.price + (custM.inMenu ? 3 : 0));
+        setCustM(null);
+        return;
+      }
+      const h = c.retraits.length || c.supplements.length || c.sauces.length || c.version || c.note || c.twisterSauce || c.twisterSupps?.length;
+      const basePrice = custM.product.price + (custM.inMenu ? 3 : 0);
+      if (custM.inMenu) {
+        // Demander la boisson
+        const cb = drink => addCart(custM.product.name + ' (en menu)', basePrice + ext, custM.product.id, {
+          ...c,
+          drink,
+          inMenu: true,
+          fritesSauce: c.twisterSauce,
+          fritesSupps: c.twisterSupps
+        });
+        setCustM(null);
+        setDrinkM({
+          cb
+        });
+      } else {
+        addCart(custM.product.name, basePrice + ext, custM.product.id, h ? c : null);
+        setCustM(null);
+      }
+    }
+  }), custM?.type === 'riz' && /*#__PURE__*/React.createElement(RizCust, {
+    product: custM.product,
+    initial: custM.initial,
+    onClose: () => setCustM(null),
+    onOk: c => {
+      if (custM.editId) {
+        editCC(custM.editId, c, 0, custM.product.price);
+        setCustM(null);
+        return;
+      }
+      if (custM.needsDrink) {
+        const rc = c,
+          pr = custM.product;
+        setCustM(null);
+        setDrinkM({
+          cb: d => addCart(pr.name + (d ? ` (${d})` : ''), pr.price, pr.id, {
+            ...rc,
+            drink: d
+          })
+        });
+      } else {
+        addCart(custM.product.name, custM.product.price, custM.product.id, c);
+        setCustM(null);
+      }
+    }
+  }), custM?.type === 'loaded' && /*#__PURE__*/React.createElement(LoadedCust, {
+    product: custM.product,
+    initial: custM.initial,
+    onClose: () => setCustM(null),
+    onOk: (c, ext) => {
+      if (custM.editId) editCC(custM.editId, c, ext, custM.product.price);else {
+        const h = c.retraits.length || c.supplements.length || c.note;
+        addCart(custM.product.name, custM.product.price + ext, custM.product.id, h ? c : null);
+      }
+      setCustM(null);
+    }
+  }), (custM?.type === 'milk' || custM?.type === 'crepe') && /*#__PURE__*/React.createElement(TopModal, {
+    product: custM.product,
+    isCrepe: custM.type === 'crepe',
+    initial: custM.initial,
+    onClose: () => setCustM(null),
+    onOk: (c, ext) => {
+      if (custM.editId) editCC(custM.editId, c, ext, custM.product.price);else {
+        const h = c.toppings.length || c.glace || c.chantilly || c.note;
+        addCart(custM.product.name, custM.product.price + ext, custM.product.id, h ? c : null);
+      }
+      setCustM(null);
+    }
+  }), drinkM && /*#__PURE__*/React.createElement(DrinkPick, {
+    onClose: () => setDrinkM(null),
+    onPick: d => {
+      drinkM.cb(d);
+      setDrinkM(null);
+    }
+  }), duoM && /*#__PURE__*/React.createElement(DuoBuild, {
+    formule: duoM,
+    onClose: () => setDuoM(null),
+    onAdd: item => {
+      addCart(item.name, item.price, duoM.id, item.cust);
+      setDuoM(null);
+    }
+  }), etudM && /*#__PURE__*/React.createElement(MenuEtud, {
+    formule: etudM,
+    onClose: () => setEtudM(null),
+    onAdd: item => {
+      addCart(item.name, item.price, etudM.id, item.cust);
+      setEtudM(null);
+    }
+  }), fritesM && /*#__PURE__*/React.createElement(FritesSauce, {
+    product: fritesM,
+    initial: fritesM.initial,
+    onClose: () => setFritesM(null),
+    onOk: (c, ext) => {
+      if (fritesM.editId) editCC(fritesM.editId, c, ext, fritesM.price);else {
+        const has = c.sauce || c.supps.length;
+        addCart(fritesM.name, fritesM.price + ext, fritesM.id, has ? c : null);
+      }
+      setFritesM(null);
+    }
+  }));
+
   // Ecran d'accueil de la borne : tant que le client n'a pas touche l'ecran,
   // on n'affiche ni la caisse ni les onglets staff. Un tap sur le logo x7
   // (geste discret) ouvre le code PIN pour repasser en caisse normale.
@@ -818,6 +961,20 @@ export default function App({ restaurantId }) {
           onPay={() => setConfirmM(true)}
           onLogoTap={handleKioskLogoTap}
         />
+        {productModals}
+        {upsellM && (
+          <KioskUpsell
+            suggestions={upsellM.suggestions}
+            onSkip={() => {
+              setCart(p => [...p, upsellM.pending]);
+              setUpsellM(null);
+            }}
+            onAdd={extras => {
+              setCart(p => [...p, upsellM.pending, ...extras.map(x => mkItem(x.name, x.price, x.id))]);
+              setUpsellM(null);
+            }}
+          />
+        )}
         {confirmM && (
           <KioskConfirm
             cart={cart}
@@ -1155,129 +1312,7 @@ export default function App({ restaurantId }) {
       setView(pinFor);
       setPinFor(null);
     }
-  }), burgerStartM && /*#__PURE__*/React.createElement(BurgerStartModal, {
-    product: burgerStartM,
-    onClose: () => setBurgerStartM(null),
-    onChoice: mode => {
-      const p = burgerStartM;
-      setBurgerStartM(null);
-      setCustM({
-        product: p,
-        type: 'burger',
-        inMenu: mode === 'menu'
-      });
-    }
-  }), custM?.type === 'burger' && /*#__PURE__*/React.createElement(BurgerCust, {
-    product: custM.product,
-    initial: custM.initial,
-    inMenu: custM.inMenu,
-    onClose: () => setCustM(null),
-    onOk: (c, ext) => {
-      if (custM.editId) {
-        editCC(custM.editId, c, ext, custM.product.price + (custM.inMenu ? 3 : 0));
-        setCustM(null);
-        return;
-      }
-      const h = c.retraits.length || c.supplements.length || c.sauces.length || c.version || c.note || c.twisterSauce || c.twisterSupps?.length;
-      const basePrice = custM.product.price + (custM.inMenu ? 3 : 0);
-      if (custM.inMenu) {
-        // Demander la boisson
-        const cb = drink => addCart(custM.product.name + ' (en menu)', basePrice + ext, custM.product.id, {
-          ...c,
-          drink,
-          inMenu: true,
-          fritesSauce: c.twisterSauce,
-          fritesSupps: c.twisterSupps
-        });
-        setCustM(null);
-        setDrinkM({
-          cb
-        });
-      } else {
-        addCart(custM.product.name, basePrice + ext, custM.product.id, h ? c : null);
-        setCustM(null);
-      }
-    }
-  }), custM?.type === 'riz' && /*#__PURE__*/React.createElement(RizCust, {
-    product: custM.product,
-    initial: custM.initial,
-    onClose: () => setCustM(null),
-    onOk: c => {
-      if (custM.editId) {
-        editCC(custM.editId, c, 0, custM.product.price);
-        setCustM(null);
-        return;
-      }
-      if (custM.needsDrink) {
-        const rc = c,
-          pr = custM.product;
-        setCustM(null);
-        setDrinkM({
-          cb: d => addCart(pr.name + (d ? ` (${d})` : ''), pr.price, pr.id, {
-            ...rc,
-            drink: d
-          })
-        });
-      } else {
-        addCart(custM.product.name, custM.product.price, custM.product.id, c);
-        setCustM(null);
-      }
-    }
-  }), custM?.type === 'loaded' && /*#__PURE__*/React.createElement(LoadedCust, {
-    product: custM.product,
-    initial: custM.initial,
-    onClose: () => setCustM(null),
-    onOk: (c, ext) => {
-      if (custM.editId) editCC(custM.editId, c, ext, custM.product.price);else {
-        const h = c.retraits.length || c.supplements.length || c.note;
-        addCart(custM.product.name, custM.product.price + ext, custM.product.id, h ? c : null);
-      }
-      setCustM(null);
-    }
-  }), (custM?.type === 'milk' || custM?.type === 'crepe') && /*#__PURE__*/React.createElement(TopModal, {
-    product: custM.product,
-    isCrepe: custM.type === 'crepe',
-    initial: custM.initial,
-    onClose: () => setCustM(null),
-    onOk: (c, ext) => {
-      if (custM.editId) editCC(custM.editId, c, ext, custM.product.price);else {
-        const h = c.toppings.length || c.glace || c.chantilly || c.note;
-        addCart(custM.product.name, custM.product.price + ext, custM.product.id, h ? c : null);
-      }
-      setCustM(null);
-    }
-  }), drinkM && /*#__PURE__*/React.createElement(DrinkPick, {
-    onClose: () => setDrinkM(null),
-    onPick: d => {
-      drinkM.cb(d);
-      setDrinkM(null);
-    }
-  }), duoM && /*#__PURE__*/React.createElement(DuoBuild, {
-    formule: duoM,
-    onClose: () => setDuoM(null),
-    onAdd: item => {
-      addCart(item.name, item.price, duoM.id, item.cust);
-      setDuoM(null);
-    }
-  }), etudM && /*#__PURE__*/React.createElement(MenuEtud, {
-    formule: etudM,
-    onClose: () => setEtudM(null),
-    onAdd: item => {
-      addCart(item.name, item.price, etudM.id, item.cust);
-      setEtudM(null);
-    }
-  }), fritesM && /*#__PURE__*/React.createElement(FritesSauce, {
-    product: fritesM,
-    initial: fritesM.initial,
-    onClose: () => setFritesM(null),
-    onOk: (c, ext) => {
-      if (fritesM.editId) editCC(fritesM.editId, c, ext, fritesM.price);else {
-        const has = c.sauce || c.supps.length;
-        addCart(fritesM.name, fritesM.price + ext, fritesM.id, has ? c : null);
-      }
-      setFritesM(null);
-    }
-  }), confirmM && /*#__PURE__*/React.createElement(ConfirmModal, {
+  }), productModals, confirmM && /*#__PURE__*/React.createElement(ConfirmModal, {
     cart: cart,
     cartTotal: cartTotal,
     clientName: clientName,
