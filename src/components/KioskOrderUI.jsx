@@ -13,35 +13,24 @@ import { fp } from '../utils/format.js';
 // appellent les memes fonctions que le reste de l'app (handleProd, updQty,
 // rmCart, handleEdit, placeKioskOrder). Aucune logique metier ici.
 //
-// Direction : identite O'Smash. Fond creme, cartes blanches a bordure fine,
-// texte encre, violet pour les actions principales et les etats actifs,
-// jaune chaud en accent, damier violet/jaune en rappel ponctuel (bandeaux,
-// separateurs). Pas d'ombres, pas de degrade, pas d'emoji : les icones sont
-// des SVG traces au trait. Police Barlow (texte) et Barlow Condensed
-// (titres, prix), dessinee pour la signaletique, lisible de loin.
+// Direction : fond blanc casse chaud, cartes blanches a bordure fine, texte
+// encre, un seul accent (rouge tomate) pour l'action principale et la
+// categorie active. Pas d'ombres, pas de degrade, pas d'emoji : les icones
+// sont des SVG traces au trait. Police Barlow (texte) et Barlow Condensed
+// (titres, prix) : grotesque dessinee pour la signaletique, lisible de loin
+// et en gros corps sur un ecran tactile.
 // ─────────────────────────────────────────────────────────────────────────
 
 const C = {
-  bg: '#FBF6EA',
+  bg: '#F4F1EC',
   surface: '#FFFFFF',
-  soft: '#F3EBD9',
-  line: '#E4D9C3',
-  ink: '#1B1620',
-  muted: '#6E6672',
-  accent: '#5B2A9C',
-  yellow: '#F2C94C',
-  disabled: '#CFC6D6'
+  soft: '#EEE9E2',
+  line: '#E3DED7',
+  ink: '#1E1B1A',
+  muted: '#716B66',
+  accent: '#D8472B',
+  disabled: '#CFC9C1'
 };
-
-// Damier violet/jaune, signature O'Smash. A utiliser en petites touches.
-const checker = (size = 14) => ({
-  backgroundImage: `repeating-conic-gradient(${C.accent} 0 25%, ${C.yellow} 0 50%)`,
-  backgroundSize: `${size * 2}px ${size * 2}px`
-});
-
-function Checker({ height = 10, style }) {
-  return <div aria-hidden="true" style={{ height, flexShrink: 0, ...checker(height), ...style }} />;
-}
 
 const F = {
   text: "'Barlow', 'Helvetica Neue', Arial, sans-serif",
@@ -236,7 +225,7 @@ function ProductCard({ p, catIcon, out, onClick }) {
           width: 40,
           height: 40,
           borderRadius: '50%',
-          background: C.accent,
+          background: C.ink,
           color: '#fff',
           display: 'flex',
           alignItems: 'center',
@@ -266,8 +255,8 @@ function ProductCard({ p, catIcon, out, onClick }) {
           </div>
         )}
       </div>
-      <div style={{ fontSize: 17, fontWeight: 600, color: C.ink, lineHeight: 1.25, minHeight: 42 }}>{p.name}</div>
-      <div style={{ fontFamily: F.display, fontSize: 28, fontWeight: 700, color: C.ink, lineHeight: 1 }}>{fp(p.price)}</div>
+      <div style={{ fontSize: 15, fontWeight: 600, color: C.ink, lineHeight: 1.25, minHeight: 38 }}>{p.name}</div>
+      <div style={{ fontFamily: F.display, fontSize: 24, fontWeight: 700, color: C.ink, lineHeight: 1 }}>{fp(p.price)}</div>
     </button>
   );
 }
@@ -349,7 +338,7 @@ function ProductGrid({ catName, prods, catIcon, stockOut, onPick }) {
           Aucun produit dans cette catégorie
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 16 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 14 }}>
           {prods.map(p => (
             <ProductCard
               key={p.id}
@@ -499,7 +488,7 @@ function BottomBar({ cart, cartTotal, cartCount, onAbandon, onOpenCart, onPay })
           {cartCount > 0 && (
             <span style={{
               position: 'absolute', top: -7, right: -7,
-              background: C.yellow, color: C.ink,
+              background: C.accent, color: '#fff',
               fontSize: 12, fontWeight: 700,
               borderRadius: 999, minWidth: 22, height: 22, padding: '0 6px',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -540,7 +529,7 @@ function Header({ onLogoTap }) {
         justifyContent: 'center'
       }}
     >
-      <img src={LOGO} alt="O'Smash" style={{ height: 70, width: 'auto', display: 'block' }} />
+      <img src={LOGO} alt="O'Smash" style={{ height: 76, width: 'auto', display: 'block' }} />
     </div>
   );
 }
@@ -572,13 +561,12 @@ export function KioskWelcome({ onStart, onLogoTap, children }) {
         src={LOGO}
         alt="O'Smash"
         onClick={e => { e.stopPropagation(); onLogoTap(); }}
-        style={{ height: 250, width: 'auto', display: 'block' }}
+        style={{ height: 230, width: 'auto', display: 'block' }}
       />
-      <Checker height={12} style={{ width: 180, marginTop: 6 }} />
-      <div style={{ fontFamily: F.display, fontSize: 52, fontWeight: 700, lineHeight: 1, textTransform: 'uppercase', letterSpacing: 1, color: C.accent }}>
+      <div style={{ fontFamily: F.display, fontSize: 48, fontWeight: 700, lineHeight: 1, textTransform: 'uppercase', letterSpacing: 1 }}>
         Commandez ici
       </div>
-      <div style={{ fontSize: 21, fontWeight: 500, color: C.muted, marginTop: -8 }}>Touchez l'écran pour commencer</div>
+      <div style={{ fontSize: 20, fontWeight: 500, color: C.muted }}>Touchez l'écran pour commencer</div>
       {children}
     </div>
   );
@@ -618,7 +606,6 @@ export function KioskOrderUI({
       fontFamily: F.text
     }}>
       <Header onLogoTap={onLogoTap} />
-      <Checker height={8} />
 
       {cartOpen ? (
         <CartScreen cart={cart} onEdit={onEdit} onQty={onQty} onRemove={onRemove} onBack={onCloseCart} />
@@ -758,10 +745,9 @@ export function KioskSuccess({ order, onDone }) {
       <div style={{ fontSize: 14, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase', color: C.muted }}>
         Commande enregistrée
       </div>
-      <div style={{ fontFamily: F.display, fontSize: 132, fontWeight: 700, lineHeight: 1, margin: '8px 0 14px', color: C.accent }}>
+      <div style={{ fontFamily: F.display, fontSize: 132, fontWeight: 700, lineHeight: 1, margin: '8px 0 18px' }}>
         #{order.num}
       </div>
-      <Checker height={10} style={{ width: 160, marginBottom: 18 }} />
       <div style={{ fontSize: 19, fontWeight: 500, maxWidth: 380, lineHeight: 1.4 }}>
         Présentez ce numéro en caisse pour régler et récupérer votre commande.
       </div>
@@ -776,94 +762,6 @@ export function KioskSuccess({ order, onDone }) {
       <button onClick={onDone} style={pill(C.accent, '#fff', { fontSize: 18, fontWeight: 700, padding: '18px 48px' })}>
         Terminer
       </button>
-    </div>
-  );
-}
-
-// Etape "Un extra avec ca ?" : affichee avant l'ajout au panier d'un plat
-// principal. Selection multiple ; onAdd recoit les produits choisis, onSkip
-// ajoute le plat seul. Les suggestions viennent de src/data/kioskUpsell.js.
-export function KioskUpsell({ suggestions, onSkip, onAdd }) {
-  const [picked, setPicked] = React.useState([]);
-  const toggle = id => setPicked(p => p.includes(id) ? p.filter(x => x !== id) : [...p, id]);
-  const chosen = suggestions.filter(p => picked.includes(p.id));
-  const extra = chosen.reduce((s, p) => s + p.price, 0);
-  return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'flex', alignItems: 'flex-end', fontFamily: F.text }}>
-      <div onClick={onSkip} style={{ position: 'absolute', inset: 0, background: 'rgba(27,22,32,0.55)' }} />
-      <div style={{
-        position: 'relative',
-        width: '100%',
-        background: C.surface,
-        borderRadius: '18px 18px 0 0',
-        maxHeight: '92vh',
-        overflowY: 'auto'
-      }}>
-        <Checker height={8} style={{ borderRadius: '18px 18px 0 0' }} />
-        <div style={{ padding: '22px 24px 24px' }}>
-          <div style={{ fontFamily: F.display, fontSize: 34, fontWeight: 700, color: C.ink, lineHeight: 1 }}>
-            Un extra avec ça ?
-          </div>
-          <div style={{ fontSize: 15, color: C.muted, fontWeight: 500, marginTop: 6, marginBottom: 18 }}>
-            Complétez votre commande
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14, marginBottom: 22 }}>
-            {suggestions.map(p => {
-              const on = picked.includes(p.id);
-              return (
-                <button
-                  key={p.id}
-                  onClick={() => toggle(p.id)}
-                  aria-pressed={on}
-                  style={{
-                    position: 'relative',
-                    background: on ? C.soft : C.surface,
-                    border: on ? `2.5px solid ${C.accent}` : `1.5px solid ${C.line}`,
-                    borderRadius: 10,
-                    padding: 12,
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 8,
-                    textAlign: 'left',
-                    cursor: 'pointer',
-                    fontFamily: F.text
-                  }}
-                >
-                  <div style={{ position: 'relative', width: '100%', aspectRatio: '4 / 3' }}>
-                    <Photo src={`/products/${p.id}.jpg`} icon={p.id.startsWith('dr-') ? 'boissons' : p.id.startsWith('de-') ? 'desserts' : p.id.startsWith('lo-') ? 'loaded' : 'sides'} fill radius={6} />
-                    <div style={{
-                      position: 'absolute', top: 8, right: 8,
-                      width: 40, height: 40, borderRadius: '50%',
-                      background: on ? C.accent : C.surface,
-                      border: on ? 'none' : `1.5px solid ${C.ink}`,
-                      color: on ? '#fff' : C.ink,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: 24, fontWeight: 500, lineHeight: 1
-                    }}>
-                      {on ? <Icon name="check" size={22} stroke={2.6} /> : '+'}
-                    </div>
-                  </div>
-                  <div style={{ fontSize: 16, fontWeight: 600, color: C.ink, lineHeight: 1.25, minHeight: 40 }}>{p.name}</div>
-                  <div style={{ fontFamily: F.display, fontSize: 26, fontWeight: 700, color: C.ink, lineHeight: 1 }}>{fp(p.price)}</div>
-                </button>
-              );
-            })}
-          </div>
-
-          <div style={{ display: 'flex', gap: 12 }}>
-            <button onClick={onSkip} style={pill('transparent', C.ink, { border: `1.5px solid ${C.ink}`, flex: 1, fontSize: 16 })}>
-              Non merci
-            </button>
-            <button
-              onClick={() => chosen.length ? onAdd(chosen) : onSkip()}
-              style={pill(C.accent, '#fff', { flex: 2, fontSize: 17, fontWeight: 700 })}
-            >
-              {chosen.length ? `Ajouter et continuer (+${fp(extra)})` : 'Continuer'}
-            </button>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
