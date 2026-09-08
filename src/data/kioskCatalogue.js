@@ -1,50 +1,5 @@
-import { CATS, BURGERS, FORMULES, SIDES, LOADED, PMAP } from "./products.js";
-
-// BAO catalogue copied without price changes from main, commit 0dbc55c.
-export const BAO = [
-  {
-    id: "bao-orig",
-    name: "BAO Original",
-    price: 8.5,
-    tag: "BAO",
-    desc: "Bao, double steak smashé, cheddar, oignon crispy, cornichon, sauce moutarde ketchup ou biggy",
-  },
-  {
-    id: "bao-spicy",
-    name: "BAO Spicy",
-    price: 10.9,
-    tag: "BAO",
-    desc: "Bao, double steak smashé, cheddar, salade, tomate, oignon crispy, bacon, jalapeños, sauce spicy",
-  },
-  {
-    id: "bao-chick",
-    name: "BAO Chicken",
-    price: 8.5,
-    tag: "BAO",
-    desc: "Bao, double crispy chicken, cheddar, oignon, salade, tomate, sauce chicken",
-  },
-  {
-    id: "bao-cara",
-    name: "BAO Caramel",
-    price: 11.5,
-    tag: "BAO",
-    desc: "Bao, double steak smashé, cheddar, salade, tomate, oignon caramélisé, sauce honey barbecue",
-  },
-  {
-    id: "bao-mnc",
-    name: "Mac n Chicken Cheese Burger",
-    price: 9.0,
-    tag: "BAO",
-    desc: "Mac n cheese, crispy chicken, sauce cheddar, oignon crispy, persil",
-  },
-  {
-    id: "bao-mncb",
-    name: "Mac n Cheese Beef Burger",
-    price: 10.0,
-    tag: "BAO",
-    desc: "Potato buns, double steak smashé, cheddar, oignon crispy, sauce biggy ou spicy",
-  },
-];
+import { CATS, BURGERS, BAO, FORMULES, SIDES, PMAP } from "./products.js";
+export { BAO } from "./products.js";
 
 export const PRODUCT_IMAGES = {
   "b-orig": "burger_classic_pickles_bacon.png",
@@ -72,6 +27,7 @@ export const MENU_IMAGES = {
   "b-spicy": "SPICY MENU .png",
   "b-truf": "TRUFFEMENU .png",
   "b-wrap": "WRAP MENU .png",
+  "b-avoc": "AVOCADO MENU .png",
   "bao-orig": "BAO ORIGINAL MENU .png",
   "bao-spicy": "BAO SPICY MENU .png",
   "bao-chick": "BAO CHICKEN MENU .png",
@@ -119,7 +75,7 @@ export function kioskCatalogue(customProducts = []) {
     burger: source(BURGERS, "burger"),
     menus: [...menuProducts, ...source(FORMULES, "formule")],
     bao: source(BAO, "bao"),
-    petite: [...source(SIDES, "sides"), ...source(LOADED, "loaded")],
+    petite: source(SIDES, "sides"),
   };
   // Show supplied photography first without removing unavailable visual entries.
   for (const key of ['burger', 'menus', 'bao', 'petite']) {

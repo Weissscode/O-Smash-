@@ -6,12 +6,19 @@ import { BURGERS, SIDES, LOADED, FORMULES } from '../src/data/products.js';
 
 test('Petite faim preserves each source ID, price and configuration route', () => {
   const items = kioskCatalogue().products.petite;
-  assert.equal(items.length, SIDES.length + LOADED.length);
-  for (const product of [...SIDES, ...LOADED]) {
+  assert.equal(items.length, SIDES.length);
+  assert.equal(new Set(items.map(p => p.id)).size, items.length);
+  for (const product of SIDES) {
     const item = items.find(p => p.id === product.id);
     assert.equal(item.price, product.price);
-    assert.equal(item.sourceCategory, LOADED.includes(product) ? 'loaded' : 'sides');
+    assert.equal(item.sourceCategory, 'sides');
   }
+});
+
+test('BAO comes from the shared catalogue and menu Avocado uses the new price', async () => {
+  const current = await import('../src/data/products.js');
+  assert.equal(BAO, current.BAO);
+  assert.equal(kioskCatalogue().products.menus.find(p => p.id === 'b-avoc').price, 13.5);
 });
 test('Menus reuse existing burger IDs and the current menu surcharge', () => {
   const menus = kioskCatalogue().products.menus;

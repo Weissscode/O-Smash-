@@ -341,6 +341,10 @@ function OrderDetailModal({ order, onClose, onSave, onDelete }) {
             /*#__PURE__*/React.createElement(InfoRow, { key: 'phone', label: 'Téléphone', value: order.phone || '—' }),
             /*#__PURE__*/React.createElement(InfoRow, { key: 'service', label: 'Service', value: order.service || '—' }),
             /*#__PURE__*/React.createElement(InfoRow, { key: 'payment', label: 'Paiement', value: order.payment || '—' }),
+            order.printError && /*#__PURE__*/React.createElement('div', {
+              key: 'print-error',
+              style: { marginTop: 10, padding: '10px 12px', borderRadius: 10, background: T.noL, color: T.no, fontSize: 12.5, fontWeight: 600 }
+            }, '⚠ Ticket non imprimé : ' + order.printError),
             /*#__PURE__*/React.createElement('div', { key: 'items-title', style: { fontSize: 12.5, fontWeight: 700, color: T.txtMuted, textTransform: 'uppercase', letterSpacing: 0.6, marginTop: 16, marginBottom: 8 } }, 'Articles'),
             ...order.items.map((it, i) => /*#__PURE__*/React.createElement('div', {
               key: 'item' + i,
@@ -438,7 +442,13 @@ function OrderCard({ order, onClick }) {
         '#' + order.num,
         /*#__PURE__*/React.createElement('span', { style: { display: 'flex', alignItems: 'center', gap: 3 } }, /*#__PURE__*/React.createElement(IconClock, { size: 12 }), ft(order.date))
       ),
-      /*#__PURE__*/React.createElement(PaymentPill, { payment: order.payment })
+      /*#__PURE__*/React.createElement('span', { style: { display: 'flex', alignItems: 'center', gap: 6 } },
+        order.printError && /*#__PURE__*/React.createElement('span', {
+          title: order.printError,
+          style: { fontSize: 11, fontWeight: 700, color: T.no, background: T.noL, padding: '3px 8px', borderRadius: 999, flexShrink: 0 }
+        }, '⚠ Non imprimé'),
+        /*#__PURE__*/React.createElement(PaymentPill, { payment: order.payment })
+      )
     ),
     /*#__PURE__*/React.createElement('div', { style: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10 } },
       /*#__PURE__*/React.createElement('span', { style: { fontWeight: 700, fontSize: 16, color: T.txt, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, displayName),

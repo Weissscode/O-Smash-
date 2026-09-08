@@ -3,7 +3,7 @@ import { T } from '../data/theme.js';
 import { fp, fd } from '../utils/format.js';
 import {
   IconCash, IconCard, IconPhone, IconBag, IconReceipt,
-  IconChevronLeft, IconChevronRight, IconCalendar, IconChevronDown,
+  IconChevronLeft, IconChevronRight, IconCalendar,
   IconTrendUp, IconTrendDown, IconSun, IconMoon
 } from './icons.jsx';
 import {
@@ -107,40 +107,49 @@ function PeriodTopSwitch({ period, setPeriod }) {
   );
 }
 
-function FilterSelect({ allLabel, value, onChange, options }) {
+function FilterSelect({ allLabel, value, onChange, options, active }) {
+  const displayLabel = value ? (options.find(o => o.value === value) || {}).label || allLabel : allLabel;
   return /*#__PURE__*/React.createElement('div', { style: { position: 'relative', flex: 1, minWidth: 0 } },
     /*#__PURE__*/React.createElement('select', {
       value: value || '',
       onChange: e => onChange(e.target.value),
       style: {
-        width: '100%', appearance: 'none', WebkitAppearance: 'none', MozAppearance: 'none',
-        padding: '11px 32px 11px 14px', borderRadius: 14, border: '1px solid rgba(180,143,224,0.22)',
-        background: 'linear-gradient(135deg, #FFFFFF, #F7F1FF)', color: T.txt, fontWeight: 700, fontSize: 13,
-        boxShadow: T.shSoft, cursor: 'pointer'
+        position: 'absolute', inset: 0, width: '100%', height: '100%',
+        opacity: 0, cursor: 'pointer', border: 'none'
       }
     },
       /*#__PURE__*/React.createElement('option', { value: '' }, allLabel),
       options.map(o => /*#__PURE__*/React.createElement('option', { key: o.value, value: o.value }, o.label))
     ),
     /*#__PURE__*/React.createElement('div', {
-      style: { position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: T.txtSub }
-    }, /*#__PURE__*/React.createElement(IconChevronDown, { size: 14 }))
+      style: {
+        padding: '12px 14px', borderRadius: 12, textAlign: 'center',
+        background: active ? '#FFFFFF' : '#EEE9F5',
+        color: active ? T.primaryD : T.txtSub,
+        fontWeight: 700, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+        boxShadow: active ? T.shSoft : 'none', pointerEvents: 'none'
+      }
+    }, displayLabel)
   );
 }
 
 function FilterBar({ filter, setFilter, categoryOptions, productOptions }) {
-  return /*#__PURE__*/React.createElement('div', { style: { display: 'flex', gap: 10, margin: '0 20px 20px' } },
+  return /*#__PURE__*/React.createElement('div', {
+    style: { display: 'flex', gap: 8, margin: '0 20px 20px', background: '#F4F0FA', padding: 6, borderRadius: 16 }
+  },
     /*#__PURE__*/React.createElement(FilterSelect, {
       allLabel: 'Toutes les catégories',
       value: filter.type === 'category' ? filter.key : '',
       onChange: v => setFilter(v ? { type: 'category', key: v } : { type: 'all' }),
-      options: categoryOptions.map(c => ({ value: c.key, label: c.label }))
+      options: categoryOptions.map(c => ({ value: c.key, label: c.label })),
+      active: filter.type !== 'product'
     }),
     /*#__PURE__*/React.createElement(FilterSelect, {
       allLabel: 'Tous les produits',
       value: filter.type === 'product' ? filter.name : '',
       onChange: v => setFilter(v ? { type: 'product', name: v } : { type: 'all' }),
-      options: productOptions.map(p => ({ value: p, label: p }))
+      options: productOptions.map(p => ({ value: p, label: p })),
+      active: filter.type === 'product'
     })
   );
 }

@@ -21,7 +21,7 @@ export function getUpsellSuggestions(item, stockOut = [], cart = []) {
   if (group === "menu") excluded.add("si-frit");
   return (UPSELL_RULES[group] || [])
     .flatMap((id) => {
-      if (excluded.has(id) || (item.cust?.drink && id.startsWith("dr-")))
+      if (excluded.has(id) || ((item.cust?.drink || item.cust?.boisson) && id.startsWith("dr-")))
         return [];
       for (const [category, products] of Object.entries(PMAP)) {
         const product = products.find((p) => p.id === id);

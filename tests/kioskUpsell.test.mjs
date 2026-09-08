@@ -52,6 +52,11 @@ test("no upsell after extras, beverages, dessert, milkshake or crepe", () => {
     assert.deepEqual(getUpsellSuggestions({ pid }), []);
   }
 });
+
+test("new rice drink flag excludes drinks and Loaded uses the merged sides route", () => {
+  assert.ok(!getUpsellSuggestions({ pid: "r-cgrat", cust: { boisson: true } }).some(p => p.category === "boissons"));
+  assert.equal(getUpsellSuggestions({ pid: "b-orig" }).find(p => p.id === "lo-cana").category, "sides");
+});
 test("unavailable products and products already in cart are excluded", () => {
   const result = getUpsellSuggestions(
     { pid: "b-orig" },

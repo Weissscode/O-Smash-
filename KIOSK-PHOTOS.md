@@ -35,13 +35,17 @@ Menus regroupe les burgers et BAO en mode menu, avec le supplément existant
 de 3 euros, ainsi que les anciennes Formules. Les identifiants ne changent pas.
 Le choix de boisson et la personnalisation utilisent les composants existants.
 
-Petite faim fusionne visuellement Sides et Loaded. Chaque produit conserve
-sa catégorie source pour ouvrir sa personnalisation habituelle.
+Petite faim présente la catégorie Sides de la base actuelle, qui contient déjà
+les Loaded. Chaque produit conserve sa route source : aucun doublon n'est ajouté.
+Les produits lo- gardent leur bouton de personnalisation dans les suggestions.
 
-Les six BAO et leurs prix proviennent du catalogue déjà publié sur main,
-commit `0dbc55c`. Ils sont ajoutés à la borne uniquement. Leur préfixe est
-reconnu par le regroupement des ventes. Le reste de main n'a pas été fusionné :
-pas de mise à jour globale des tarifs ou du catalogue de la caisse.
+Réintégration du 9 septembre sur la base distante `848868c`.
+Le catalogue partagé est maintenant la seule source des BAO et des prix.
+Le Menu Avocado reprend le prix de 10,50 euros et le supplément menu existant.
+Le riz conserve le choix boisson à +1 euro ; son indicateur boisson empêche
+les suggestions de boissons supplémentaires.
+Le serveur d'impression, les analytics et la migration des erreurs d'impression
+de la branche distante sont conservés sans modification.
 
 Les articles dont la photo n'est pas identifiée restent commandables avec
 la mention « Photo à venir ». Les produits photographiés sont affichés en premier.
@@ -55,6 +59,15 @@ Les tests couvrent les routes source, prix et IDs, les fichiers de catégories,
 les règles de suggestion et les constructeurs de tickets existants.
 Les impressions physiques et la synchronisation Supabase réelle nécessitent
 une vérification dans le restaurant.
+
+Douze tests passent après fusion. Parcours réels vérifiés : Original et Canadian
+personnalisé (14,40 euros), riz gratiné avec boisson (11,50 euros), Menu Chicken
+(9,50 euros), total de contrôle 35,40 euros. La caisse ajoute directement
+un Original à 6,50 euros sans upsell. Panier et confirmation vérifiés à 375 px.
+
+Le build local utilise temporairement esbuild-wasm à cause du refus d'accès
+du compilateur natif Windows à un dossier parent. Les fichiers de dépendances
+ne sont pas modifiés et npm ci restaure les dépendances après vérification.
 
 Le bypass de démonstration et le fichier d'environnement factice doivent
 rester absents de tout commit.

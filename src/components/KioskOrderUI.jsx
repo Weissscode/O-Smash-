@@ -404,7 +404,7 @@ export function KioskUpsell({
                 unavailable={stockOut.includes(p.id)}
                 onClick={() => (selected ? onRemove(p.id) : onPick(p))}
               />
-              {selected && (p.category === "loaded" || p.hasSauce) && (
+              {selected && (p.id.startsWith("lo-") || p.hasSauce) && (
                 <button
                   className="k-text-button"
                   onClick={() => onConfigure(p)}
