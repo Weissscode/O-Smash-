@@ -35,6 +35,7 @@ import { KioskOrderUI, KioskWelcome, KioskConfirm, KioskSuccess, KioskUpsell } f
 import { getUpsellSuggestions, upsellGroup } from './data/kioskUpsell.js';
 import { KioskFlowContext } from './components/KioskFlowContext.jsx';
 import { kioskCatalogue } from './data/kioskCatalogue.js';
+import { KioskBurgerFlow } from './components/KioskBurgerFlow.jsx';
 
 export default function App({ restaurantId }) {
   // Mode borne de commande en libre-service : ?kiosk=1 dans l'URL.
@@ -117,6 +118,8 @@ export default function App({ restaurantId }) {
   const [now, setNow] = React.useState(new Date());
   const [pinFor, setPinFor] = React.useState(null);
   const [upsell, setUpsell] = React.useState(null);
+  const [burgerFlow, setBurgerFlow] = React.useState(null);
+  const composerGuardUntil = React.useRef(0);
   const upsellCommit = React.useRef(false);
   const [cartOpen, setCartOpen] = React.useState(false);
   const [mob, setMob] = React.useState(window.innerWidth < 1100);
@@ -144,6 +147,7 @@ export default function App({ restaurantId }) {
         setCart([]);
         setCartOpen(false);
         setUpsell(null);
+        setBurgerFlow(null);
         setSuccessM(null);
         setBoissonYNM(null);
         setClientName('');
@@ -398,6 +402,7 @@ export default function App({ restaurantId }) {
   };
   const handleProd = (p, cat) => {
     if (stockOut.includes(p.id)) return;
+    if (isKiosk && (cat === 'burger' || cat === 'bao')) return setBurgerFlow({ product: p });
     if (cat === 'burger') return setBurgerStartM(p);
     if (cat === 'bao') return setBurgerStartM(p);
     if (cat === 'riz') {
@@ -441,6 +446,7 @@ export default function App({ restaurantId }) {
   };
   const handleEdit = item => {
     const b = [...BURGERS, ...BAO].find(x => x.id === item.pid);
+    if (isKiosk && b) return setBurgerFlow({ product: b, initial: item.cust || {}, inMenu: !!item.cust?.inMenu, editId: item.id, qty: item.qty });
     if (b) return setCustM({
       product: b,
       type: 'burger',
@@ -980,6 +986,20 @@ export default function App({ restaurantId }) {
   // confirmM...) — aucune logique metier n'est dupliquee ici.
   if (isKiosk && kioskStarted) {
     const kiosk = kioskCatalogue(customProds);
+    if (burgerFlow) return <KioskBurgerFlow
+      key={burgerFlow.editId || burgerFlow.product.id}
+      {...burgerFlow} cart={cart} stockOut={stockOut}
+      onCancel={() => setBurgerFlow(null)}
+      onCommit={(lines, editId) => {
+        composerGuardUntil.current = Date.now() + 500;
+        const rows = lines.map((line, index) => ({ ...line, id: editId && index === 0 ? editId : uid() }));
+        setCart(current => editId
+          ? [...current.map(item => item.id === editId ? rows[0] : item), ...rows.slice(1)]
+          : [...current, ...rows]);
+        setBurgerFlow(null);
+        setCartOpen(true);
+      }}
+    />;
     return (
       <KioskFlowContext.Provider value={true}>
         <KioskOrderUI
@@ -992,7 +1012,7 @@ export default function App({ restaurantId }) {
           stockOut={stockOut}
           onPick={p => {
             if (stockOut.includes(p.id)) return;
-            if (p.menuProduct) setCustM({product:p.menuProduct, type:'burger', inMenu:true});
+            if (p.menuProduct) setBurgerFlow({ product: p.menuProduct, inMenu: true });
             else handleProd(p, p.sourceCategory || selCat);
           }}
           onEdit={handleEdit}
@@ -1007,7 +1027,7 @@ export default function App({ restaurantId }) {
             setCartOpen(false);
             setKioskStarted(false);
           }}
-          onPay={() => setConfirmM(true)}
+          onPay={() => { if (Date.now() >= composerGuardUntil.current) setConfirmM(true); }}
           onLogoTap={handleKioskLogoTap}
         />
         {productModals}

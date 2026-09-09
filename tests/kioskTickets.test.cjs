@@ -31,3 +31,22 @@ test('kitchen receives extras and customizations but excludes the drink', () => 
   assert.match(ticket,/BACON/i);
   assert.ok(!ticket.includes('Coca-Cola'));
 });
+
+test('step-by-step composer lines pass unchanged through the real print builders', async () => {
+  const { createBurgerDraft, composerLines } = await import('../src/data/kioskComposer.js');
+  const { BURGERS } = await import('../src/data/products.js');
+  const draft = {...createBurgerDraft({}, true), sauces:['Biggy'],retraits:['Sans oignon'],
+    supplements:['Supp. Cheddar'],twisterSauce:'BBQ',twisterSupps:['Bacon'],
+    drink:'Coca-Cola 33cl', extraIds:['si-tend']};
+  const items = composerLines(BURGERS.find(p=>p.id==='b-orig'),draft);
+  const order = {num:100,date:'2026-09-09T12:00:00Z',items,total:15.5,service:'Sur place',payment:null};
+  const kitchen=builders.buildCuisine(order).toString('latin1');
+  assert.match(kitchen,/SANS OIGNON/i);
+  assert.match(kitchen,/BIGGY/i);
+  assert.match(kitchen,/BACON/i);
+  assert.match(kitchen,/TENDERS/i);
+  assert.ok(!kitchen.includes('Coca-Cola'));
+  const cashier=builders.buildCaisse(order).toString('latin1');
+  assert.ok(cashier.includes('Coca-Cola'));
+  assert.ok(cashier.includes('15,50E'));
+});
