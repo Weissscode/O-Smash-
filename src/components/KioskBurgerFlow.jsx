@@ -18,7 +18,10 @@ import {
   composerError,
 } from "../data/kioskComposer.js";
 import { getUpsellSuggestions } from "../data/kioskUpsell.js";
-import { productImage } from "../data/kioskCatalogue.js";
+import {
+  compositionProductImage as productImage,
+  optionImage,
+} from "../data/kioskCompositionImages.js";
 import { KioskLogo } from "./KioskOrderUI.jsx";
 import { fp } from "../utils/format.js";
 import "./kiosk-composer.css";
@@ -56,17 +59,39 @@ const hints = {
 const toggle = (array, value) =>
   array.includes(value) ? array.filter((x) => x !== value) : [...array, value];
 
+function FoodPhoto({ src, alt = "" }) {
+  const [failed, setFailed] = React.useState(false);
+  const [loaded, setLoaded] = React.useState(false);
+  return (
+    <span className="kc-photo">
+      {src && !failed && (
+        <img
+          className={loaded ? "" : "kc-photo-loading"}
+          src={src}
+          alt={alt}
+          onLoad={() => setLoaded(true)}
+          onError={() => setFailed(true)}
+        />
+      )}
+      {(!src || failed || !loaded) && (
+        <span className="kc-photo-placeholder" aria-hidden="true">
+          {src && !failed ? "Chargement…" : "Photo à venir"}
+        </span>
+      )}
+    </span>
+  );
+}
 function Choice({ label, selected, price, image, disabled, onClick }) {
   return (
     <button
       type="button"
-      className="kc-choice"
+      className={"kc-choice" + (image ? " kc-choice-visual" : "")}
       aria-pressed={!!selected}
       disabled={disabled}
       onClick={onClick}
     >
-      {image && <img src={image} alt="" />}
-      <span>{label}</span>
+      {image && <FoodPhoto key={image} src={image} />}
+      <span className="kc-choice-label">{label}</span>
       {price !== undefined && <strong>{fp(price)}</strong>}
       <span className="kc-selection-mark" aria-hidden="true">
         {selected ? "✓" : "+"}
@@ -83,6 +108,7 @@ function Options({ options, selected, onPick, priced = false }) {
           <Choice
             key={label}
             label={label}
+            image={optionImage(label)}
             selected={selected.includes(label)}
             price={priced ? option.p : undefined}
             onClick={() => onPick(label)}
@@ -92,7 +118,7 @@ function Options({ options, selected, onPick, priced = false }) {
     </div>
   );
 }
-function Details({ line }) {
+function Details({ line, primary }) {
   const c = line.cust || {};
   const details = [
     ...(c.sauces || []).map((x) => "Sauce " + x),
@@ -107,12 +133,14 @@ function Details({ line }) {
     ...(c.note ? ["Remarque : " + c.note] : []),
   ];
   return (
-    <article className="kc-recap-line">
-      <div>
+    <article className={"kc-recap-line" + (primary ? " kc-recap-primary" : "")}>
+      <FoodPhoto key={line.pid} src={productImage(line.pid)} alt={line.name} />
+      <div className="kc-recap-description">
         <h2>
           {line.qty > 1 ? line.qty + " × " : ""}
           {line.name}
         </h2>
+        <strong className="kc-recap-price">{fp(line.total)}</strong>
         {c.inMenu && <p>Frites Twister incluses</p>}
         {details.length ? (
           <ul>
@@ -124,7 +152,6 @@ function Details({ line }) {
           <p>Recette d'origine</p>
         )}
       </div>
-      <strong>{fp(line.total)}</strong>
     </article>
   );
 }
@@ -249,11 +276,6 @@ export function KioskBurgerFlow({
           <span>
             {product.name}
             {qty > 1 ? " · " + qty + " unités" : ""}
-          </span>
-          <span>
-            {extraPanel
-              ? "Extra · étape " + (extraPanel.stage + 1) + " sur 2"
-              : "Étape " + (index + 1) + " sur " + steps.length}
           </span>
         </div>
         <progress
@@ -423,6 +445,7 @@ export function KioskBurgerFlow({
                   <Choice
                     key={p.id}
                     label={p.name}
+                    image={productImage(p.id)}
                     selected={draft.drink === p.name}
                     disabled={stockOut.includes(p.id)}
                     onClick={() => setField("drink", p.name)}
@@ -478,7 +501,7 @@ export function KioskBurgerFlow({
               <>
                 <div className="kc-recap">
                   {lines.map((line, i) => (
-                    <Details key={i} line={line} />
+                    <Details key={i} line={line} primary={i === 0} />
                   ))}
                 </div>
                 <label className="kc-note">
