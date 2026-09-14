@@ -2,7 +2,7 @@ import { T } from '../data/theme.js';
 
 export const card = (ex = {}) => ({
   background: T.bgCard,
-  borderRadius: 10,
+  borderRadius: 5,
   border: `1px solid ${T.brd}`,
   boxShadow: T.sh,
   ...ex

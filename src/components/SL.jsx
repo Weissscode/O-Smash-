@@ -16,7 +16,7 @@ export function SL({
   }, /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 11,
-      fontWeight: 700,
+      fontWeight: 600,
       color,
       letterSpacing: 1.5,
       textTransform: 'uppercase'

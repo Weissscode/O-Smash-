@@ -76,7 +76,7 @@ function distinctProducts(orders) {
   return Array.from(seen).sort((a, b) => a.localeCompare(b, 'fr'));
 }
 
-const MEDALS = ['🥇', '🥈', '🥉'];
+const MEDALS = ['1', '2', '3'];
 
 const PERIODS = [
   { key: 'jour', label: 'Journée' },
@@ -87,9 +87,9 @@ function PeriodTopSwitch({ period, setPeriod }) {
   return /*#__PURE__*/React.createElement('div', {
     style: {
       display: 'flex', gap: 4, margin: '16px 20px 12px',
-      background: 'linear-gradient(160deg, #251A3D 0%, #2E2154 60%, #1B1330 100%)',
-      padding: 5, borderRadius: 16,
-      boxShadow: '0 6px 18px rgba(30,15,55,0.22)'
+      background: T.bgCard,
+      padding: 5, borderRadius: 6,
+      boxShadow: 'none'
     }
   },
     PERIODS.map(p => /*#__PURE__*/React.createElement('button', {
@@ -97,11 +97,11 @@ function PeriodTopSwitch({ period, setPeriod }) {
       className: 'osm-btn-premium',
       onClick: () => setPeriod(p.key),
       style: {
-        flex: 1, padding: '11px 0', borderRadius: 12, border: 'none',
-        background: period === p.key ? 'linear-gradient(135deg, #C084FC, #9333EA)' : 'transparent',
-        color: period === p.key ? '#fff' : 'rgba(238,225,255,0.65)',
-        fontWeight: 800, fontSize: 14.5, cursor: 'pointer',
-        boxShadow: period === p.key ? '0 4px 14px rgba(147,51,234,0.45)' : 'none'
+        flex: 1, padding: '11px 0', borderRadius: 6, border: 'none',
+        background: period === p.key ? T.primaryL : 'transparent',
+        color: period === p.key ? T.txt : T.txtSub,
+        fontWeight: 600, fontSize: 14.5, cursor: 'pointer',
+        boxShadow: 'none'
       }
     }, p.label))
   );
@@ -123,11 +123,11 @@ function FilterSelect({ allLabel, value, onChange, options, active }) {
     ),
     /*#__PURE__*/React.createElement('div', {
       style: {
-        padding: '12px 14px', borderRadius: 12, textAlign: 'center',
-        background: active ? '#FFFFFF' : '#EEE9F5',
+        padding: '12px 14px', borderRadius: 6, textAlign: 'center',
+        background: active ? T.primaryL : T.bg,
         color: active ? T.primaryD : T.txtSub,
-        fontWeight: 700, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-        boxShadow: active ? T.shSoft : 'none', pointerEvents: 'none'
+        fontWeight: 600, fontSize: 13, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+        boxShadow: 'none', pointerEvents: 'none'
       }
     }, displayLabel)
   );
@@ -135,7 +135,7 @@ function FilterSelect({ allLabel, value, onChange, options, active }) {
 
 function FilterBar({ filter, setFilter, categoryOptions, productOptions }) {
   return /*#__PURE__*/React.createElement('div', {
-    style: { display: 'flex', gap: 8, margin: '0 20px 20px', background: '#F4F0FA', padding: 6, borderRadius: 16 }
+    style: { display: 'flex', gap: 8, margin: '0 20px 20px', background: T.bg, padding: 6, borderRadius: 6 }
   },
     /*#__PURE__*/React.createElement(FilterSelect, {
       allLabel: 'Toutes les catégories',
@@ -158,7 +158,7 @@ function EmptyCard({ text }) {
   return /*#__PURE__*/React.createElement('div', {
     style: {
       margin: '0 20px 24px', padding: 32, textAlign: 'center', color: T.txtMuted, fontSize: 14,
-      background: T.gradViolet, borderRadius: 16, border: '1px solid rgba(180,143,224,0.16)', boxShadow: T.shSoft
+      background: T.gradViolet, borderRadius: 6, border: `1px solid ${T.brd}`, boxShadow: 'none'
     }
   }, text);
 }
@@ -168,16 +168,16 @@ function PaymentSplitBar({ revEsp, revCB }) {
   const pctEsp = total > 0 ? Math.round((revEsp / total) * 100) : 50;
   const pctCB = 100 - pctEsp;
   return /*#__PURE__*/React.createElement('div', {
-    style: { margin: '0 20px 24px', background: T.gradViolet, borderRadius: 16, border: '1px solid rgba(180,143,224,0.16)', boxShadow: T.shSoft, padding: '14px 16px' }
+    style: { margin: '0 20px 24px', background: T.gradViolet, borderRadius: 6, border: `1px solid ${T.brd}`, boxShadow: 'none', padding: '14px 16px' }
   },
-    /*#__PURE__*/React.createElement('div', { style: { display: 'flex', height: 14, borderRadius: 999, overflow: 'hidden' } },
-      total > 0 && /*#__PURE__*/React.createElement('div', { style: { width: pctEsp + '%', background: 'linear-gradient(90deg, #34D399, #059669)', transition: 'width .5s ease' } }),
-      total > 0 && /*#__PURE__*/React.createElement('div', { style: { width: pctCB + '%', background: 'linear-gradient(90deg, #3B82F6, #1D4ED8)', transition: 'width .5s ease' } }),
+    /*#__PURE__*/React.createElement('div', { style: { display: 'flex', height: 14, borderRadius: 6, overflow: 'hidden' } },
+      total > 0 && /*#__PURE__*/React.createElement('div', { style: { width: pctEsp + '%', background: '#28704E', transition: 'none' } }),
+      total > 0 && /*#__PURE__*/React.createElement('div', { style: { width: pctCB + '%', background: '#456785', transition: 'none' } }),
       total === 0 && /*#__PURE__*/React.createElement('div', { style: { width: '100%', background: T.brdL } })
     ),
     /*#__PURE__*/React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', marginTop: 10 } },
-      /*#__PURE__*/React.createElement('span', { style: { fontSize: 12.5, fontWeight: 700, color: '#059669' } }, 'Espèces ' + pctEsp + '%'),
-      /*#__PURE__*/React.createElement('span', { style: { fontSize: 12.5, fontWeight: 700, color: '#1D4ED8' } }, 'CB ' + pctCB + '%')
+      /*#__PURE__*/React.createElement('span', { style: { fontSize: 12.5, fontWeight: 600, color: '#059669' } }, 'Espèces ' + pctEsp + '%'),
+      /*#__PURE__*/React.createElement('span', { style: { fontSize: 12.5, fontWeight: 600, color: '#1D4ED8' } }, 'CB ' + pctCB + '%')
     )
   );
 }
@@ -187,7 +187,7 @@ function NavArrow({ icon, onClick, disabled }) {
     className: 'osm-icon-btn',
     onClick, disabled,
     style: {
-      width: 40, height: 40, borderRadius: 12, border: 'none', background: 'transparent',
+      width: 40, height: 40, borderRadius: 6, border: 'none', background: 'transparent',
       color: disabled ? T.txtMuted : T.txt, display: 'flex', alignItems: 'center', justifyContent: 'center',
       cursor: disabled ? 'default' : 'pointer', opacity: disabled ? 0.4 : 1
     }
@@ -203,18 +203,18 @@ function MonthlyCategoryList({ categoryStats, categoryTotal }) {
       const pct = categoryTotal > 0 ? Math.round((cat.revenue / categoryTotal) * 100) : 0;
       return /*#__PURE__*/React.createElement('div', {
         key: cat.key,
-        style: { background: T.gradViolet, borderRadius: 14, border: '1px solid rgba(180,143,224,0.16)', boxShadow: T.shSoft, padding: '14px 16px' }
+        style: { background: T.gradViolet, borderRadius: 6, border: `1px solid ${T.brd}`, boxShadow: 'none', padding: '14px 16px' }
       },
         /*#__PURE__*/React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' } },
-          /*#__PURE__*/React.createElement('span', { style: { fontWeight: 800, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', color: T.txt } }, cat.label),
-          /*#__PURE__*/React.createElement('span', { style: { fontWeight: 800, fontSize: 14, color: cat.tint } }, fp(cat.revenue))
+          /*#__PURE__*/React.createElement('span', { style: { fontWeight: 600, fontSize: 13, letterSpacing: 0.5, textTransform: 'uppercase', color: T.txt } }, cat.label),
+          /*#__PURE__*/React.createElement('span', { style: { fontWeight: 600, fontSize: 14, color: cat.tint } }, fp(cat.revenue))
         ),
-        /*#__PURE__*/React.createElement('div', { style: { height: 8, borderRadius: 999, background: cat.tint + '15', marginTop: 10, overflow: 'hidden' } },
-          /*#__PURE__*/React.createElement('div', { style: { height: '100%', width: pct + '%', background: cat.tint, borderRadius: 999, transition: 'width .5s ease' } })
+        /*#__PURE__*/React.createElement('div', { style: { height: 8, borderRadius: 6, background: cat.tint + '15', marginTop: 10, overflow: 'hidden' } },
+          /*#__PURE__*/React.createElement('div', { style: { height: '100%', width: pct + '%', background: cat.tint, borderRadius: 6, transition: 'none' } })
         ),
         /*#__PURE__*/React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', marginTop: 6 } },
           /*#__PURE__*/React.createElement('span', { style: { fontSize: 12, color: T.txtSub } }, cat.qty + ' vente' + (cat.qty !== 1 ? 's' : '')),
-          /*#__PURE__*/React.createElement('span', { style: { fontSize: 12, fontWeight: 700, color: cat.tint } }, pct + '%')
+          /*#__PURE__*/React.createElement('span', { style: { fontSize: 12, fontWeight: 600, color: cat.tint } }, pct + '%')
         )
       );
     })
@@ -230,45 +230,45 @@ function TopProductsCard({ topProducts }) {
       key: p.name,
       style: {
         display: 'flex', alignItems: 'center', gap: 14, padding: '13px 16px',
-        background: 'linear-gradient(135deg, #FFFFFF, #FBF8FF)', border: '1px solid rgba(180,143,224,0.16)',
-        borderRadius: 14, boxShadow: T.shSoft
+        background: T.bgCard, border: `1px solid ${T.brd}`,
+        borderRadius: 6, boxShadow: 'none'
       }
     },
       /*#__PURE__*/React.createElement('div', {
         style: {
-          width: 26, height: 26, borderRadius: 9, background: T.primaryL, color: T.primaryD,
-          fontWeight: 800, fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+          width: 26, height: 26, borderRadius: 6, background: T.primaryL, color: T.primaryD,
+          fontWeight: 600, fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
         }
       }, i + 1),
       /*#__PURE__*/React.createElement('div', { style: { flex: 1, minWidth: 0 } },
-        /*#__PURE__*/React.createElement('div', { style: { fontWeight: 700, fontSize: 14, color: T.txt, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, p.name),
+        /*#__PURE__*/React.createElement('div', { style: { fontWeight: 600, fontSize: 14, color: T.txt, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, p.name),
         /*#__PURE__*/React.createElement('div', { style: { fontSize: 12, color: T.txtSub, marginTop: 2 } }, p.qty + ' vendu' + (p.qty !== 1 ? 's' : ''))
       ),
-      /*#__PURE__*/React.createElement('div', { style: { fontWeight: 800, fontSize: 15, color: T.primaryD, flexShrink: 0 } }, fp(p.revenue))
+      /*#__PURE__*/React.createElement('div', { style: { fontWeight: 600, fontSize: 15, color: T.primaryD, flexShrink: 0 } }, fp(p.revenue))
     ))
   );
 }
 
 function MidiSoirCard({ label, icon, rev, count, avg, theme, winning }) {
   return /*#__PURE__*/React.createElement('div', {
-    style: { flex: 1, minWidth: 0, borderRadius: 20, padding: '18px 16px', position: 'relative', overflow: 'hidden', background: theme.bg, boxShadow: theme.shadow }
+    style: { flex: 1, minWidth: 0, borderRadius: 6, padding: '18px 16px', position: 'relative', overflow: 'hidden', background: theme.bg, boxShadow: 'none'}
   },
     winning && /*#__PURE__*/React.createElement('div', {
-      style: { position: 'absolute', top: 10, right: 10, fontSize: 10.5, fontWeight: 800, color: theme.text, background: 'rgba(255,255,255,0.3)', padding: '3px 8px', borderRadius: 999 }
+      style: { position: 'absolute', top: 10, right: 10, fontSize: 10.5, fontWeight: 600, color: theme.text, background: 'rgba(255,255,255,0.3)', padding: '3px 8px', borderRadius: 6 }
     }, '🏆 Meilleur'),
     /*#__PURE__*/React.createElement('div', {
-      style: { width: 38, height: 38, borderRadius: 11, background: theme.iconBg, color: theme.iconColor, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }
+      style: { width: 38, height: 38, borderRadius: 6, background: theme.iconBg, color: theme.iconColor, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }
     }, icon),
-    /*#__PURE__*/React.createElement('div', { style: { fontSize: 11, fontWeight: 700, letterSpacing: 0.6, textTransform: 'uppercase', color: theme.subText } }, label),
-    /*#__PURE__*/React.createElement('div', { style: { fontSize: 22, fontWeight: 800, color: theme.text, marginTop: 2 } }, fp(rev)),
+    /*#__PURE__*/React.createElement('div', { style: { fontSize: 11, fontWeight: 600, letterSpacing: 0.6, textTransform: 'uppercase', color: theme.subText } }, label),
+    /*#__PURE__*/React.createElement('div', { style: { fontSize: 22, fontWeight: 600, color: theme.text, marginTop: 2 } }, fp(rev)),
     /*#__PURE__*/React.createElement('div', { style: { display: 'flex', gap: 18, marginTop: 14 } },
       /*#__PURE__*/React.createElement('div', null,
-        /*#__PURE__*/React.createElement('div', { style: { fontSize: 9.5, color: theme.subText, fontWeight: 700, textTransform: 'uppercase' } }, 'Commandes'),
-        /*#__PURE__*/React.createElement('div', { style: { fontSize: 14, fontWeight: 800, color: theme.text, marginTop: 2 } }, count)
+        /*#__PURE__*/React.createElement('div', { style: { fontSize: 9.5, color: theme.subText, fontWeight: 600, textTransform: 'uppercase' } }, 'Commandes'),
+        /*#__PURE__*/React.createElement('div', { style: { fontSize: 14, fontWeight: 600, color: theme.text, marginTop: 2 } }, count)
       ),
       /*#__PURE__*/React.createElement('div', null,
-        /*#__PURE__*/React.createElement('div', { style: { fontSize: 9.5, color: theme.subText, fontWeight: 700, textTransform: 'uppercase' } }, 'Panier moy.'),
-        /*#__PURE__*/React.createElement('div', { style: { fontSize: 14, fontWeight: 800, color: theme.text, marginTop: 2 } }, fp(avg))
+        /*#__PURE__*/React.createElement('div', { style: { fontSize: 9.5, color: theme.subText, fontWeight: 600, textTransform: 'uppercase' } }, 'Panier moy.'),
+        /*#__PURE__*/React.createElement('div', { style: { fontSize: 14, fontWeight: 600, color: theme.text, marginTop: 2 } }, fp(avg))
       )
     )
   );
@@ -297,11 +297,11 @@ function ComparisonBadge({ label, curr, prev, isFirst }) {
   return /*#__PURE__*/React.createElement('div', {
     style: {
       flex: 1, display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center',
-      padding: '12px 8px', borderLeft: isFirst ? 'none' : '1px solid rgba(180,143,224,0.22)'
+      padding: '12px 8px', borderLeft: isFirst ? 'none' : `1px solid ${T.brd}`
     }
   },
-    /*#__PURE__*/React.createElement('div', { style: { fontSize: 10.5, fontWeight: 700, color: T.txtSub, textTransform: 'uppercase', letterSpacing: 0.4, textAlign: 'center' } }, label),
-    /*#__PURE__*/React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 4, color: up ? '#059669' : '#DC2626', fontWeight: 800, fontSize: 16, marginTop: 2 } },
+    /*#__PURE__*/React.createElement('div', { style: { fontSize: 10.5, fontWeight: 600, color: T.txtSub, textTransform: 'uppercase', letterSpacing: 0.4, textAlign: 'center' } }, label),
+    /*#__PURE__*/React.createElement('div', { style: { display: 'flex', alignItems: 'center', gap: 4, color: up ? '#059669' : '#DC2626', fontWeight: 600, fontSize: 16, marginTop: 2 } },
       /*#__PURE__*/React.createElement(up ? IconTrendUp : IconTrendDown, { size: 15 }),
       (up ? '+' : '') + pct + '%'
     )
@@ -311,8 +311,8 @@ function ComparisonBadge({ label, curr, prev, isFirst }) {
 function PeriodComparison({ rev, prevRev, count, prevCount, avgBasket, prevAvg }) {
   return /*#__PURE__*/React.createElement('div', {
     style: {
-      margin: '0 20px 20px', background: T.gradViolet, borderRadius: 18,
-      border: '1px solid rgba(180,143,224,0.18)', boxShadow: T.shSoft, display: 'flex'
+      margin: '0 20px 20px', background: T.gradViolet, borderRadius: 6,
+      border: `1px solid ${T.brd}`, boxShadow: 'none', display: 'flex'
     }
   },
     /*#__PURE__*/React.createElement(ComparisonBadge, { label: "Chiffre d'affaires", curr: rev, prev: prevRev, isFirst: true }),
@@ -327,8 +327,8 @@ function MonthlyTrendChart({ buckets, max, onSelectDay }) {
   const gap = 4;
   return /*#__PURE__*/React.createElement('div', {
     style: {
-      margin: '0 20px 24px', background: T.gradViolet, borderRadius: 20,
-      border: '1px solid rgba(180,143,224,0.18)', boxShadow: T.shSoft,
+      margin: '0 20px 24px', background: T.gradViolet, borderRadius: 6,
+      border: `1px solid ${T.brd}`, boxShadow: 'none',
       padding: '18px 16px 16px'
     }
   },
@@ -352,9 +352,9 @@ function MonthlyTrendChart({ buckets, max, onSelectDay }) {
               style: {
                 width: '100%', borderRadius: '4px 4px 2px 2px',
                 height: Math.max(3, (b.total / max) * 100),
-                background: isToday ? 'linear-gradient(180deg, #C084FC, #9333EA)' : 'linear-gradient(180deg, #B48FE0, #9370CC)',
-                boxShadow: b.total > 0 ? '0 4px 10px rgba(147,51,234,0.25)' : 'none',
-                transition: 'height .4s ease'
+                background: isToday ? '#75608B' : '#75608B',
+                boxShadow: 'none',
+                transition: 'none'
               }
             }),
             showLabel && /*#__PURE__*/React.createElement('div', { style: { fontSize: 9.5, color: T.txtMuted, fontWeight: 600 } }, b.day)
@@ -376,17 +376,17 @@ function TopDaysCard({ topDays, onSelectDay }) {
       className: 'osm-tap-card osm-btn-premium',
       style: {
         display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px',
-        background: i === 0 ? 'linear-gradient(135deg, #FFF4D6, #FFE9A8)' : 'linear-gradient(135deg, #FFFFFF, #FBF8FF)',
+        background: i === 0 ? T.bgCard : T.bgCard,
         border: `1px solid ${i === 0 ? 'rgba(217,119,6,0.35)' : 'rgba(180,143,224,0.16)'}`,
-        borderRadius: 16, boxShadow: T.shSoft, cursor: 'pointer', textAlign: 'left', width: '100%'
+        borderRadius: 6, boxShadow: 'none', cursor: 'pointer', textAlign: 'left', width: '100%'
       }
     },
       /*#__PURE__*/React.createElement('div', { style: { fontSize: 22, width: 32, textAlign: 'center', flexShrink: 0 } }, MEDALS[i] || (i + 1) + '.'),
       /*#__PURE__*/React.createElement('div', { style: { flex: 1, minWidth: 0 } },
-        /*#__PURE__*/React.createElement('div', { style: { fontWeight: 700, fontSize: 14, color: T.txt, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, dayOfWeekLabel(b.date)),
+        /*#__PURE__*/React.createElement('div', { style: { fontWeight: 600, fontSize: 14, color: T.txt, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, dayOfWeekLabel(b.date)),
         /*#__PURE__*/React.createElement('div', { style: { fontSize: 12, color: T.txtSub, marginTop: 2 } }, b.count + ' commande' + (b.count !== 1 ? 's' : ''))
       ),
-      /*#__PURE__*/React.createElement('div', { style: { fontWeight: 800, fontSize: 16, color: T.primaryD, flexShrink: 0 } }, fp(b.total))
+      /*#__PURE__*/React.createElement('div', { style: { fontWeight: 600, fontSize: 16, color: T.primaryD, flexShrink: 0 } }, fp(b.total))
     ))
   );
 }
@@ -400,9 +400,9 @@ const CALENDAR_TIERS = [
 function tierStyle(bucket, maxDayRev) {
   if (!bucket || bucket.total === 0) return { bg: T.gradViolet, border: 'rgba(180,143,224,0.14)', text: T.txtMuted };
   const ratio = bucket.total / maxDayRev;
-  if (ratio >= 0.66) return { bg: 'linear-gradient(135deg, #DCFCE7, #BBF7D0)', border: 'rgba(5,150,105,0.3)', text: '#047857' };
-  if (ratio >= 0.33) return { bg: 'linear-gradient(135deg, #FFEDD5, #FED7AA)', border: 'rgba(217,119,6,0.3)', text: '#9A3412' };
-  return { bg: 'linear-gradient(135deg, #FEE2E2, #FECACA)', border: 'rgba(220,38,38,0.3)', text: '#991B1B' };
+  if (ratio >= 0.66) return { bg: T.bgCard, border: 'rgba(5,150,105,0.3)', text: '#047857' };
+  if (ratio >= 0.33) return { bg: T.bgCard, border: 'rgba(217,119,6,0.3)', text: '#9A3412' };
+  return { bg: T.bgCard, border: 'rgba(220,38,38,0.3)', text: '#991B1B' };
 }
 
 function MonthCalendar({ month, dailyBuckets, maxDayRev, onSelectDay }) {
@@ -412,11 +412,11 @@ function MonthCalendar({ month, dailyBuckets, maxDayRev, onSelectDay }) {
   const now = new Date();
 
   return /*#__PURE__*/React.createElement('div', {
-    style: { margin: '0 20px 24px', background: T.bgCard, borderRadius: 20, border: '1px solid rgba(180,143,224,0.16)', boxShadow: T.shSoft, padding: 16 }
+    style: { margin: '0 20px 24px', background: T.bgCard, borderRadius: 6, border: `1px solid ${T.brd}`, boxShadow: 'none', padding: 16 }
   },
     /*#__PURE__*/React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 4, marginBottom: 6 } },
       ['L', 'M', 'M', 'J', 'V', 'S', 'D'].map((d, i) => /*#__PURE__*/React.createElement('div', {
-        key: i, style: { textAlign: 'center', fontSize: 10.5, fontWeight: 700, color: T.txtMuted }
+        key: i, style: { textAlign: 'center', fontSize: 10.5, fontWeight: 600, color: T.txtMuted }
       }, d))
     ),
     /*#__PURE__*/React.createElement('div', { style: { display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: 4 } },
@@ -430,8 +430,8 @@ function MonthCalendar({ month, dailyBuckets, maxDayRev, onSelectDay }) {
           onClick: () => b.total > 0 && onSelectDay(b.date),
           title: b.date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) + ' : ' + fp(b.total),
           style: {
-            aspectRatio: '1', borderRadius: 10, border: `1.5px solid ${isToday ? T.primary : c.border}`,
-            background: c.bg, color: c.text, fontWeight: 700, fontSize: 12.5,
+            aspectRatio: '1', borderRadius: 6, border: `1.5px solid ${isToday ? T.primary : c.border}`,
+            background: c.bg, color: c.text, fontWeight: 600, fontSize: 12.5,
             cursor: b.total > 0 ? 'pointer' : 'default', display: 'flex', alignItems: 'center', justifyContent: 'center'
           }
         }, b.day);
@@ -479,12 +479,12 @@ function DayNav({ selectedDate, setSelectedDate, isToday }) {
     /*#__PURE__*/React.createElement(NavArrow, { icon: /*#__PURE__*/React.createElement(IconChevronLeft, {}), onClick: () => shiftDate(-1) }),
     /*#__PURE__*/React.createElement('div', {
       style: {
-        display: 'flex', alignItems: 'center', gap: 8, padding: '9px 18px', borderRadius: 14,
-        background: 'linear-gradient(135deg, #FFFFFF, #F7F1FF)', border: '1px solid rgba(180,143,224,0.2)', boxShadow: T.shSoft
+        display: 'flex', alignItems: 'center', gap: 8, padding: '9px 18px', borderRadius: 6,
+        background: T.bgCard, border: `1px solid ${T.brd}`, boxShadow: 'none'
       }
     },
       /*#__PURE__*/React.createElement(IconCalendar, { size: 16 }),
-      /*#__PURE__*/React.createElement('span', { style: { fontSize: 14.5, fontWeight: 700, color: T.txt, textTransform: 'capitalize' } }, dayLabel(selectedDate))
+      /*#__PURE__*/React.createElement('span', { style: { fontSize: 14.5, fontWeight: 600, color: T.txt, textTransform: 'capitalize' } }, dayLabel(selectedDate))
     ),
     /*#__PURE__*/React.createElement(NavArrow, { icon: /*#__PURE__*/React.createElement(IconChevronRight, {}), onClick: () => shiftDate(1), disabled: isToday })
   );
@@ -512,11 +512,11 @@ function DayAnalysis({ filteredOrders, selectedDate, setSelectedDate, filterActi
     /*#__PURE__*/React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, margin: '0 20px 20px' } },
       /*#__PURE__*/React.createElement(PaymentHeroCard, {
         icon: /*#__PURE__*/React.createElement(IconCash, { size: 20 }), label: 'Espèces', value: fp(revEsp),
-        bg: 'linear-gradient(160deg, #34D399, #059669)', shadow: '0 8px 20px rgba(5,150,105,0.28)', glow: 'rgba(167,243,208,0.4)'
+        bg: '#28704E', shadow: '0 8px 20px rgba(5,150,105,0.28)', glow: 'rgba(167,243,208,0.4)'
       }),
       /*#__PURE__*/React.createElement(PaymentHeroCard, {
         icon: /*#__PURE__*/React.createElement(IconCard, { size: 20 }), label: 'Carte bancaire', value: fp(revCB),
-        bg: 'linear-gradient(160deg, #3B82F6, #1D4ED8)', shadow: '0 8px 20px rgba(29,78,216,0.28)', glow: 'rgba(191,219,254,0.4)'
+        bg: '#456785', shadow: '0 8px 20px rgba(29,78,216,0.28)', glow: 'rgba(191,219,254,0.4)'
       })
     ),
     /*#__PURE__*/React.createElement(PaymentSplitBar, { revEsp, revCB }),
@@ -589,10 +589,10 @@ function MonthAnalysis({ filteredOrders, month, setMonth, onSelectDay, filterAct
     /*#__PURE__*/React.createElement('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2, padding: '4px 20px 4px' } },
       /*#__PURE__*/React.createElement(NavArrow, { icon: /*#__PURE__*/React.createElement(IconChevronLeft, {}), onClick: () => setMonth(m => addMonths(m, -1)) }),
       /*#__PURE__*/React.createElement('div', {
-        style: { display: 'flex', alignItems: 'center', gap: 8, padding: '9px 18px', borderRadius: 14, background: 'linear-gradient(135deg, #FFFFFF, #F7F1FF)', border: '1px solid rgba(180,143,224,0.2)', boxShadow: T.shSoft }
+        style: { display: 'flex', alignItems: 'center', gap: 8, padding: '9px 18px', borderRadius: 6, background: T.bgCard, border: `1px solid ${T.brd}`, boxShadow: 'none'}
       },
         /*#__PURE__*/React.createElement(IconCalendar, { size: 16 }),
-        /*#__PURE__*/React.createElement('span', { style: { fontSize: 14.5, fontWeight: 700, color: T.txt, textTransform: 'capitalize' } }, monthLabel(month))
+        /*#__PURE__*/React.createElement('span', { style: { fontSize: 14.5, fontWeight: 600, color: T.txt, textTransform: 'capitalize' } }, monthLabel(month))
       ),
       /*#__PURE__*/React.createElement(NavArrow, { icon: /*#__PURE__*/React.createElement(IconChevronRight, {}), onClick: () => setMonth(m => addMonths(m, 1)), disabled: monthKey(month) === monthKey(new Date()) })
     ),
@@ -603,11 +603,11 @@ function MonthAnalysis({ filteredOrders, month, setMonth, onSelectDay, filterAct
     /*#__PURE__*/React.createElement('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, margin: '0 20px 20px' } },
       /*#__PURE__*/React.createElement(PaymentHeroCard, {
         icon: /*#__PURE__*/React.createElement(IconCash, { size: 20 }), label: 'Espèces', value: fp(revEsp),
-        bg: 'linear-gradient(160deg, #34D399, #059669)', shadow: '0 8px 20px rgba(5,150,105,0.28)', glow: 'rgba(167,243,208,0.4)'
+        bg: '#28704E', shadow: '0 8px 20px rgba(5,150,105,0.28)', glow: 'rgba(167,243,208,0.4)'
       }),
       /*#__PURE__*/React.createElement(PaymentHeroCard, {
         icon: /*#__PURE__*/React.createElement(IconCard, { size: 20 }), label: 'Carte bancaire', value: fp(revCB),
-        bg: 'linear-gradient(160deg, #3B82F6, #1D4ED8)', shadow: '0 8px 20px rgba(29,78,216,0.28)', glow: 'rgba(191,219,254,0.4)'
+        bg: '#456785', shadow: '0 8px 20px rgba(29,78,216,0.28)', glow: 'rgba(191,219,254,0.4)'
       })
     ),
     /*#__PURE__*/React.createElement(PaymentSplitBar, { revEsp, revCB }),

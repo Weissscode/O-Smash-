@@ -7,12 +7,13 @@ export function Tag({
   return /*#__PURE__*/React.createElement("span", {
     style: {
       display: 'inline-block',
-      padding: '2px 9px',
+      alignSelf: 'flex-start',
+      padding: '2px 0',
       borderRadius: 4,
       fontSize: 10,
-      fontWeight: 700,
-      background: `${color}16`,
-      color,
+      fontWeight: 600,
+      background: 'transparent',
+      color: '#62666B',
       letterSpacing: 0.5,
       textTransform: 'uppercase'
     }

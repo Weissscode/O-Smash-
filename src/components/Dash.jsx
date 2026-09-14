@@ -87,10 +87,10 @@ function PeriodSwitch({ period, setPeriod }) {
   return /*#__PURE__*/React.createElement('div', {
     style: {
       display: 'flex', gap: 4, margin: '0 20px 16px',
-      background: 'linear-gradient(135deg, #EDE4FA, #F4EFFF)',
-      padding: 4, borderRadius: 15,
-      border: '1px solid rgba(180,143,224,0.18)',
-      boxShadow: 'inset 0 1px 3px rgba(148,100,214,0.08)'
+      background: T.bgCard,
+      padding: 4, borderRadius: 6,
+      border: `1px solid ${T.brd}`,
+      boxShadow: 'none'
     }
   },
     PERIODS.map(p => /*#__PURE__*/React.createElement('button', {
@@ -100,14 +100,14 @@ function PeriodSwitch({ period, setPeriod }) {
       style: {
         flex: 1,
         padding: '10px 0',
-        borderRadius: 11,
+        borderRadius: 6,
         border: 'none',
-        background: period === p.key ? 'linear-gradient(135deg, #FFFFFF, #F7F1FF)' : 'transparent',
-        color: period === p.key ? T.primaryD : T.txtSub,
-        fontWeight: 700,
+        background: period === p.key ? T.primaryL : 'transparent',
+        color: period === p.key ? T.txt : T.txtSub,
+        fontWeight: 600,
         fontSize: 14,
         cursor: 'pointer',
-        boxShadow: period === p.key ? '0 4px 12px rgba(148,100,214,0.18)' : 'none'
+        boxShadow: 'none'
       }
     }, p.label))
   );
@@ -130,12 +130,12 @@ function CategoryAccordion({ dayOrders }) {
       return /*#__PURE__*/React.createElement('div', {
         key: cat.key,
         style: {
-          background: isOpen ? `linear-gradient(135deg, ${cat.tint}12, ${cat.tint}05)` : T.gradViolet,
-          borderRadius: 16,
+          background: isOpen ? T.bgCard : T.gradViolet,
+          borderRadius: 6,
           border: `1px solid ${isOpen ? cat.tint + '55' : 'rgba(180,143,224,0.16)'}`,
-          boxShadow: T.shSoft,
+          boxShadow: 'none',
           overflow: 'hidden',
-          transition: 'border-color .15s ease, background .2s ease'
+          transition: 'none'
         }
       },
         /*#__PURE__*/React.createElement('button', {
@@ -151,33 +151,33 @@ function CategoryAccordion({ dayOrders }) {
           }
         },
           /*#__PURE__*/React.createElement('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between' } },
-            /*#__PURE__*/React.createElement('span', { style: { fontWeight: 800, fontSize: 13, letterSpacing: 0.6, textTransform: 'uppercase', color: isOpen ? cat.tint : T.txt } }, cat.label),
+            /*#__PURE__*/React.createElement('span', { style: { fontWeight: 600, fontSize: 13, letterSpacing: 0.6, textTransform: 'uppercase', color: isOpen ? cat.tint : T.txt } }, cat.label),
             /*#__PURE__*/React.createElement('span', {
               style: {
                 display: 'flex', color: isOpen ? cat.tint : T.txtMuted,
                 transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                transition: 'transform .2s ease'
+                transition: 'none'
               }
             }, /*#__PURE__*/React.createElement(IconChevronDown, { size: 16 }))
           ),
-          /*#__PURE__*/React.createElement('div', { style: { height: 8, borderRadius: 999, background: cat.tint + '15', marginTop: 10, overflow: 'hidden' } },
+          /*#__PURE__*/React.createElement('div', { style: { height: 8, borderRadius: 6, background: cat.tint + '15', marginTop: 10, overflow: 'hidden' } },
             /*#__PURE__*/React.createElement('div', {
               style: {
-                height: '100%', width: pct + '%', background: cat.tint, borderRadius: 999,
-                transition: 'width .5s ease'
+                height: '100%', width: pct + '%', background: cat.tint, borderRadius: 6,
+                transition: 'none'
               }
             })
           ),
           /*#__PURE__*/React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', marginTop: 6 } },
             /*#__PURE__*/React.createElement('span', { style: { fontSize: 12, color: T.txtSub } }, total + ' vente' + (total !== 1 ? 's' : '')),
-            /*#__PURE__*/React.createElement('span', { style: { fontSize: 12, fontWeight: 700, color: cat.tint } }, pct + '%')
+            /*#__PURE__*/React.createElement('span', { style: { fontSize: 12, fontWeight: 600, color: cat.tint } }, pct + '%')
           )
         ),
         /*#__PURE__*/React.createElement('div', {
           style: {
             display: 'grid',
             gridTemplateRows: isOpen ? '1fr' : '0fr',
-            transition: 'grid-template-rows .25s ease'
+            transition: 'none'
           }
         },
           /*#__PURE__*/React.createElement('div', { style: { overflow: 'hidden' } },
@@ -199,7 +199,7 @@ function CategoryAccordion({ dayOrders }) {
                       /*#__PURE__*/React.createElement(IconCheck, { size: 13 }),
                       /*#__PURE__*/React.createElement('span', { style: { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, name)
                     ),
-                    /*#__PURE__*/React.createElement('span', { style: { fontWeight: 700, color: T.txt, flexShrink: 0, marginLeft: 12 } }, qty)
+                    /*#__PURE__*/React.createElement('span', { style: { fontWeight: 600, color: T.txt, flexShrink: 0, marginLeft: 12 } }, qty)
                   ))
                 )
           )
@@ -217,7 +217,7 @@ function IconButton({ icon, onClick, disabled, tint }) {
     style: {
       width: 40,
       height: 40,
-      borderRadius: 12,
+      borderRadius: 6,
       border: 'none',
       background: 'transparent',
       color: disabled ? T.txtMuted : (tint || T.txt),
@@ -242,7 +242,7 @@ function InfoRow({ label, value }) {
     }
   },
     /*#__PURE__*/React.createElement('span', { style: { color: T.txtSub } }, label),
-    /*#__PURE__*/React.createElement('span', { style: { color: T.txt, fontWeight: 700, textAlign: 'right' } }, value)
+    /*#__PURE__*/React.createElement('span', { style: { color: T.txt, fontWeight: 600, textAlign: 'right' } }, value)
   );
 }
 
@@ -250,7 +250,7 @@ const fieldStyle = {
   width: '100%',
   padding: '11px 12px',
   fontSize: 15,
-  borderRadius: 12,
+  borderRadius: 6,
   border: `1px solid ${T.brd}`,
   background: T.gradViolet,
   color: T.txt,
@@ -294,9 +294,9 @@ function OrderDetailModal({ order, onClose, onSave, onDelete }) {
       maxHeight: '88vh',
       display: 'flex',
       flexDirection: 'column',
-      background: 'linear-gradient(160deg, #FFFFFF 0%, #FBF7FF 100%)',
-      borderRadius: 22,
-      boxShadow: '0 24px 70px rgba(20,10,40,0.28)',
+      background: T.bgCard,
+      borderRadius: 6,
+      boxShadow: 'none',
       overflow: 'hidden'
     }
   },
@@ -310,7 +310,7 @@ function OrderDetailModal({ order, onClose, onSave, onDelete }) {
       }
     },
       /*#__PURE__*/React.createElement('div', null,
-        /*#__PURE__*/React.createElement('div', { style: { fontSize: 18, fontWeight: 800, color: T.txt } }, 'Commande #' + order.num),
+        /*#__PURE__*/React.createElement('div', { style: { fontSize: 18, fontWeight: 600, color: T.txt } }, 'Commande #' + order.num),
         /*#__PURE__*/React.createElement('div', { style: { fontSize: 12.5, color: T.txtSub, marginTop: 3 } }, fd(order.date) + ' à ' + ft(order.date))
       ),
       /*#__PURE__*/React.createElement(IconButton, { icon: /*#__PURE__*/React.createElement(IconClose, { size: 18 }), onClick: onClose })
@@ -343,14 +343,14 @@ function OrderDetailModal({ order, onClose, onSave, onDelete }) {
             /*#__PURE__*/React.createElement(InfoRow, { key: 'payment', label: 'Paiement', value: order.payment || '—' }),
             order.printError && /*#__PURE__*/React.createElement('div', {
               key: 'print-error',
-              style: { marginTop: 10, padding: '10px 12px', borderRadius: 10, background: T.noL, color: T.no, fontSize: 12.5, fontWeight: 600 }
+              style: { marginTop: 10, padding: '10px 12px', borderRadius: 6, background: T.noL, color: T.no, fontSize: 12.5, fontWeight: 600 }
             }, '⚠ Ticket non imprimé : ' + order.printError),
-            /*#__PURE__*/React.createElement('div', { key: 'items-title', style: { fontSize: 12.5, fontWeight: 700, color: T.txtMuted, textTransform: 'uppercase', letterSpacing: 0.6, marginTop: 16, marginBottom: 8 } }, 'Articles'),
+            /*#__PURE__*/React.createElement('div', { key: 'items-title', style: { fontSize: 12.5, fontWeight: 600, color: T.txtMuted, textTransform: 'uppercase', letterSpacing: 0.6, marginTop: 16, marginBottom: 8 } }, 'Articles'),
             ...order.items.map((it, i) => /*#__PURE__*/React.createElement('div', {
               key: 'item' + i,
               style: { padding: '10px 0', borderBottom: `1px solid ${T.brdL}` }
             },
-              /*#__PURE__*/React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', fontWeight: 700, fontSize: 14.5, color: T.txt } },
+              /*#__PURE__*/React.createElement('div', { style: { display: 'flex', justifyContent: 'space-between', fontWeight: 600, fontSize: 14.5, color: T.txt } },
                 /*#__PURE__*/React.createElement('span', null, it.qty + 'x ' + it.name),
                 /*#__PURE__*/React.createElement('span', null, fp(it.total))
               ),
@@ -361,7 +361,7 @@ function OrderDetailModal({ order, onClose, onSave, onDelete }) {
             )),
             /*#__PURE__*/React.createElement('div', {
               key: 'total',
-              style: { display: 'flex', justifyContent: 'space-between', paddingTop: 14, marginTop: 6, fontSize: 17, fontWeight: 800, color: T.txt }
+              style: { display: 'flex', justifyContent: 'space-between', paddingTop: 14, marginTop: 6, fontSize: 17, fontWeight: 600, color: T.txt }
             },
               /*#__PURE__*/React.createElement('span', null, 'Total'),
               /*#__PURE__*/React.createElement('span', { style: { color: T.primaryD } }, fp(order.total))
@@ -376,14 +376,14 @@ function OrderDetailModal({ order, onClose, onSave, onDelete }) {
               key: 'cancel',
               className: 'osm-btn-premium',
               onClick: () => setEditing(false),
-              style: { flex: 1, padding: '13px', borderRadius: 14, border: '1px solid rgba(180,143,224,0.25)', background: T.gradViolet, color: T.txtSub, fontWeight: 700, fontSize: 15, cursor: 'pointer', boxShadow: T.shSoft }
+              style: { flex: 1, padding: '13px', borderRadius: 6, border: `1px solid ${T.brd}`, background: T.gradViolet, color: T.txtSub, fontWeight: 600, fontSize: 15, cursor: 'pointer', boxShadow: 'none'}
             }, 'Annuler'),
             /*#__PURE__*/React.createElement('button', {
               key: 'save',
               className: 'osm-btn-premium',
               onClick: save,
               disabled: saving,
-              style: { flex: 1, padding: '13px', borderRadius: 14, border: 'none', background: `linear-gradient(135deg, ${T.primary}, ${T.primaryD})`, color: '#fff', fontWeight: 700, fontSize: 15, cursor: 'pointer', opacity: saving ? 0.7 : 1, boxShadow: `0 6px 16px ${T.primaryD}45` }
+              style: { flex: 1, padding: '13px', borderRadius: 6, border: 'none', background: T.primary, color: '#fff', fontWeight: 600, fontSize: 15, cursor: 'pointer', opacity: saving ? 0.7 : 1, boxShadow: 'none' }
             }, saving ? 'Enregistrement...' : 'Enregistrer')
           ]
         : [
@@ -391,13 +391,13 @@ function OrderDetailModal({ order, onClose, onSave, onDelete }) {
               key: 'edit',
               className: 'osm-btn-premium',
               onClick: () => setEditing(true),
-              style: { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '13px', borderRadius: 14, border: '1px solid rgba(180,143,224,0.25)', background: T.gradViolet, color: T.txt, fontWeight: 700, fontSize: 15, cursor: 'pointer', boxShadow: T.shSoft }
+              style: { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '13px', borderRadius: 6, border: `1px solid ${T.brd}`, background: T.gradViolet, color: T.txt, fontWeight: 600, fontSize: 15, cursor: 'pointer', boxShadow: 'none'}
             }, /*#__PURE__*/React.createElement(IconEdit, { size: 17 }), 'Modifier'),
             /*#__PURE__*/React.createElement('button', {
               key: 'delete',
               className: 'osm-btn-premium',
               onClick: del,
-              style: { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '13px', borderRadius: 14, border: 'none', background: 'linear-gradient(135deg, #FEF2F2, #FEE2E2)', color: T.no, fontWeight: 700, fontSize: 15, cursor: 'pointer', boxShadow: '0 4px 14px rgba(239,68,68,0.15)' }
+              style: { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '13px', borderRadius: 6, border: 'none', background: T.bgCard, color: T.no, fontWeight: 600, fontSize: 15, cursor: 'pointer', boxShadow: 'none' }
             }, /*#__PURE__*/React.createElement(IconTrash, { size: 17 }), 'Supprimer')
           ]
     )
@@ -410,11 +410,11 @@ function PaymentPill({ payment }) {
   return /*#__PURE__*/React.createElement('span', {
     style: {
       fontSize: 11.5,
-      fontWeight: 700,
+      fontWeight: 600,
       color,
       background: color + '15',
       padding: '3px 9px',
-      borderRadius: 999,
+      borderRadius: 6,
       flexShrink: 0
     }
   }, payment || '—');
@@ -428,10 +428,10 @@ function OrderCard({ order, onClick }) {
     style: {
       width: '100%',
       display: 'block',
-      background: 'linear-gradient(135deg, #FFFFFF 0%, #FBF8FF 100%)',
-      border: '1px solid rgba(180,143,224,0.16)',
-      borderRadius: 16,
-      boxShadow: T.shSoft,
+      background: T.bgCard,
+      border: `1px solid ${T.brd}`,
+      borderRadius: 6,
+      boxShadow: 'none',
       padding: '13px 16px',
       textAlign: 'left',
       cursor: 'pointer'
@@ -445,14 +445,14 @@ function OrderCard({ order, onClick }) {
       /*#__PURE__*/React.createElement('span', { style: { display: 'flex', alignItems: 'center', gap: 6 } },
         order.printError && /*#__PURE__*/React.createElement('span', {
           title: order.printError,
-          style: { fontSize: 11, fontWeight: 700, color: T.no, background: T.noL, padding: '3px 8px', borderRadius: 999, flexShrink: 0 }
+          style: { fontSize: 11, fontWeight: 600, color: T.no, background: T.noL, padding: '3px 8px', borderRadius: 6, flexShrink: 0 }
         }, '⚠ Non imprimé'),
         /*#__PURE__*/React.createElement(PaymentPill, { payment: order.payment })
       )
     ),
     /*#__PURE__*/React.createElement('div', { style: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10 } },
-      /*#__PURE__*/React.createElement('span', { style: { fontWeight: 700, fontSize: 16, color: T.txt, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, displayName),
-      /*#__PURE__*/React.createElement('span', { style: { fontWeight: 800, fontSize: 17, color: T.primaryD, flexShrink: 0 } }, fp(order.total))
+      /*#__PURE__*/React.createElement('span', { style: { fontWeight: 600, fontSize: 16, color: T.txt, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, displayName),
+      /*#__PURE__*/React.createElement('span', { style: { fontWeight: 600, fontSize: 17, color: T.primaryD, flexShrink: 0 } }, fp(order.total))
     ),
     /*#__PURE__*/React.createElement('div', { style: { fontSize: 12.5, color: T.txtSub, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, itemsSummary(order.items))
   );
@@ -515,15 +515,15 @@ export function Dash({ orders, onReset, onUpdateOrder, onDeleteOrder }) {
         /*#__PURE__*/React.createElement('div', {
           style: {
             display: 'flex', alignItems: 'center', gap: 8,
-            padding: '9px 14px', borderRadius: 14,
-            background: 'linear-gradient(135deg, #FFFFFF, #F7F1FF)',
-            border: '1px solid rgba(180,143,224,0.2)',
-            boxShadow: T.shSoft,
+            padding: '9px 14px', borderRadius: 6,
+            background: T.bgCard,
+            border: `1px solid ${T.brd}`,
+            boxShadow: 'none',
             position: 'relative'
           }
         },
           /*#__PURE__*/React.createElement(IconCalendar, { size: 16 }),
-          /*#__PURE__*/React.createElement('span', { style: { fontSize: 14.5, fontWeight: 700, color: T.txt, textTransform: 'capitalize' } }, dayLabel(selectedDate)),
+          /*#__PURE__*/React.createElement('span', { style: { fontSize: 14.5, fontWeight: 600, color: T.txt, textTransform: 'capitalize' } }, dayLabel(selectedDate)),
           /*#__PURE__*/React.createElement('input', {
             type: 'date',
             value: toDateInputValue(selectedDate),
@@ -542,14 +542,14 @@ export function Dash({ orders, onReset, onUpdateOrder, onDeleteOrder }) {
         onClick: onReset,
         style: {
           padding: '9px 14px',
-          borderRadius: 12,
+          borderRadius: 6,
           border: 'none',
-          background: 'linear-gradient(135deg, #FEF2F2, #FEE2E2)',
+          background: T.bgCard,
           color: T.no,
-          fontWeight: 700,
+          fontWeight: 600,
           fontSize: 13,
           cursor: 'pointer',
-          boxShadow: '0 4px 12px rgba(239,68,68,0.14)'
+          boxShadow: 'none'
         }
       }, 'Réinitialiser')
     ),
@@ -568,11 +568,11 @@ export function Dash({ orders, onReset, onUpdateOrder, onDeleteOrder }) {
     },
       /*#__PURE__*/React.createElement(PaymentHeroCard, {
         icon: /*#__PURE__*/React.createElement(IconCash, { size: 20 }), label: 'Espèces', value: fp(revEsp),
-        bg: 'linear-gradient(160deg, #34D399, #059669)', shadow: '0 8px 20px rgba(5,150,105,0.28)', glow: 'rgba(167,243,208,0.4)'
+        bg: '#28704E', shadow: '0 8px 20px rgba(5,150,105,0.28)', glow: 'rgba(167,243,208,0.4)'
       }),
       /*#__PURE__*/React.createElement(PaymentHeroCard, {
         icon: /*#__PURE__*/React.createElement(IconCard, { size: 20 }), label: 'Carte bancaire', value: fp(revCB),
-        bg: 'linear-gradient(160deg, #3B82F6, #1D4ED8)', shadow: '0 8px 20px rgba(29,78,216,0.28)', glow: 'rgba(191,219,254,0.4)'
+        bg: '#456785', shadow: '0 8px 20px rgba(29,78,216,0.28)', glow: 'rgba(191,219,254,0.4)'
       })
     ),
 
@@ -594,7 +594,7 @@ export function Dash({ orders, onReset, onUpdateOrder, onDeleteOrder }) {
     },
       periodOrders.length === 0
         ? /*#__PURE__*/React.createElement('div', {
-            style: { padding: 40, textAlign: 'center', color: T.txtMuted, fontSize: 14, background: T.gradViolet, borderRadius: 16, border: '1px solid rgba(180,143,224,0.16)', boxShadow: T.shSoft }
+            style: { padding: 40, textAlign: 'center', color: T.txtMuted, fontSize: 14, background: T.gradViolet, borderRadius: 6, border: `1px solid ${T.brd}`, boxShadow: 'none'}
           }, 'Aucune commande sur cette période')
         : periodOrders.map(o => /*#__PURE__*/React.createElement(OrderCard, { key: o.id, order: o, onClick: () => setSelectedOrder(o) }))
     ),

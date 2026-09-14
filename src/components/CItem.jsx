@@ -143,7 +143,7 @@ export function CItem({
       color: T.no,
       cursor: 'pointer',
       fontSize: 10,
-      fontWeight: 700,
+      fontWeight: 600,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -172,7 +172,7 @@ export function CItem({
       color: T.txt,
       cursor: 'pointer',
       fontSize: 14,
-      fontWeight: 700
+      fontWeight: 600
     }
   }, "\u2212"), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -186,7 +186,7 @@ export function CItem({
       borderBottom: `1px solid ${T.brd}`,
       color: T.primary,
       fontSize: 13,
-      fontWeight: 800
+      fontWeight: 600
     }
   }, item.qty), /*#__PURE__*/React.createElement("button", {
     onClick: () => onQ(1),
@@ -199,12 +199,12 @@ export function CItem({
       color: T.txt,
       cursor: 'pointer',
       fontSize: 14,
-      fontWeight: 700
+      fontWeight: 600
     }
   }, "+")), /*#__PURE__*/React.createElement("span", {
     style: {
       fontSize: 14,
-      fontWeight: 700,
+      fontWeight: 600,
       color: T.txt
     }
   }, fp(item.total))));

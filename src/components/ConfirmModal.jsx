@@ -36,12 +36,12 @@ export function ConfirmModal({
     style: {
       padding: '18px 22px',
       borderBottom: `1px solid ${T.brd}`,
-      background: `linear-gradient(135deg,${T.primaryL},#F0EAFF)`
+      background: T.bgCard
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 18,
-      fontWeight: 800,
+      fontWeight: 600,
       color: T.txt
     }
   }, "Finaliser la commande"), /*#__PURE__*/React.createElement("div", {
@@ -96,7 +96,7 @@ export function ConfirmModal({
     style: {
       fontSize: 12,
       color: '#2563EB',
-      fontWeight: 700,
+      fontWeight: 600,
       marginBottom: 14,
       padding: '6px 10px',
       background: '#DBEAFE',
@@ -122,10 +122,10 @@ export function ConfirmModal({
       background: service === s ? T.warnL : T.bgCard,
       cursor: 'pointer',
       fontSize: 15,
-      fontWeight: 700,
+      fontWeight: 600,
       color: service === s ? T.warn : T.txtSub,
       textAlign: 'center',
-      boxShadow: service === s ? T.shMd : T.sh
+      boxShadow: 'none'
     }
   }, s))), !isTel && /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement(SL, {
     title: "MODE DE PAIEMENT",
@@ -147,10 +147,10 @@ export function ConfirmModal({
       background: payment === p ? T.okL : T.bgCard,
       cursor: 'pointer',
       fontSize: 15,
-      fontWeight: 700,
+      fontWeight: 600,
       color: payment === p ? T.ok : T.txtSub,
       textAlign: 'center',
-      boxShadow: payment === p ? T.shMd : T.sh
+      boxShadow: 'none'
     }
   }, p)))), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -177,7 +177,7 @@ export function ConfirmModal({
   }, item.qty, "x ", item.name), /*#__PURE__*/React.createElement("span", {
     style: {
       color: T.primary,
-      fontWeight: 700
+      fontWeight: 600
     }
   }, fp(item.total)))), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -189,12 +189,12 @@ export function ConfirmModal({
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontWeight: 700,
+      fontWeight: 600,
       color: T.txt
     }
   }, "Total"), /*#__PURE__*/React.createElement("span", {
     style: {
-      fontWeight: 900,
+      fontWeight: 600,
       color: T.primary,
       fontSize: 18
     }
@@ -223,7 +223,7 @@ export function ConfirmModal({
       ...btn(valid ? T.ok : T.brd, valid ? T.white : T.txtMuted, {
         flex: 2,
         cursor: valid ? 'pointer' : 'not-allowed',
-        boxShadow: valid ? `0 4px 14px ${T.ok}40` : 'none'
+        boxShadow: 'none'
       })
     }
   }, valid ? 'Valider et imprimer' : 'Choisir service')), valid && !isTel && onSplit && /*#__PURE__*/React.createElement("div", {
@@ -236,7 +236,7 @@ export function ConfirmModal({
     style: {
       ...btn('#F59E0B', T.white, {
         width: '100%',
-        fontWeight: 700,
+        fontWeight: 600,
         fontSize: 14
       })
     }

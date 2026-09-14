@@ -48,16 +48,16 @@ export function TopModal({
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 17,
-      fontWeight: 800,
+      fontWeight: 600,
       color: T.txt
     }
   }, product.name), /*#__PURE__*/React.createElement("div", {
     style: {
       background: T.primary,
       color: T.white,
-      fontWeight: 700,
+      fontWeight: 600,
       padding: '5px 16px',
-      borderRadius: 10,
+      borderRadius: 6,
       fontSize: 14
     }
   }, fp(product.price + ext))), /*#__PURE__*/React.createElement(SL, {

@@ -21,7 +21,7 @@ export function BurgerStartModal({
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 18,
-      fontWeight: 800,
+      fontWeight: 600,
       color: T.txt,
       marginBottom: 4,
       textAlign: 'center'
@@ -44,8 +44,8 @@ export function BurgerStartModal({
     onClick: () => onChoice('seul'),
     style: {
       padding: '24px 16px',
-      borderRadius: 10,
-      border: `2px solid ${T.brd}`,
+      borderRadius: 6,
+      border: `1px solid ${T.brd}`,
       background: T.bgCard,
       cursor: 'pointer',
       textAlign: 'center'
@@ -53,34 +53,34 @@ export function BurgerStartModal({
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 16,
-      fontWeight: 800,
+      fontWeight: 600,
       color: T.primary,
       marginBottom: 4
     }
   }, "Burger seul"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 18,
-      fontWeight: 900,
+      fontWeight: 600,
       color: T.txt
     }
   }, fp(product.price))), /*#__PURE__*/React.createElement("button", {
     onClick: () => onChoice('menu'),
     style: {
       padding: '24px 16px',
-      borderRadius: 10,
-      border: `2px solid #0891B2`,
-      background: '#0891B214',
+      borderRadius: 6,
+      border: `1px solid ${T.brd}`,
+      background: T.primaryL,
       cursor: 'pointer',
       textAlign: 'center'
     }
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 16,
-      fontWeight: 800,
-      color: '#0891B2',
+      fontWeight: 600,
+      color: T.txt,
       marginBottom: 4
     }
-  }, "En menu (+3\u20AC)"), /*#__PURE__*/React.createElement("div", {
+  }, "En menu (+3 \u20AC)"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
       color: T.txtSub,
@@ -89,7 +89,7 @@ export function BurgerStartModal({
   }, "+ Frites Twister + Boisson"), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 18,
-      fontWeight: 900,
+      fontWeight: 600,
       color: T.txt
     }
   }, fp(product.price + 3)))), /*#__PURE__*/React.createElement("button", {

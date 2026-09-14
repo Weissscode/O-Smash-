@@ -90,7 +90,7 @@ export function SplitModal({
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 16,
-      fontWeight: 800,
+      fontWeight: 600,
       color: T.txt
     }
   }, "Diviser commande #", order.num), /*#__PURE__*/React.createElement("div", {
@@ -127,7 +127,7 @@ export function SplitModal({
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontWeight: 800,
+      fontWeight: 600,
       fontSize: 13
     }
   }, "Ticket ", ti + 1, " \u2014 #", order.num), /*#__PURE__*/React.createElement("div", {
@@ -138,7 +138,7 @@ export function SplitModal({
     }
   }, /*#__PURE__*/React.createElement("span", {
     style: {
-      fontWeight: 700,
+      fontWeight: 600,
       color: T.primary,
       fontSize: 13
     }
@@ -215,7 +215,7 @@ export function SplitModal({
         flex: 1,
         padding: '9px',
         fontSize: 13,
-        fontWeight: 700,
+        fontWeight: 600,
         border: `1.5px solid ${ticket.payment === p ? T.ok : T.brd}`
       })
     }
@@ -226,7 +226,7 @@ export function SplitModal({
         border: `1.5px dashed ${T.primary}`,
         padding: '10px',
         fontSize: 14,
-        fontWeight: 700
+        fontWeight: 600
       })
     }
   }, " + Ajouter un ticket")), /*#__PURE__*/React.createElement("div", {
@@ -254,7 +254,7 @@ export function SplitModal({
     style: {
       ...btn(allOk ? T.ok : T.brd, allOk ? T.white : T.txtMuted, {
         flex: 2,
-        fontWeight: 700,
+        fontWeight: 600,
         cursor: allOk ? 'pointer' : 'not-allowed'
       })
     }

@@ -31,7 +31,7 @@ export function TelephoneView({
     }, "\uD83D\uDCDE"), /*#__PURE__*/React.createElement("div", {
       style: {
         fontSize: 18,
-        fontWeight: 700
+        fontWeight: 600
       }
     }, "Aucune commande telephone en attente"));
   }
@@ -45,7 +45,7 @@ export function TelephoneView({
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 15,
-      fontWeight: 800,
+      fontWeight: 600,
       color: T.txt,
       marginBottom: 14
     }
@@ -65,7 +65,7 @@ export function TelephoneView({
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       padding: '12px 16px',
-      background: `linear-gradient(135deg,#2563EB15,#1E40AF0A)`,
+      background: T.bgCard,
       borderBottom: `1px solid ${T.brd}`,
       display: 'flex',
       justifyContent: 'space-between',
@@ -80,19 +80,19 @@ export function TelephoneView({
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 20,
-      fontWeight: 900,
+      fontWeight: 600,
       color: '#2563EB'
     }
   }, "#", order.num), /*#__PURE__*/React.createElement("div", null, order.client && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 15,
-      fontWeight: 800,
+      fontWeight: 600,
       color: T.txt
     }
   }, order.client), order.phone && /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 13,
-      fontWeight: 700,
+      fontWeight: 600,
       color: '#2563EB'
     }
   }, "\uD83D\uDCDE ", order.phone), /*#__PURE__*/React.createElement("div", {
@@ -108,16 +108,16 @@ export function TelephoneView({
     style: {
       fontSize: 11,
       color: T.warn,
-      fontWeight: 700,
+      fontWeight: 600,
       background: T.warnL,
       padding: '2px 8px',
-      borderRadius: 10,
+      borderRadius: 6,
       marginBottom: 3
     }
   }, order.service), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 16,
-      fontWeight: 900,
+      fontWeight: 600,
       color: '#2563EB'
     }
   }, fp(order.total)))), /*#__PURE__*/React.createElement("div", {
