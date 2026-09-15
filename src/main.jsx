@@ -11,7 +11,11 @@ import '@fontsource/anton';
 import '@fontsource/permanent-marker';
 import './index.css';
 
-const mode = window.location.pathname.startsWith('/gestion') ? 'manager' : 'pos';
+const mode = window.location.pathname.startsWith('/gestion')
+  ? 'manager'
+  : window.location.pathname.startsWith('/scan')
+  ? 'scan'
+  : 'pos';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
