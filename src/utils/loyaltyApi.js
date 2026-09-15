@@ -93,6 +93,32 @@ export async function recordOrderPoints(restaurantId, { orderId, customerId, car
   return { points, newBalance };
 }
 
+// Liste des clients fidelite d'un restaurant, pour l'ecran admin
+// (Dashboard > Fidelite). Plus recents en premier.
+export async function fetchCustomers(restaurantId) {
+  const { data, error } = await supabase
+    .from('customers')
+    .select('*, loyalty_tiers(nom), loyalty_cards(uid_nfc, statut)')
+    .eq('restaurant_id', restaurantId)
+    .eq('anonymise', false)
+    .order('cree_le', { ascending: false });
+  if (error) throw error;
+  return data || [];
+}
+
+// Historique des mouvements de points d'un client (ledger), pour sa
+// fiche detail cote admin.
+export async function fetchCustomerTransactions(customerId) {
+  const { data, error } = await supabase
+    .from('loyalty_transactions')
+    .select('*')
+    .eq('customer_id', customerId)
+    .order('cree_le', { ascending: false })
+    .limit(50);
+  if (error) throw error;
+  return data || [];
+}
+
 // ── Relais temps reel entre la page /scan (telephone du serveur) et la
 // caisse : canal Supabase Realtime "broadcast", sans table dediee.
 function loyaltyChannelName(restaurantId) {
