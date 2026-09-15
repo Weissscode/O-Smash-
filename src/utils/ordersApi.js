@@ -16,7 +16,10 @@ function rowToOrder(row) {
     client: row.client,
     status: row.status,
     splitOf: row.split_of,
-    printRequest: row.print_request
+    printRequest: row.print_request,
+    customerId: row.customer_id,
+    cardId: row.card_id,
+    pointsGagnes: row.points_gagnes
   };
 }
 
@@ -32,7 +35,10 @@ function orderToRow(restaurantId, order) {
     client: order.client || null,
     status: order.status,
     split_of: order.splitOf || null,
-    print_request: order.printRequest || null
+    print_request: order.printRequest || null,
+    customer_id: order.customerId || null,
+    card_id: order.cardId || null,
+    points_gagnes: order.pointsGagnes || null
   };
 }
 

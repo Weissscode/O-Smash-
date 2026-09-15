@@ -3,7 +3,7 @@ import jsQR from 'jsqr';
 import QRCode from 'qrcode';
 import { T } from '../data/theme.js';
 import { signOut } from '../utils/auth.js';
-import { lookupCardByCode, createCustomerWithCard } from '../utils/loyaltyApi.js';
+import { lookupCardByCode, createCustomerWithCard, broadcastLoyaltyScan } from '../utils/loyaltyApi.js';
 
 const STATUT_LABELS = {
   bloquee: 'Carte bloquée',
@@ -245,6 +245,9 @@ export function ScanFidelite({ restaurantId, profile }) {
       const r = await lookupCardByCode(restaurantId, code);
       setResult(r);
       setMode('result');
+      if (r.status === 'active') {
+        broadcastLoyaltyScan(restaurantId, { customer: r.customer, card: r.card });
+      }
     } catch (e) {
       setResult({ status: 'erreur' });
       setMode('result');
@@ -290,7 +293,11 @@ export function ScanFidelite({ restaurantId, profile }) {
 
     mode === 'newClient' && /*#__PURE__*/React.createElement(NewClientForm, {
       restaurantId, onCancel: reset,
-      onCreated: r => { setResult(r); setMode('newClientResult'); }
+      onCreated: r => {
+        setResult(r);
+        setMode('newClientResult');
+        broadcastLoyaltyScan(restaurantId, { customer: r.customer, card: r.card });
+      }
     }),
     mode === 'newClientResult' && result && /*#__PURE__*/React.createElement(NewClientResult, { result, onReset: reset })
   );

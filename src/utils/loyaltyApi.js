@@ -47,3 +47,80 @@ export async function createCustomerWithCard(restaurantId, { prenom, telephone }
 
   return { customer, card, code };
 }
+
+const POINTS_PAR_EURO = 1;
+
+// Enregistre les points gagnes pour une commande : ecrit la ligne de
+// ledger (source de verite) puis met a jour le solde cache du client.
+// Ne doit jamais faire echouer la vente si ca plante : a appeler apres
+// coup, dans un try/catch, sans bloquer l'encaissement.
+export async function recordOrderPoints(restaurantId, { orderId, customerId, cardId, total, staffId }) {
+  const points = Math.floor(total * POINTS_PAR_EURO);
+  if (points <= 0 || !customerId) return null;
+
+  const { data: customer, error: fetchError } = await supabase
+    .from('customers')
+    .select('points_balance, total_depense, nombre_visites')
+    .eq('id', customerId)
+    .single();
+  if (fetchError) throw fetchError;
+
+  const newBalance = customer.points_balance + points;
+
+  const { error: txError } = await supabase.from('loyalty_transactions').insert({
+    restaurant_id: restaurantId,
+    customer_id: customerId,
+    card_id: cardId || null,
+    order_id: orderId,
+    type: 'gain',
+    points_delta: points,
+    solde_apres: newBalance,
+    cree_par: staffId || null
+  });
+  if (txError) throw txError;
+
+  const { error: custError } = await supabase
+    .from('customers')
+    .update({
+      points_balance: newBalance,
+      total_depense: customer.total_depense + total,
+      nombre_visites: customer.nombre_visites + 1,
+      derniere_visite_le: new Date().toISOString()
+    })
+    .eq('id', customerId);
+  if (custError) throw custError;
+
+  return { points, newBalance };
+}
+
+// ── Relais temps reel entre la page /scan (telephone du serveur) et la
+// caisse : canal Supabase Realtime "broadcast", sans table dediee.
+function loyaltyChannelName(restaurantId) {
+  return `fidelite-${restaurantId}`;
+}
+
+// Cote caisse : ecoute les scans effectues depuis /scan et rattache le
+// client trouve a la commande en cours. Renvoie une fonction de cleanup.
+export function subscribeLoyaltyScans(restaurantId, onScan) {
+  const channel = supabase.channel(loyaltyChannelName(restaurantId));
+  channel.on('broadcast', { event: 'scan' }, ({ payload }) => onScan(payload));
+  channel.subscribe();
+  return () => supabase.removeChannel(channel);
+}
+
+let sendChannel = null;
+let sendChannelKey = null;
+
+// Cote /scan : diffuse le client identifie vers la caisse abonnee.
+export function broadcastLoyaltyScan(restaurantId, payload) {
+  if (sendChannel && sendChannelKey !== restaurantId) {
+    supabase.removeChannel(sendChannel);
+    sendChannel = null;
+  }
+  if (!sendChannel) {
+    sendChannel = supabase.channel(loyaltyChannelName(restaurantId));
+    sendChannel.subscribe();
+    sendChannelKey = restaurantId;
+  }
+  return sendChannel.send({ type: 'broadcast', event: 'scan', payload });
+}
