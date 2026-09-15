@@ -100,7 +100,7 @@ function CameraScanner({ onDetected, active }) {
   );
 }
 
-function CustomerCard({ customer, onReset }) {
+function CustomerCard({ customer, cardCode, onReset }) {
   const tier = customer.loyalty_tiers ? customer.loyalty_tiers.nom : null;
   return /*#__PURE__*/React.createElement('div', {
     style: {
@@ -120,7 +120,14 @@ function CustomerCard({ customer, onReset }) {
       `⭐ ${customer.points_balance} pts`),
     /*#__PURE__*/React.createElement('div', { style: { marginTop: 4, fontSize: 13, color: T.txtSub } },
       `${customer.nombre_visites} visite(s) · ${customer.total_depense.toFixed(2)} € dépensés`),
-    /*#__PURE__*/React.createElement('div', { style: { marginTop: 24 } },
+    /*#__PURE__*/React.createElement('a', {
+      href: `/api/wallet-pass?code=${encodeURIComponent(cardCode)}`,
+      style: {
+        display: 'inline-block', marginTop: 18, padding: '10px 18px', borderRadius: 12,
+        background: '#000', color: '#fff', fontWeight: 700, fontSize: 13, textDecoration: 'none'
+      }
+    }, '  Ajouter à Apple Wallet'),
+    /*#__PURE__*/React.createElement('div', { style: { marginTop: 18 } },
       /*#__PURE__*/React.createElement(Btn, { label: 'Nouveau scan', onClick: onReset })
     )
   );
@@ -227,6 +234,13 @@ function NewClientResult({ result, onReset }) {
     }),
     /*#__PURE__*/React.createElement('div', { style: { fontSize: 12, color: T.txtMuted, marginTop: 12 } },
       "À faire scanner par le client depuis son téléphone (capture d'écran), ou à imprimer sur une carte."),
+    /*#__PURE__*/React.createElement('a', {
+      href: `/api/wallet-pass?code=${encodeURIComponent(result.code)}`,
+      style: {
+        display: 'inline-block', marginTop: 16, padding: '12px 20px', borderRadius: 12,
+        background: '#000', color: '#fff', fontWeight: 700, fontSize: 14, textDecoration: 'none'
+      }
+    }, '  Ajouter à Apple Wallet'),
     /*#__PURE__*/React.createElement('div', { style: { marginTop: 20 } },
       /*#__PURE__*/React.createElement(Btn, { label: 'Nouveau scan', onClick: onReset })
     )
@@ -283,7 +297,7 @@ export function ScanFidelite({ restaurantId, profile }) {
     ),
 
     mode === 'result' && result && result.status === 'active' &&
-      /*#__PURE__*/React.createElement(CustomerCard, { customer: result.customer, onReset: reset }),
+      /*#__PURE__*/React.createElement(CustomerCard, { customer: result.customer, cardCode: result.card.uid_nfc, onReset: reset }),
     mode === 'result' && result && result.status === 'inconnue' &&
       /*#__PURE__*/React.createElement(UnknownCode, { onReset: reset }),
     mode === 'result' && result && result.status === 'erreur' &&
