@@ -119,6 +119,103 @@ export async function fetchCustomerTransactions(customerId) {
   return data || [];
 }
 
+// ── Catalogue de recompenses ──────────────────────────────────
+
+// Recompenses actives d'un restaurant, triees par cout croissant -
+// utilise cote caisse (/scan) pour savoir lesquelles proposer au client.
+export async function fetchActiveRewards(restaurantId) {
+  const { data, error } = await supabase
+    .from('rewards')
+    .select('*')
+    .eq('restaurant_id', restaurantId)
+    .eq('actif', true)
+    .order('cout_points', { ascending: true });
+  if (error) throw error;
+  return data || [];
+}
+
+// Toutes les recompenses (actives ou non), pour l'ecran admin.
+export async function fetchAllRewards(restaurantId) {
+  const { data, error } = await supabase
+    .from('rewards')
+    .select('*')
+    .eq('restaurant_id', restaurantId)
+    .order('cout_points', { ascending: true });
+  if (error) throw error;
+  return data || [];
+}
+
+export async function createReward(restaurantId, { nom, description, coutPoints, type, valeur }) {
+  const { data, error } = await supabase
+    .from('rewards')
+    .insert({
+      restaurant_id: restaurantId,
+      nom,
+      description: description || null,
+      cout_points: coutPoints,
+      type,
+      valeur: valeur || null
+    })
+    .select()
+    .single();
+  if (error) throw error;
+  return data;
+}
+
+export async function setRewardActive(rewardId, actif) {
+  const { error } = await supabase.from('rewards').update({ actif }).eq('id', rewardId);
+  if (error) throw error;
+}
+
+// Utilisation d'une recompense par un client : deduit ses points
+// (ledger + solde cache) et trace la recompense obtenue/utilisee.
+// Verifie le solde juste avant de deduire pour eviter de passer en negatif.
+export async function redeemReward(restaurantId, { customerId, cardId, reward, staffId }) {
+  const { data: customer, error: fetchError } = await supabase
+    .from('customers')
+    .select('points_balance')
+    .eq('id', customerId)
+    .single();
+  if (fetchError) throw fetchError;
+
+  if (customer.points_balance < reward.cout_points) {
+    throw new Error('Solde de points insuffisant');
+  }
+
+  const newBalance = customer.points_balance - reward.cout_points;
+
+  const { error: txError } = await supabase.from('loyalty_transactions').insert({
+    restaurant_id: restaurantId,
+    customer_id: customerId,
+    card_id: cardId || null,
+    type: 'utilisation_recompense',
+    points_delta: -reward.cout_points,
+    solde_apres: newBalance,
+    description: reward.nom,
+    cree_par: staffId || null
+  });
+  if (txError) throw txError;
+
+  const { error: custError } = await supabase
+    .from('customers')
+    .update({ points_balance: newBalance })
+    .eq('id', customerId);
+  if (custError) throw custError;
+
+  const now = new Date().toISOString();
+  const { error: rewardError } = await supabase.from('customer_rewards').insert({
+    restaurant_id: restaurantId,
+    customer_id: customerId,
+    reward_id: reward.id,
+    statut: 'utilisee',
+    obtenue_le: now,
+    utilisee_le: now
+  });
+  if (rewardError) throw rewardError;
+
+  return { newBalance };
+}
+
 // ── Relais temps reel entre la page /scan (telephone du serveur) et la
 // caisse : canal Supabase Realtime "broadcast", sans table dediee.
 function loyaltyChannelName(restaurantId) {

@@ -3,7 +3,7 @@ import jsQR from 'jsqr';
 import QRCode from 'qrcode';
 import { T } from '../data/theme.js';
 import { signOut } from '../utils/auth.js';
-import { lookupCardByCode, createCustomerWithCard, broadcastLoyaltyScan } from '../utils/loyaltyApi.js';
+import { lookupCardByCode, createCustomerWithCard, broadcastLoyaltyScan, fetchActiveRewards, redeemReward } from '../utils/loyaltyApi.js';
 
 const STATUT_LABELS = {
   bloquee: 'Carte bloquée',
@@ -100,8 +100,52 @@ function CameraScanner({ onDetected, active }) {
   );
 }
 
-function CustomerCard({ customer, cardCode, onReset }) {
+function RewardCard({ reward, disabled, redeeming, onUse }) {
+  return /*#__PURE__*/React.createElement('div', {
+    style: {
+      minWidth: 140, background: disabled ? T.brdL : T.gradOrange, borderRadius: 14,
+      padding: 12, textAlign: 'center', opacity: disabled ? 0.6 : 1, flexShrink: 0
+    }
+  },
+    /*#__PURE__*/React.createElement('div', { style: { fontWeight: 700, fontSize: 13, color: T.txt } }, reward.nom),
+    /*#__PURE__*/React.createElement('div', { style: { fontSize: 12, color: T.txtSub, marginTop: 2 } }, `${reward.cout_points} pts`),
+    /*#__PURE__*/React.createElement('button', {
+      onClick: onUse,
+      disabled: disabled || redeeming,
+      style: {
+        marginTop: 8, padding: '6px 14px', borderRadius: 999, border: 'none', fontWeight: 700, fontSize: 12,
+        background: disabled ? T.brd : T.primary, color: disabled ? T.txtMuted : '#fff',
+        cursor: disabled ? 'not-allowed' : 'pointer'
+      }
+    }, redeeming ? '...' : 'Utiliser')
+  );
+}
+
+function CustomerCard({ customer: initialCustomer, cardCode, cardId, restaurantId, staffId, onReset }) {
+  const [customer, setCustomer] = React.useState(initialCustomer);
+  const [rewards, setRewards] = React.useState(null);
+  const [redeemingId, setRedeemingId] = React.useState(null);
+  const [message, setMessage] = React.useState(null);
   const tier = customer.loyalty_tiers ? customer.loyalty_tiers.nom : null;
+
+  React.useEffect(() => {
+    fetchActiveRewards(restaurantId).then(setRewards).catch(() => setRewards([]));
+  }, [restaurantId]);
+
+  async function handleUse(reward) {
+    setRedeemingId(reward.id);
+    setMessage(null);
+    try {
+      const { newBalance } = await redeemReward(restaurantId, { customerId: customer.id, cardId, reward, staffId });
+      setCustomer(c => ({ ...c, points_balance: newBalance }));
+      setMessage(`🎁 ${reward.nom} utilisée !`);
+    } catch (e) {
+      setMessage("Impossible d'utiliser cette récompense.");
+    } finally {
+      setRedeemingId(null);
+    }
+  }
+
   return /*#__PURE__*/React.createElement('div', {
     style: {
       background: T.bgCard, borderRadius: 20, padding: 28, maxWidth: 420,
@@ -120,6 +164,20 @@ function CustomerCard({ customer, cardCode, onReset }) {
       `⭐ ${customer.points_balance} pts`),
     /*#__PURE__*/React.createElement('div', { style: { marginTop: 4, fontSize: 13, color: T.txtSub } },
       `${customer.nombre_visites} visite(s) · ${customer.total_depense.toFixed(2)} € dépensés`),
+
+    rewards && rewards.length > 0 && /*#__PURE__*/React.createElement('div', { style: { marginTop: 20, textAlign: 'left' } },
+      /*#__PURE__*/React.createElement('div', { style: { fontSize: 12, fontWeight: 700, color: T.txtSub, marginBottom: 8 } }, 'Récompenses'),
+      /*#__PURE__*/React.createElement('div', { style: { display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 4 } },
+        rewards.map(r => /*#__PURE__*/React.createElement(RewardCard, {
+          key: r.id, reward: r,
+          disabled: customer.points_balance < r.cout_points,
+          redeeming: redeemingId === r.id,
+          onUse: () => handleUse(r)
+        }))
+      )
+    ),
+    message && /*#__PURE__*/React.createElement('div', { style: { marginTop: 12, fontSize: 13, fontWeight: 700, color: T.primaryD } }, message),
+
     /*#__PURE__*/React.createElement('a', {
       href: `/api/wallet-pass?code=${encodeURIComponent(cardCode)}`,
       style: {
@@ -297,7 +355,10 @@ export function ScanFidelite({ restaurantId, profile }) {
     ),
 
     mode === 'result' && result && result.status === 'active' &&
-      /*#__PURE__*/React.createElement(CustomerCard, { customer: result.customer, cardCode: result.card.uid_nfc, onReset: reset }),
+      /*#__PURE__*/React.createElement(CustomerCard, {
+        customer: result.customer, cardCode: result.card.uid_nfc, cardId: result.card.id,
+        restaurantId, staffId: profile ? profile.id : null, onReset: reset
+      }),
     mode === 'result' && result && result.status === 'inconnue' &&
       /*#__PURE__*/React.createElement(UnknownCode, { onReset: reset }),
     mode === 'result' && result && result.status === 'erreur' &&

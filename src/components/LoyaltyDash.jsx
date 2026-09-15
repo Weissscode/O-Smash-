@@ -1,7 +1,7 @@
 import React from 'react';
 import { T } from '../data/theme.js';
 import { fp, fd } from '../utils/format.js';
-import { fetchCustomers, fetchCustomerTransactions } from '../utils/loyaltyApi.js';
+import { fetchCustomers, fetchCustomerTransactions, fetchAllRewards, createReward, setRewardActive } from '../utils/loyaltyApi.js';
 
 const STATUT_LABELS = {
   active: 'Active',
@@ -105,7 +105,105 @@ function CustomerDetail({ customer, onClose }) {
   );
 }
 
+const REWARD_TYPES = [
+  { value: 'produit_offert', label: 'Produit offert' },
+  { value: 'reduction_pourcent', label: 'Réduction %' },
+  { value: 'reduction_montant', label: 'Réduction €' },
+  { value: 'cadeau', label: 'Cadeau' }
+];
+
+function RewardForm({ onCreated }) {
+  const [nom, setNom] = React.useState('');
+  const [coutPoints, setCoutPoints] = React.useState('');
+  const [type, setType] = React.useState('produit_offert');
+  const [valeur, setValeur] = React.useState('');
+  const [saving, setSaving] = React.useState(false);
+
+  async function submit(e) {
+    e.preventDefault();
+    if (!nom.trim() || !coutPoints) return;
+    setSaving(true);
+    try {
+      const reward = await createReward(onCreated.restaurantId, {
+        nom: nom.trim(),
+        coutPoints: parseInt(coutPoints, 10),
+        type,
+        valeur: valeur ? parseFloat(valeur) : null
+      });
+      onCreated.callback(reward);
+      setNom(''); setCoutPoints(''); setValeur('');
+    } catch (e2) {
+      window.alert('Erreur lors de la création de la récompense.');
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const inputStyle = {
+    padding: '9px 12px', borderRadius: 10, border: `1px solid ${T.brd}`, fontSize: 13, boxSizing: 'border-box'
+  };
+
+  return /*#__PURE__*/React.createElement('form', {
+    onSubmit: submit,
+    style: { display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', background: T.bgCard, padding: 16, borderRadius: 16, boxShadow: T.sh, marginBottom: 16 }
+  },
+    /*#__PURE__*/React.createElement('input', { placeholder: 'Nom (ex: Frites offertes)', value: nom, onChange: e => setNom(e.target.value), style: { ...inputStyle, flex: '1 1 180px' } }),
+    /*#__PURE__*/React.createElement('input', { placeholder: 'Coût en points', type: 'number', value: coutPoints, onChange: e => setCoutPoints(e.target.value), style: { ...inputStyle, width: 130 } }),
+    /*#__PURE__*/React.createElement('select', { value: type, onChange: e => setType(e.target.value), style: { ...inputStyle, width: 160 } },
+      REWARD_TYPES.map(t => /*#__PURE__*/React.createElement('option', { key: t.value, value: t.value }, t.label))
+    ),
+    /*#__PURE__*/React.createElement('input', { placeholder: 'Valeur (optionnel)', type: 'number', value: valeur, onChange: e => setValeur(e.target.value), style: { ...inputStyle, width: 130 } }),
+    /*#__PURE__*/React.createElement('button', {
+      type: 'submit', disabled: saving || !nom.trim() || !coutPoints,
+      style: { padding: '10px 18px', borderRadius: 10, border: 'none', background: T.primary, color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer' }
+    }, saving ? '...' : '+ Ajouter')
+  );
+}
+
+function RewardsAdmin({ restaurantId }) {
+  const [rewards, setRewards] = React.useState(null);
+
+  const load = React.useCallback(() => {
+    fetchAllRewards(restaurantId).then(setRewards).catch(() => setRewards([]));
+  }, [restaurantId]);
+
+  React.useEffect(() => { load(); }, [load]);
+
+  async function toggle(reward) {
+    await setRewardActive(reward.id, !reward.actif).catch(() => {});
+    load();
+  }
+
+  return /*#__PURE__*/React.createElement('div', null,
+    /*#__PURE__*/React.createElement(RewardForm, { onCreated: { restaurantId, callback: load } }),
+    rewards === null && /*#__PURE__*/React.createElement('div', { style: { textAlign: 'center', padding: 40, color: T.txtSub } }, 'Chargement...'),
+    rewards && rewards.length === 0 && /*#__PURE__*/React.createElement('div', { style: { textAlign: 'center', padding: 40, color: T.txtSub } }, 'Aucune récompense pour l’instant.'),
+    rewards && rewards.length > 0 && /*#__PURE__*/React.createElement('div', { style: { background: T.bgCard, borderRadius: 16, boxShadow: T.sh, overflow: 'hidden' } },
+      rewards.map((r, i) => /*#__PURE__*/React.createElement('div', {
+        key: r.id,
+        style: {
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px',
+          borderBottom: i < rewards.length - 1 ? `1px solid ${T.brdL}` : 'none'
+        }
+      },
+        /*#__PURE__*/React.createElement('div', null,
+          /*#__PURE__*/React.createElement('div', { style: { fontWeight: 700, fontSize: 14 } }, r.nom),
+          /*#__PURE__*/React.createElement('div', { style: { fontSize: 12, color: T.txtSub } }, `${r.cout_points} pts · ${REWARD_TYPES.find(t => t.value === r.type)?.label || r.type}`)
+        ),
+        /*#__PURE__*/React.createElement('button', {
+          onClick: () => toggle(r),
+          style: {
+            padding: '6px 14px', borderRadius: 999, border: 'none', fontWeight: 700, fontSize: 12, cursor: 'pointer',
+            background: r.actif ? T.okL : T.brdL, color: r.actif ? T.ok : T.txtSub
+          }
+        }, r.actif ? 'Active' : 'Désactivée')
+      ))
+    )
+  );
+}
+
 export function LoyaltyDash({ restaurantId }) {
+  const [subTab, setSubTab] = React.useState('clients');
   const [customers, setCustomers] = React.useState(null);
   const [search, setSearch] = React.useState('');
   const [selected, setSelected] = React.useState(null);
@@ -124,6 +222,20 @@ export function LoyaltyDash({ restaurantId }) {
   });
 
   return /*#__PURE__*/React.createElement('div', { style: { padding: '16px 20px 40px' } },
+    /*#__PURE__*/React.createElement('div', { style: { display: 'flex', gap: 8, marginBottom: 16 } },
+      ['clients', 'recompenses'].map(k => /*#__PURE__*/React.createElement('button', {
+        key: k,
+        onClick: () => setSubTab(k),
+        style: {
+          padding: '8px 16px', borderRadius: 999, border: 'none', fontWeight: 700, fontSize: 13, cursor: 'pointer',
+          background: subTab === k ? T.primary : T.bgCard, color: subTab === k ? '#fff' : T.txtSub, boxShadow: T.sh
+        }
+      }, k === 'clients' ? 'Clients' : 'Récompenses'))
+    ),
+
+    subTab === 'recompenses' && /*#__PURE__*/React.createElement(RewardsAdmin, { restaurantId }),
+
+    subTab === 'clients' && /*#__PURE__*/React.createElement(React.Fragment, null,
     /*#__PURE__*/React.createElement('input', {
       placeholder: 'Rechercher un client (nom, téléphone)...',
       value: search,
@@ -171,5 +283,6 @@ export function LoyaltyDash({ restaurantId }) {
     ),
 
     selected && /*#__PURE__*/React.createElement(CustomerDetail, { customer: selected, onClose: () => setSelected(null) })
+    )
   );
 }
