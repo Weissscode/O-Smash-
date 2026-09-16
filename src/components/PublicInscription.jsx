@@ -1,7 +1,7 @@
 import React from 'react';
 import QRCode from 'qrcode';
 import { T } from '../data/theme.js';
-import { Logo } from './Logo.jsx';
+import osmashLogo from '../assets/osmash-logo.png';
 import { PhoneInput } from './PhoneInput.jsx';
 import { toE164, DEFAULT_PHONE_COUNTRY } from '../utils/phoneCountries.js';
 
@@ -138,8 +138,11 @@ export function PublicInscription({ restaurantSlug }) {
   return /*#__PURE__*/React.createElement('div', {
     style: { minHeight: '100vh', background: T.bgGradient, padding: '32px 16px', boxSizing: 'border-box' }
   },
-    /*#__PURE__*/React.createElement('div', { style: { display: 'flex', justifyContent: 'center', marginBottom: 24 } },
-      /*#__PURE__*/React.createElement(Logo, { size: 70 })
+    /*#__PURE__*/React.createElement('div', { style: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, marginBottom: 24 } },
+      /*#__PURE__*/React.createElement('img', { src: osmashLogo, alt: "O'Smash", style: { height: 90, width: 'auto' } }),
+      /*#__PURE__*/React.createElement('div', {
+        style: { fontWeight: 800, fontSize: 15, letterSpacing: 1, color: T.primaryD, textTransform: 'uppercase' }
+      }, 'Fidélité')
     ),
     !result && /*#__PURE__*/React.createElement(RegisterForm, { restaurantSlug, onDone: setResult }),
     result && result.status === 'existing' && /*#__PURE__*/React.createElement(ExistingAccount, null),

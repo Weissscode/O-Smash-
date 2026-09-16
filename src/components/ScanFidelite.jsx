@@ -1,11 +1,8 @@
 import React from 'react';
 import jsQR from 'jsqr';
-import QRCode from 'qrcode';
 import { T } from '../data/theme.js';
 import { signOut } from '../utils/auth.js';
-import { lookupCardByCode, createCustomerWithCard, broadcastLoyaltyScan, fetchActiveRewards, redeemReward } from '../utils/loyaltyApi.js';
-import { PhoneInput } from './PhoneInput.jsx';
-import { toE164, DEFAULT_PHONE_COUNTRY } from '../utils/phoneCountries.js';
+import { lookupCardByCode, broadcastLoyaltyScan, fetchActiveRewards, redeemReward } from '../utils/loyaltyApi.js';
 
 const STATUT_LABELS = {
   bloquee: 'Carte bloquée',
@@ -221,95 +218,8 @@ function UnknownCode({ onReset }) {
   );
 }
 
-function NewClientForm({ onCreated, onCancel, restaurantId }) {
-  const [prenom, setPrenom] = React.useState('');
-  const [phone, setPhone] = React.useState({ country: DEFAULT_PHONE_COUNTRY, number: '' });
-  const [saving, setSaving] = React.useState(false);
-  const [err, setErr] = React.useState(null);
-
-  async function submit(e) {
-    e.preventDefault();
-    if (!prenom.trim()) return;
-    setSaving(true);
-    setErr(null);
-    try {
-      const telephone = phone.number.trim() ? toE164(phone.country.dial, phone.number, phone.country.code) : null;
-      const result = await createCustomerWithCard(restaurantId, { prenom: prenom.trim(), telephone });
-      onCreated(result);
-    } catch (e2) {
-      setErr("Erreur lors de la création. Réessayez.");
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  const inputStyle = {
-    width: '100%', padding: '12px 14px', borderRadius: 12, border: `1px solid ${T.brd}`,
-    fontSize: 15, marginTop: 6, boxSizing: 'border-box'
-  };
-
-  return /*#__PURE__*/React.createElement('form', {
-    onSubmit: submit,
-    style: { maxWidth: 380, margin: '0 auto', background: T.bgCard, borderRadius: 20, padding: 24, boxShadow: T.shSoft }
-  },
-    /*#__PURE__*/React.createElement('div', { style: { fontWeight: 800, fontSize: 17, marginBottom: 16 } }, 'Nouveau client'),
-    /*#__PURE__*/React.createElement('label', { style: { fontSize: 13, color: T.txtSub, fontWeight: 600 } }, 'Prénom',
-      /*#__PURE__*/React.createElement('input', {
-        style: inputStyle, value: prenom, onChange: e => setPrenom(e.target.value), autoFocus: true
-      })
-    ),
-    /*#__PURE__*/React.createElement('label', { style: { fontSize: 13, color: T.txtSub, fontWeight: 600, display: 'block', marginTop: 14 } }, 'Téléphone (optionnel)',
-      /*#__PURE__*/React.createElement('div', { style: { marginTop: 6 } },
-        /*#__PURE__*/React.createElement(PhoneInput, { value: phone, onChange: setPhone, inputStyle: { ...inputStyle, marginTop: 0 } })
-      )
-    ),
-    err && /*#__PURE__*/React.createElement('div', { style: { color: T.no, fontSize: 13, marginTop: 10 } }, err),
-    /*#__PURE__*/React.createElement('div', { style: { display: 'flex', gap: 10, marginTop: 20 } },
-      /*#__PURE__*/React.createElement(Btn, { label: 'Annuler', onClick: onCancel, kind: 'ghost' }),
-      /*#__PURE__*/React.createElement('button', {
-        type: 'submit', disabled: saving || !prenom.trim(),
-        style: {
-          flex: 1, padding: '14px 0', borderRadius: 14, border: 'none', fontWeight: 700, fontSize: 15,
-          background: T.primary, color: '#fff', cursor: 'pointer', opacity: saving ? 0.6 : 1
-        }
-      }, saving ? 'Création...' : 'Créer la carte')
-    )
-  );
-}
-
-function NewClientResult({ result, onReset }) {
-  const [qrDataUrl, setQrDataUrl] = React.useState(null);
-
-  React.useEffect(() => {
-    QRCode.toDataURL(result.code, { width: 280, margin: 1 }).then(setQrDataUrl);
-  }, [result.code]);
-
-  return /*#__PURE__*/React.createElement('div', {
-    style: { maxWidth: 380, margin: '0 auto', background: T.bgCard, borderRadius: 20, padding: 28, boxShadow: T.shSoft, textAlign: 'center' }
-  },
-    /*#__PURE__*/React.createElement('div', { style: { fontWeight: 800, fontSize: 18 } }, `Bienvenue ${result.customer.prenom} 🎉`),
-    /*#__PURE__*/React.createElement('div', { style: { fontSize: 13, color: T.txtSub, marginTop: 6 } },
-      'Sa carte de fidélité (QR à scanner à chaque passage) :'),
-    qrDataUrl && /*#__PURE__*/React.createElement('img', {
-      src: qrDataUrl, alt: 'QR code fidélité', style: { marginTop: 16, borderRadius: 12, border: `1px solid ${T.brd}` }
-    }),
-    /*#__PURE__*/React.createElement('div', { style: { fontSize: 12, color: T.txtMuted, marginTop: 12 } },
-      "À faire scanner par le client depuis son téléphone (capture d'écran), ou à imprimer sur une carte."),
-    /*#__PURE__*/React.createElement('a', {
-      href: `/api/wallet-pass?code=${encodeURIComponent(result.code)}`,
-      style: {
-        display: 'inline-block', marginTop: 16, padding: '12px 20px', borderRadius: 12,
-        background: '#000', color: '#fff', fontWeight: 700, fontSize: 14, textDecoration: 'none'
-      }
-    }, '  Ajouter à Apple Wallet'),
-    /*#__PURE__*/React.createElement('div', { style: { marginTop: 20 } },
-      /*#__PURE__*/React.createElement(Btn, { label: 'Nouveau scan', onClick: onReset })
-    )
-  );
-}
-
 export function ScanFidelite({ restaurantId, profile }) {
-  const [mode, setMode] = React.useState('scan'); // scan | result | newClient | newClientResult
+  const [mode, setMode] = React.useState('scan'); // scan | result
   const [result, setResult] = React.useState(null);
   const [busy, setBusy] = React.useState(false);
 
@@ -350,12 +260,7 @@ export function ScanFidelite({ restaurantId, profile }) {
       }, 'Se déconnecter')
     ),
 
-    mode === 'scan' && /*#__PURE__*/React.createElement(React.Fragment, null,
-      /*#__PURE__*/React.createElement(CameraScanner, { active: mode === 'scan', onDetected: handleDetected }),
-      /*#__PURE__*/React.createElement('div', { style: { textAlign: 'center', marginTop: 20 } },
-        /*#__PURE__*/React.createElement(Btn, { label: '+ Nouveau client', onClick: () => setMode('newClient'), kind: 'ghost' })
-      )
-    ),
+    mode === 'scan' && /*#__PURE__*/React.createElement(CameraScanner, { active: mode === 'scan', onDetected: handleDetected }),
 
     mode === 'result' && result && result.status === 'active' &&
       /*#__PURE__*/React.createElement(CustomerCard, {
@@ -367,16 +272,6 @@ export function ScanFidelite({ restaurantId, profile }) {
     mode === 'result' && result && result.status === 'erreur' &&
       /*#__PURE__*/React.createElement(UnknownCode, { onReset: reset }),
     mode === 'result' && result && !['active', 'inconnue', 'erreur'].includes(result.status) &&
-      /*#__PURE__*/React.createElement(CardIssue, { status: result.status, onReset: reset }),
-
-    mode === 'newClient' && /*#__PURE__*/React.createElement(NewClientForm, {
-      restaurantId, onCancel: reset,
-      onCreated: r => {
-        setResult(r);
-        setMode('newClientResult');
-        broadcastLoyaltyScan(restaurantId, { customer: r.customer, card: r.card });
-      }
-    }),
-    mode === 'newClientResult' && result && /*#__PURE__*/React.createElement(NewClientResult, { result, onReset: reset })
+      /*#__PURE__*/React.createElement(CardIssue, { status: result.status, onReset: reset })
   );
 }
