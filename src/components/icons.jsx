@@ -66,6 +66,13 @@ export const IconTrash = ({ size = 18, strokeWidth = 2 }) => /*#__PURE__*/React.
   /*#__PURE__*/React.createElement('path', { d: 'M10 11v6M14 11v6' })
 );
 
+export const IconPrinter = ({ size = 18, strokeWidth = 2 }) => /*#__PURE__*/React.createElement('svg', base(size, strokeWidth),
+  /*#__PURE__*/React.createElement('path', { d: 'M7 8V4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v4' }),
+  /*#__PURE__*/React.createElement('path', { d: 'M7 17H5a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2' }),
+  /*#__PURE__*/React.createElement('rect', { x: 7, y: 13, width: 10, height: 8, rx: 1 }),
+  /*#__PURE__*/React.createElement('path', { d: 'M17 11h.01' })
+);
+
 export const IconEdit = ({ size = 18, strokeWidth = 2 }) => /*#__PURE__*/React.createElement('svg', base(size, strokeWidth),
   /*#__PURE__*/React.createElement('path', { d: 'M4 20l.9-3.6L16.4 5a1.5 1.5 0 0 1 2.1 0l1.5 1.5a1.5 1.5 0 0 1 0 2.1L8.5 20 4 20z' }),
   /*#__PURE__*/React.createElement('path', { d: 'M14.5 6.9l2.6 2.6' })
