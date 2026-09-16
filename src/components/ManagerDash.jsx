@@ -1,3 +1,4 @@
+import { PosIcon } from './PosIcon.jsx';
 import React from 'react';
 import { T } from '../data/theme.js';
 import { btn } from '../utils/styles.js';
@@ -17,6 +18,7 @@ const MANAGER_TABS = [
 
 function ManagerTabSwitch({ tab, setTab }) {
   return /*#__PURE__*/React.createElement('div', {
+    className: 'osm-manager-tabs',
     style: {
       display: 'flex', gap: 4, margin: '12px 20px 0',
       background: T.bgCard,
@@ -28,6 +30,7 @@ function ManagerTabSwitch({ tab, setTab }) {
   },
     MANAGER_TABS.map(t => /*#__PURE__*/React.createElement('button', {
       key: t.key,
+      'aria-current': tab === t.key ? 'page' : undefined,
       className: 'osm-btn-premium',
       onClick: () => setTab(t.key),
       style: {
@@ -37,7 +40,7 @@ function ManagerTabSwitch({ tab, setTab }) {
         fontWeight: 600, fontSize: 14, cursor: 'pointer',
         boxShadow: 'none'
       }
-    }, t.label))
+    }, <span className="mr-manager-tab-icon"><PosIcon name={t.key}/></span>, t.label))
   );
 }
 
@@ -59,6 +62,7 @@ export function ManagerDash({ restaurantId, restaurantName }) {
   const orders = allOrders.filter(o => o.status !== 'en attente');
 
   return /*#__PURE__*/React.createElement('div', {
+    className: 'osm-manager-shell',
     style: { height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: T.bgGradient }
   },
     /*#__PURE__*/React.createElement('div', {
@@ -116,3 +120,4 @@ export function ManagerDash({ restaurantId, restaurantName }) {
           })
   );
 }
+

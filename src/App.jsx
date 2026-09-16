@@ -1,3 +1,4 @@
+import { MobileNavigation } from './components/MobileReports.jsx';
 import { PosIcon } from './components/PosIcon.jsx';
 import React from 'react';
 import { T } from './data/theme.js';
@@ -662,6 +663,8 @@ export default function App({ restaurantId }) {
     }
   }, "Valider la commande")));
   return /*#__PURE__*/React.createElement("div", {
+    className: 'osm-app-shell',
+    'data-view': view,
     style: {
       height: '100vh',
       display: 'flex',
@@ -671,7 +674,7 @@ export default function App({ restaurantId }) {
       overflow: 'hidden',
       userSelect: 'none'
     }
-  }, /*#__PURE__*/React.createElement("div", {
+  }, <MobileNavigation view={view} phoneCount={phoneOrders.length} onSelect={id => ['dashboard','analytics'].includes(id) ? setPinFor(id) : setView(id)}/>, /*#__PURE__*/React.createElement("div", {
     className: 'osm-topbar',
     style: {
       display: 'flex',
@@ -817,6 +820,7 @@ export default function App({ restaurantId }) {
       flexShrink: 0
     }
   }, /*#__PURE__*/React.createElement(CartPanel, null)), mob && /*#__PURE__*/React.createElement(React.Fragment, null, cartOpen && /*#__PURE__*/React.createElement("div", {
+    className: 'osm-mobile-cart-drawer',
     style: {
       position: 'fixed',
       bottom: 64,
@@ -833,6 +837,7 @@ export default function App({ restaurantId }) {
   }, /*#__PURE__*/React.createElement(CartPanel, {
     isDrawer: true
   })), /*#__PURE__*/React.createElement("div", {
+    className: 'osm-mobile-cart-bar',
     style: {
       position: 'fixed',
       bottom: 0,
@@ -1244,3 +1249,4 @@ export default function App({ restaurantId }) {
     }
   }, "Nouvelle commande")))));
 }
+

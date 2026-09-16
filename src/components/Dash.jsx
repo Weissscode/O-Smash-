@@ -1,3 +1,4 @@
+import { useReportMobile, ReportHeader, DateControl, Segments, RevenueSummary, CategoryRanking, Services, MobileOrders } from './MobileReports.jsx';
 import React from 'react';
 import { T } from '../data/theme.js';
 import { fp, ft, fd } from '../utils/format.js';
@@ -459,6 +460,7 @@ function OrderCard({ order, onClick }) {
 }
 
 export function Dash({ orders, onReset, onUpdateOrder, onDeleteOrder }) {
+  const mobile = useReportMobile();
   const [selectedDate, setSelectedDate] = React.useState(() => new Date());
   const [selectedOrder, setSelectedOrder] = React.useState(null);
   const [period, setPeriod] = React.useState('all');
@@ -496,6 +498,26 @@ export function Dash({ orders, onReset, onUpdateOrder, onDeleteOrder }) {
   const handleDelete = async id => {
     await onDeleteOrder(id);
   };
+
+  if (mobile) {
+    const sales = categorySales(periodOrders);
+    const stats = Object.fromEntries(CATEGORIES.map(c => [c.key, {
+      qty: Object.values(sales[c.key]).reduce((sum, qty) => sum + qty, 0),
+      revenue: periodOrders.flatMap(o => o.items).filter(it => c.test(it.pid || '')).reduce((sum, it) => sum + it.total, 0)
+    }]));
+    return <main className="mr-page" aria-label="Dashboard">
+      <ReportHeader title="Dashboard" subtitle={(isToday ? "Aujourd’hui, " : '') + selectedDate.toLocaleDateString('fr-FR', {day:'numeric', month:'long'})}>
+        {isToday && <details className="mr-overflow-menu"><summary aria-label="Actions du dashboard">···</summary><button onClick={onReset}>Réinitialiser la journée</button></details>}
+      </ReportHeader>
+      <DateControl date={selectedDate} onChange={setSelectedDate} isToday={isToday}/>
+      <Segments label="Service" value={period} onChange={setPeriod} options={PERIODS.map(p=>[p.key,p.label])}/>
+      <RevenueSummary rev={rev} count={periodOrders.length} avg={panierMoyen} cash={revEsp} card={revCB} phone={telCount} tag={periodTag}/>
+      <CategoryRanking stats={stats} total={Object.values(stats).reduce((sum,c)=>sum+c.qty,0)} quantityShare products={sales}/>
+      <Services orders={dayOrders}/>
+      <MobileOrders orders={periodOrders} tag={periodTag} onSelect={setSelectedOrder}/>
+      {selectedOrder && <OrderDetailModal order={selectedOrder} onClose={()=>setSelectedOrder(null)} onSave={handleSave} onDelete={handleDelete}/>}
+    </main>;
+  }
 
   return /*#__PURE__*/React.createElement('div', {
     style: { flex: 1, overflowY: 'auto', background: T.bgGradient }
@@ -607,3 +629,4 @@ export function Dash({ orders, onReset, onUpdateOrder, onDeleteOrder }) {
     })
   );
 }
+
