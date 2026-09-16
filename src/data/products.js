@@ -443,8 +443,11 @@ export const CB = {
   }, {
     l: 'Supp. Steak Smashé',
     p: 2.5
+  }, {
+    l: 'Supp. Fonte Halloumi',
+    p: 2
   }],
-  sauces: ['Algérienne', 'Biggy', 'Smoke', 'Ketchup', 'Mayonnaise', 'BBQ', 'Honey', 'Spicy', 'Chicken', 'Truffe'],
+  sauces: ['Algérienne', 'Andalouse', 'Biggy', 'Smoke', 'Ketchup', 'Mayonnaise', 'BBQ', 'Honey', 'Spicy', 'Chicken', 'Truffe'],
   versions: ['Version Bœuf', 'Version Chicken']
 };
 export const CR = {
@@ -461,7 +464,7 @@ export const TOPS = [{
   l: 'Éclats pistache',
   p: 0.5
 }];
-export const FRITES_SAUCES = ['Algerienne', 'Biggy', 'Ketchup', 'Mayonnaise', 'BBQ'];
+export const FRITES_SAUCES = ['Algerienne', 'Andalouse', 'Biggy', 'Ketchup', 'Mayonnaise', 'BBQ'];
 export const TWISTER_SUPPS = [{
   l: 'Bacon',
   p: 1

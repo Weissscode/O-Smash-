@@ -1,6 +1,7 @@
 import React from 'react';
 import { T } from '../data/theme.js';
 import { fp, ft, fd } from '../utils/format.js';
+import { formatPhoneDisplay } from '../utils/phone.js';
 import { Modal } from './Modal.jsx';
 import {
   IconReceipt, IconBag, IconCash, IconCard, IconPhone,
@@ -46,8 +47,10 @@ function custLines(cust, depth = 0) {
   if (cust.supplements) cust.supplements.forEach(s => lines.push(pad + '+ ' + s));
   if (cust.sauces) cust.sauces.forEach(s => lines.push(pad + 'Sauce : ' + s));
   if (cust.sauce) lines.push(pad + 'Sauce : ' + cust.sauce);
-  if (cust.fritesSauce) lines.push(pad + 'Sauce frites : ' + cust.fritesSauce);
+  if (cust.fritesSauces?.length) cust.fritesSauces.forEach(s => lines.push(pad + 'Sauce frites : ' + s));
+  else if (cust.fritesSauce) lines.push(pad + 'Sauce frites : ' + cust.fritesSauce);
   if (cust.fritesSupps) cust.fritesSupps.forEach(s => lines.push(pad + '+ ' + s));
+  if (cust.supps) cust.supps.forEach(s => lines.push(pad + '+ ' + s));
   if (cust.chantilly) lines.push(pad + '+ Chantilly');
   if (cust.toppings) cust.toppings.forEach(t => lines.push(pad + '+ ' + t));
   if (cust.glace) lines.push(pad + '+ Glace');
@@ -338,7 +341,7 @@ function OrderDetailModal({ order, onClose, onSave, onDelete }) {
           ]
         : [
             /*#__PURE__*/React.createElement(InfoRow, { key: 'client', label: 'Client', value: order.client || '—' }),
-            /*#__PURE__*/React.createElement(InfoRow, { key: 'phone', label: 'Téléphone', value: order.phone || '—' }),
+            /*#__PURE__*/React.createElement(InfoRow, { key: 'phone', label: 'Téléphone', value: order.phone ? formatPhoneDisplay(order.phone) : '—' }),
             /*#__PURE__*/React.createElement(InfoRow, { key: 'service', label: 'Service', value: order.service || '—' }),
             /*#__PURE__*/React.createElement(InfoRow, { key: 'payment', label: 'Paiement', value: order.payment || '—' }),
             order.printError && /*#__PURE__*/React.createElement('div', {
@@ -421,7 +424,7 @@ function PaymentPill({ payment }) {
 }
 
 function OrderCard({ order, onClick }) {
-  const displayName = order.client || order.phone || 'Commande';
+  const displayName = order.client || (order.phone ? formatPhoneDisplay(order.phone) : '') || 'Commande';
   return /*#__PURE__*/React.createElement('button', {
     className: 'osm-tap-card',
     onClick,

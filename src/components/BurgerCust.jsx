@@ -22,12 +22,15 @@ export function BurgerCust({
     sauces: [],
     version: '',
     note: '',
-    twisterSauce: '',
+    twisterSauces: [],
     twisterSupps: []
   };
   const [s, setS] = React.useState(initial ? {
     ...def,
-    ...initial
+    ...initial,
+    // Retrocompatibilite : d'anciennes commandes en cours d'edition peuvent
+    // encore porter une seule sauce Twister au lieu du tableau.
+    twisterSauces: initial?.twisterSauces || (initial?.twisterSauce ? [initial.twisterSauce] : [])
   } : def);
   const tog = (t, l) => setS(p => {
     const a = p[t];
@@ -176,10 +179,10 @@ export function BurgerCust({
   }, FRITES_SAUCES.map(s2 => /*#__PURE__*/React.createElement(Chip, {
     key: s2,
     label: s2,
-    active: s.twisterSauce === s2,
+    active: s.twisterSauces.includes(s2),
     onClick: () => setS(p => ({
       ...p,
-      twisterSauce: p.twisterSauce === s2 ? '' : s2
+      twisterSauces: p.twisterSauces.includes(s2) ? p.twisterSauces.filter(x => x !== s2) : [...p.twisterSauces, s2]
     })),
     clr: "#0891B2"
   }))), /*#__PURE__*/React.createElement(SL, {

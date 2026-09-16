@@ -2,6 +2,7 @@ import React from 'react';
 import { T } from '../data/theme.js';
 import { card, btn } from '../utils/styles.js';
 import { fp, ft } from '../utils/format.js';
+import { formatPhoneDisplay } from '../utils/phone.js';
 import { sendPrintCuisine } from '../utils/printServer.js';
 import { PhonePayModal } from './PhonePayModal.jsx';
 
@@ -95,7 +96,7 @@ export function TelephoneView({
       fontWeight: 600,
       color: '#2563EB'
     }
-  }, "\uD83D\uDCDE ", order.phone), /*#__PURE__*/React.createElement("div", {
+  }, "\uD83D\uDCDE ", formatPhoneDisplay(order.phone)), /*#__PURE__*/React.createElement("div", {
     style: {
       fontSize: 11,
       color: T.txtSub

@@ -6,8 +6,8 @@ import { card, btn } from './utils/styles.js';
 import { fp, ft, fd, uid } from './utils/format.js';
 import { LS } from './utils/storage.js';
 import { isPhoneNumber } from './utils/phone.js';
-import { getNextOrderNum } from './utils/orderNumber.js';
-import { sendPrintCuisine } from './utils/printServer.js';
+import { getNextOrderNumRemote } from './utils/orderNumber.js';
+import { sendPrint, sendPrintCuisine } from './utils/printServer.js';
 import { printTicket } from './utils/ticketPrint.js';
 import { fetchOrders, insertOrder, insertOrders, updateOrder, deleteOrder, deleteOrdersForDate, flushQueue, hasPendingSync } from './utils/ordersApi.js';
 import { fetchStockOut, setStockStatus, resetStock, flushStockQueue, hasPendingStockSync } from './utils/stockApi.js';
@@ -160,7 +160,8 @@ export default function App({ restaurantId }) {
   }));
   const cartTotal = cart.reduce((s, i) => s + i.total, 0);
   const placeOrder = async (service, payment, phoneVal) => {
-    const num = getNextOrderNum();
+    const { num, offline: numOffline } = await getNextOrderNumRemote(restaurantId);
+    if (numOffline) setSyncPending(true);
     const nomClient = clientName || null;
     const o = {
       id: uid(),
@@ -272,14 +273,51 @@ export default function App({ restaurantId }) {
     setPrintSt('Paiements enregistres !');
     setTimeout(() => setPrintSt(null), 3000);
   };
+
+  // Commande factice pour tester les imprimantes (bouton TEST discret).
+  // N'appelle jamais insertOrder ni getNextOrderNum : ne touche donc jamais
+  // Supabase, le dashboard, les analytics, ni les vraies stats/numeros.
+  const sendTestPrint = async () => {
+    const items = [
+      {
+        id: 'test-1', pid: 'b-smoke', name: "O'Smash Smoke", qty: 1, unit: 8.5, total: 8.5,
+        cust: { retraits: ['Sans oignon'], supplements: ['Supp. Fonte Halloumi'], sauces: ['Andalouse', 'Biggy'], version: 'Chicken' }
+      },
+      {
+        id: 'test-2', pid: 'si-frit', name: 'Frites Twister', qty: 1, unit: 3.0, total: 3.0,
+        cust: { sauces: ['Andalouse', 'Biggy', 'Algerienne'], supps: ['Bacon'] }
+      },
+      {
+        id: 'test-3', pid: 'r-cgratb', name: 'Crousty Gratiné Bourzin', qty: 1, unit: 12.0, total: 12.0,
+        cust: { type: 'Spicy' }
+      },
+      {
+        id: 'test-4', pid: 'mk-nut', name: 'Milkshake Nutella', qty: 1, unit: 5.5, total: 5.5,
+        cust: null
+      }
+    ];
+    const testOrder = {
+      id: 'test_' + Date.now(),
+      num: 0,
+      date: new Date().toISOString(),
+      client: 'TEST',
+      phone: '0612345678',
+      service: 'Sur place',
+      payment: 'Especes',
+      status: 'test',
+      isTest: true,
+      items,
+      total: items.reduce((s, i) => s + i.total, 0)
+    };
+    setPrintSt('Envoi du ticket TEST...');
+    await sendPrint(testOrder);
+    setTimeout(() => setPrintSt(null), 3000);
+  };
   const handleProd = (p, cat) => {
     if (stockOut.includes(p.id)) return;
     if (cat === 'burger') return setBurgerStartM(p);
     if (cat === 'bao') return setBurgerStartM(p);
     if (cat === 'riz') {
-      if (p.noType) return setBoissonYNM({
-        cb: withDrink => addCart(p.name, p.price + (withDrink ? 1 : 0), p.id, withDrink ? { boisson: true } : null)
-      });
       return setCustM({
         product: p,
         type: 'riz'
@@ -405,15 +443,15 @@ export default function App({ restaurantId }) {
         ...card(),
         background: PRODUCT_TINTS[i % PRODUCT_TINTS.length],
         borderRadius: 4,
-        padding: '28px 20px',
+        padding: mob ? '9px 10px' : '11px 12px',
         cursor: out ? 'not-allowed' : 'pointer',
         textAlign: 'center',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 10,
-        minHeight: 176,
+        gap: 4,
+        minHeight: mob ? 62 : 74,
         position: 'relative',
         overflow: 'hidden',
         opacity: out ? 0.38 : 1,
@@ -430,24 +468,24 @@ export default function App({ restaurantId }) {
       }
     }, /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 13,
+        fontSize: 11,
         fontWeight: 600,
         color: T.no,
-        padding: '4px 12px',
+        padding: '3px 9px',
         borderRadius: 6,
         background: T.noL,
         border: `1px solid ${T.no}`
       }
     }, "Rupture")), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 20,
+        fontSize: mob ? 13 : 14,
         fontWeight: 600,
         color: T.txt,
-        lineHeight: 1.3
+        lineHeight: 1.25
       }
     }, shortLabel), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: 22,
+        fontSize: mob ? 14 : 15,
         fontWeight: 700,
         color: T.txt
       }
@@ -465,7 +503,7 @@ export default function App({ restaurantId }) {
         style: {
           display: 'grid',
           gridTemplateColumns: 'repeat(3,minmax(0,1fr))',
-          gap: 12
+          gap: 6
         }
       }, prods.slice(0, 9).map((p, i) => /*#__PURE__*/React.createElement(PCard, {
         key: p.id,
@@ -476,8 +514,8 @@ export default function App({ restaurantId }) {
         style: {
           display: 'grid',
           gridTemplateColumns: 'repeat(3,minmax(0,1fr))',
-          gap: 12,
-          marginTop: 12
+          gap: 6,
+          marginTop: 6
         }
       }, prods.slice(9, 11).map((p, i) => /*#__PURE__*/React.createElement(PCard, {
         key: p.id,
@@ -486,15 +524,15 @@ export default function App({ restaurantId }) {
         i: i + 9
       }))));
     }
-    // Onglets peu remplis = cases plus grandes
+    // Onglets peu remplis = cases un peu plus larges
     const sparse = ['bao', 'formule', 'riz', 'sides', 'desserts', 'boissons', 'milkshake', 'crepes'].includes(selCat);
-    const minW = sparse ? mob ? 190 : 260 : mob ? 155 : 190;
+    const minW = sparse ? mob ? 150 : 190 : mob ? 125 : 150;
     return /*#__PURE__*/React.createElement("div", {
       style: {
         padding: pb,
         display: 'grid',
         gridTemplateColumns: `repeat(auto-fill,minmax(${minW}px,1fr))`,
-        gap: sparse ? 14 : 12,
+        gap: 6,
         alignContent: 'start'
       }
     }, prods.map((p, i) => /*#__PURE__*/React.createElement(PCard, {
@@ -772,7 +810,20 @@ export default function App({ restaurantId }) {
       fontSize: 11,
       color: T.txtSub
     }
-  }, fd(now))))), view === 'pos' && /*#__PURE__*/React.createElement("div", {
+  }, fd(now)), /*#__PURE__*/React.createElement("button", {
+    onClick: sendTestPrint,
+    title: 'Envoyer un ticket de test aux imprimantes',
+    style: {
+      fontSize: 9,
+      color: T.txtSub,
+      opacity: 0.35,
+      background: 'none',
+      border: 'none',
+      cursor: 'pointer',
+      padding: '2px 4px',
+      letterSpacing: 0.5
+    }
+  }, "TEST")))), view === 'pos' && /*#__PURE__*/React.createElement("div", {
     style: {
       flex: 1,
       display: 'flex',
@@ -966,7 +1017,7 @@ export default function App({ restaurantId }) {
         setCustM(null);
         return;
       }
-      const h = c.retraits.length || c.supplements.length || c.sauces.length || c.version || c.note || c.twisterSauce || c.twisterSupps?.length;
+      const h = c.retraits.length || c.supplements.length || c.sauces.length || c.version || c.note || c.twisterSauces?.length || c.twisterSupps?.length;
       const basePrice = custM.product.price + (custM.inMenu ? 3 : 0);
       if (custM.inMenu) {
         // Demander la boisson
@@ -974,7 +1025,7 @@ export default function App({ restaurantId }) {
           ...c,
           drink,
           inMenu: true,
-          fritesSauce: c.twisterSauce,
+          fritesSauces: c.twisterSauces,
           fritesSupps: c.twisterSupps
         });
         setCustM(null);
@@ -1070,7 +1121,7 @@ export default function App({ restaurantId }) {
     onClose: () => setFritesM(null),
     onOk: (c, ext) => {
       if (fritesM.editId) editCC(fritesM.editId, c, ext, fritesM.price);else {
-        const has = c.sauce || c.supps.length;
+        const has = c.sauces.length || c.supps.length;
         addCart(fritesM.name, fritesM.price + ext, fritesM.id, has ? c : null);
       }
       setFritesM(null);
@@ -1082,8 +1133,9 @@ export default function App({ restaurantId }) {
     setClientName: setClientName,
     onCancel: () => setConfirmM(false),
     onValidate: placeOrder,
-    onSplit: (svc, pay) => {
-      const num = getNextOrderNum();
+    onSplit: async (svc, pay) => {
+      const { num, offline: numOffline } = await getNextOrderNumRemote(restaurantId);
+      if (numOffline) setSyncPending(true);
       const o = {
         id: uid(),
         num,
