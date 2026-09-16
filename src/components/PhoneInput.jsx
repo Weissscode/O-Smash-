@@ -23,12 +23,8 @@ export function PhoneInput({ value, onChange, inputStyle }) {
         ...inputStyle, width: 110, flexShrink: 0, cursor: 'pointer'
       }
     },
-      /*#__PURE__*/React.createElement('optgroup', { label: 'Fréquents' },
-        PRIORITY_PHONE_COUNTRIES.map(c => /*#__PURE__*/React.createElement('option', { key: c.code, value: c.code }, `${c.flag} ${c.dial}`))
-      ),
-      /*#__PURE__*/React.createElement('optgroup', { label: 'Tous les pays' },
-        ALL_PHONE_COUNTRIES.map(c => /*#__PURE__*/React.createElement('option', { key: c.code, value: c.code }, `${c.flag} ${c.label} ${c.dial}`))
-      )
+      PRIORITY_PHONE_COUNTRIES.map(c => /*#__PURE__*/React.createElement('option', { key: c.code, value: c.code }, `${c.flag} ${c.dial}`)),
+      ALL_PHONE_COUNTRIES.map(c => /*#__PURE__*/React.createElement('option', { key: c.code, value: c.code }, `${c.flag} ${c.label} ${c.dial}`))
     ),
     /*#__PURE__*/React.createElement('input', {
       type: 'tel',

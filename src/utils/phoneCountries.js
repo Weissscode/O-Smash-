@@ -22,15 +22,15 @@ function buildCountry(code) {
   };
 }
 
-// Pays les plus frequents en premier dans le selecteur (zone 3
-// Frontieres : beaucoup de clients suisses/allemands/belges).
-const PRIORITY_CODES = ['FR', 'CH', 'DE', 'BE', 'LU', 'IT', 'ES', 'GB'];
+// Pays epingles en tete du selecteur, dans cet ordre precis.
+const PRIORITY_CODES = ['FR', 'BE', 'LU'];
 
 export const PRIORITY_PHONE_COUNTRIES = PRIORITY_CODES.map(buildCountry);
 
-// Tous les pays connus par libphonenumber-js, tries alphabetiquement -
-// affiches sous les "frequents" dans le selecteur.
+// Tous les autres pays connus par libphonenumber-js, tries
+// alphabetiquement, a la suite des epingles (sans doublon).
 export const ALL_PHONE_COUNTRIES = getCountries()
+  .filter(code => !PRIORITY_CODES.includes(code))
   .map(buildCountry)
   .sort((a, b) => a.label.localeCompare(b.label, 'fr'));
 
