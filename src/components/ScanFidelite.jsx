@@ -233,7 +233,7 @@ function NewClientForm({ onCreated, onCancel, restaurantId }) {
     setSaving(true);
     setErr(null);
     try {
-      const telephone = phone.number.trim() ? toE164(phone.country.dial, phone.number) : null;
+      const telephone = phone.number.trim() ? toE164(phone.country.dial, phone.number, phone.country.code) : null;
       const result = await createCustomerWithCard(restaurantId, { prenom: prenom.trim(), telephone });
       onCreated(result);
     } catch (e2) {

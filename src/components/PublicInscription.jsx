@@ -23,7 +23,7 @@ function RegisterForm({ restaurantSlug, onDone }) {
     setSaving(true);
     setError(null);
     try {
-      const telephone = phone.number.trim() ? toE164(phone.country.dial, phone.number) : null;
+      const telephone = phone.number.trim() ? toE164(phone.country.dial, phone.number, phone.country.code) : null;
       const res = await fetch('/api/register-customer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
