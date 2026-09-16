@@ -12,11 +12,27 @@
 
 alter table public.restaurants add column if not exists slug text;
 
--- Genere un slug a partir du nom pour les restaurants existants qui
--- n'en ont pas encore (minuscules, tirets, sans caracteres speciaux).
-update public.restaurants
-set slug = trim(both '-' from regexp_replace(lower(nom), '[^a-z0-9]+', '-', 'g'))
-where slug is null;
+-- Genere un slug a partir du nom pour tous les restaurants (minuscules,
+-- tirets, sans caracteres speciaux). Si plusieurs restaurants portent
+-- le meme nom (doublons de test, restaurants homonymes...), on
+-- desambiguise avec un suffixe numerique plutot que d'echouer : le
+-- plus ancien garde le slug "propre", les suivants deviennent
+-- "slug-2", "slug-3", etc. Recalcule a chaque execution (idempotent),
+-- donc rejouable meme si un essai precedent a deja pose des slugs.
+with ranked as (
+  select
+    id,
+    trim(both '-' from regexp_replace(lower(nom), '[^a-z0-9]+', '-', 'g')) as base_slug,
+    row_number() over (
+      partition by trim(both '-' from regexp_replace(lower(nom), '[^a-z0-9]+', '-', 'g'))
+      order by cree_le, id
+    ) as rn
+  from public.restaurants
+)
+update public.restaurants r
+set slug = case when ranked.rn = 1 then ranked.base_slug else ranked.base_slug || '-' || ranked.rn end
+from ranked
+where r.id = ranked.id;
 
 alter table public.restaurants alter column slug set not null;
 create unique index if not exists restaurants_slug_idx on public.restaurants (slug);
