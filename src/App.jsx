@@ -443,15 +443,15 @@ export default function App({ restaurantId }) {
         ...card(),
         background: PRODUCT_TINTS[i % PRODUCT_TINTS.length],
         borderRadius: 4,
-        padding: mob ? '9px 10px' : '11px 12px',
+        padding: mob ? '14px 12px' : '16px 14px',
         cursor: out ? 'not-allowed' : 'pointer',
         textAlign: 'center',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 4,
-        minHeight: mob ? 62 : 74,
+        gap: 6,
+        minHeight: mob ? 100 : 112,
         position: 'relative',
         overflow: 'hidden',
         opacity: out ? 0.38 : 1,
@@ -478,14 +478,14 @@ export default function App({ restaurantId }) {
       }
     }, "Rupture")), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: mob ? 13 : 14,
+        fontSize: mob ? 15 : 16,
         fontWeight: 600,
         color: T.txt,
         lineHeight: 1.25
       }
     }, shortLabel), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: mob ? 14 : 15,
+        fontSize: mob ? 16 : 17,
         fontWeight: 700,
         color: T.txt
       }
@@ -517,7 +517,7 @@ export default function App({ restaurantId }) {
           gap: 6,
           marginTop: 6
         }
-      }, prods.slice(9, 11).map((p, i) => /*#__PURE__*/React.createElement(PCard, {
+      }, prods.slice(9).map((p, i) => /*#__PURE__*/React.createElement(PCard, {
         key: p.id,
         p: p,
         cat: "burger",
