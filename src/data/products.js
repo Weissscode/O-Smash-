@@ -103,18 +103,6 @@ export const BURGERS = [{
   price: 10.5,
   tag: 'SIGNATURE',
   desc: "Potato buns, double steak smashé, cheddar, avocat, salade, tomate, oignon, sauce avocado"
-}, {
-  id: 'b-mncc',
-  name: 'Mac n Cheese Chicken Burger',
-  price: 10.0,
-  tag: 'SIGNATURE',
-  desc: 'Potato buns, crispy chicken, cheddar, oignon, salade, tomate, sauce biggy ou spicy'
-}, {
-  id: 'b-mncb',
-  name: 'Mac n Cheese Beef Burger',
-  price: 10.0,
-  tag: 'SIGNATURE',
-  desc: 'Potato buns, double steak smashé, cheddar, oignon crispy, sauce biggy ou spicy'
 }];
 export const ETUD_CHOICES = [{
   id: 'b-orig',

@@ -443,15 +443,15 @@ export default function App({ restaurantId }) {
         ...card(),
         background: PRODUCT_TINTS[i % PRODUCT_TINTS.length],
         borderRadius: 4,
-        padding: mob ? '14px 12px' : '16px 14px',
+        padding: mob ? '20px 14px' : '22px 16px',
         cursor: out ? 'not-allowed' : 'pointer',
         textAlign: 'center',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 6,
-        minHeight: mob ? 100 : 112,
+        gap: 8,
+        minHeight: mob ? 138 : 150,
         position: 'relative',
         overflow: 'hidden',
         opacity: out ? 0.38 : 1,
@@ -478,14 +478,14 @@ export default function App({ restaurantId }) {
       }
     }, "Rupture")), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: mob ? 15 : 16,
+        fontSize: mob ? 17 : 18,
         fontWeight: 600,
         color: T.txt,
         lineHeight: 1.25
       }
     }, shortLabel), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: mob ? 16 : 17,
+        fontSize: mob ? 18 : 19,
         fontWeight: 700,
         color: T.txt
       }
@@ -503,7 +503,7 @@ export default function App({ restaurantId }) {
         style: {
           display: 'grid',
           gridTemplateColumns: 'repeat(3,minmax(0,1fr))',
-          gap: 6
+          gap: 8
         }
       }, prods.slice(0, 9).map((p, i) => /*#__PURE__*/React.createElement(PCard, {
         key: p.id,
@@ -514,8 +514,8 @@ export default function App({ restaurantId }) {
         style: {
           display: 'grid',
           gridTemplateColumns: 'repeat(3,minmax(0,1fr))',
-          gap: 6,
-          marginTop: 6
+          gap: 8,
+          marginTop: 8
         }
       }, prods.slice(9).map((p, i) => /*#__PURE__*/React.createElement(PCard, {
         key: p.id,
@@ -532,7 +532,7 @@ export default function App({ restaurantId }) {
         padding: pb,
         display: 'grid',
         gridTemplateColumns: `repeat(auto-fill,minmax(${minW}px,1fr))`,
-        gap: 6,
+        gap: 8,
         alignContent: 'start'
       }
     }, prods.map((p, i) => /*#__PURE__*/React.createElement(PCard, {
