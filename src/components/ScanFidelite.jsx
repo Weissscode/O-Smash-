@@ -4,6 +4,8 @@ import QRCode from 'qrcode';
 import { T } from '../data/theme.js';
 import { signOut } from '../utils/auth.js';
 import { lookupCardByCode, createCustomerWithCard, broadcastLoyaltyScan, fetchActiveRewards, redeemReward } from '../utils/loyaltyApi.js';
+import { PhoneInput } from './PhoneInput.jsx';
+import { toE164, DEFAULT_PHONE_COUNTRY } from '../utils/phoneCountries.js';
 
 const STATUT_LABELS = {
   bloquee: 'Carte bloquée',
@@ -221,7 +223,7 @@ function UnknownCode({ onReset }) {
 
 function NewClientForm({ onCreated, onCancel, restaurantId }) {
   const [prenom, setPrenom] = React.useState('');
-  const [telephone, setTelephone] = React.useState('');
+  const [phone, setPhone] = React.useState({ country: DEFAULT_PHONE_COUNTRY, number: '' });
   const [saving, setSaving] = React.useState(false);
   const [err, setErr] = React.useState(null);
 
@@ -231,7 +233,8 @@ function NewClientForm({ onCreated, onCancel, restaurantId }) {
     setSaving(true);
     setErr(null);
     try {
-      const result = await createCustomerWithCard(restaurantId, { prenom: prenom.trim(), telephone: telephone.trim() });
+      const telephone = phone.number.trim() ? toE164(phone.country.dial, phone.number) : null;
+      const result = await createCustomerWithCard(restaurantId, { prenom: prenom.trim(), telephone });
       onCreated(result);
     } catch (e2) {
       setErr("Erreur lors de la création. Réessayez.");
@@ -256,9 +259,9 @@ function NewClientForm({ onCreated, onCancel, restaurantId }) {
       })
     ),
     /*#__PURE__*/React.createElement('label', { style: { fontSize: 13, color: T.txtSub, fontWeight: 600, display: 'block', marginTop: 14 } }, 'Téléphone (optionnel)',
-      /*#__PURE__*/React.createElement('input', {
-        style: inputStyle, value: telephone, onChange: e => setTelephone(e.target.value), type: 'tel'
-      })
+      /*#__PURE__*/React.createElement('div', { style: { marginTop: 6 } },
+        /*#__PURE__*/React.createElement(PhoneInput, { value: phone, onChange: setPhone, inputStyle: { ...inputStyle, marginTop: 0 } })
+      )
     ),
     err && /*#__PURE__*/React.createElement('div', { style: { color: T.no, fontSize: 13, marginTop: 10 } }, err),
     /*#__PURE__*/React.createElement('div', { style: { display: 'flex', gap: 10, marginTop: 20 } },
