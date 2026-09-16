@@ -11,25 +11,31 @@ function isIOS() {
 
 function RegisterForm({ restaurantSlug, onDone }) {
   const [prenom, setPrenom] = React.useState('');
+  const [nom, setNom] = React.useState('');
+  const [email, setEmail] = React.useState('');
   const [phone, setPhone] = React.useState({ country: DEFAULT_PHONE_COUNTRY, number: '' });
   const [cgu, setCgu] = React.useState(false);
   const [marketing, setMarketing] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
   const [error, setError] = React.useState(null);
 
+  const ready = prenom.trim() && nom.trim() && phone.number.trim() && cgu;
+
   async function submit(e) {
     e.preventDefault();
-    if (!prenom.trim() || !cgu) return;
+    if (!ready) return;
     setSaving(true);
     setError(null);
     try {
-      const telephone = phone.number.trim() ? toE164(phone.country.dial, phone.number, phone.country.code) : null;
+      const telephone = toE164(phone.country.dial, phone.number, phone.country.code);
       const res = await fetch('/api/register-customer', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           slug: restaurantSlug,
           prenom: prenom.trim(),
+          nom: nom.trim(),
+          email: email.trim() || null,
           telephone,
           consentementCgu: cgu,
           consentementMarketing: marketing
@@ -59,15 +65,27 @@ function RegisterForm({ restaurantSlug, onDone }) {
     /*#__PURE__*/React.createElement('div', { style: { fontWeight: 800, fontSize: 20, marginBottom: 4 } }, 'Rejoindre la fidélité'),
     /*#__PURE__*/React.createElement('div', { style: { fontSize: 13, color: T.txtSub, marginBottom: 18 } }, '1€ dépensé = 1 point. Récompenses à débloquer, carte dans votre téléphone.'),
 
-    /*#__PURE__*/React.createElement('label', { style: { fontSize: 13, color: T.txtSub, fontWeight: 600 } }, 'Prénom',
-      /*#__PURE__*/React.createElement('input', {
-        style: { ...inputStyle, width: '100%', marginTop: 6 }, value: prenom, onChange: e => setPrenom(e.target.value), autoFocus: true
-      })
+    /*#__PURE__*/React.createElement('div', { style: { display: 'flex', gap: 10 } },
+      /*#__PURE__*/React.createElement('label', { style: { fontSize: 13, color: T.txtSub, fontWeight: 600, flex: 1 } }, 'Prénom',
+        /*#__PURE__*/React.createElement('input', {
+          style: { ...inputStyle, width: '100%', marginTop: 6 }, value: prenom, onChange: e => setPrenom(e.target.value), autoFocus: true
+        })
+      ),
+      /*#__PURE__*/React.createElement('label', { style: { fontSize: 13, color: T.txtSub, fontWeight: 600, flex: 1 } }, 'Nom',
+        /*#__PURE__*/React.createElement('input', {
+          style: { ...inputStyle, width: '100%', marginTop: 6 }, value: nom, onChange: e => setNom(e.target.value)
+        })
+      )
     ),
-    /*#__PURE__*/React.createElement('label', { style: { fontSize: 13, color: T.txtSub, fontWeight: 600, display: 'block', marginTop: 14 } }, 'Téléphone (optionnel)',
+    /*#__PURE__*/React.createElement('label', { style: { fontSize: 13, color: T.txtSub, fontWeight: 600, display: 'block', marginTop: 14 } }, 'Téléphone',
       /*#__PURE__*/React.createElement('div', { style: { marginTop: 6 } },
         /*#__PURE__*/React.createElement(PhoneInput, { value: phone, onChange: setPhone, inputStyle })
       )
+    ),
+    /*#__PURE__*/React.createElement('label', { style: { fontSize: 13, color: T.txtSub, fontWeight: 600, display: 'block', marginTop: 14 } }, 'Email (optionnel)',
+      /*#__PURE__*/React.createElement('input', {
+        type: 'email', style: { ...inputStyle, width: '100%', marginTop: 6 }, value: email, onChange: e => setEmail(e.target.value)
+      })
     ),
 
     /*#__PURE__*/React.createElement('label', { style: { display: 'flex', gap: 8, alignItems: 'flex-start', marginTop: 18, fontSize: 12, color: T.txt } },
@@ -82,7 +100,7 @@ function RegisterForm({ restaurantSlug, onDone }) {
     error && /*#__PURE__*/React.createElement('div', { style: { color: T.no, fontSize: 13, marginTop: 12 } }, error),
 
     /*#__PURE__*/React.createElement('button', {
-      type: 'submit', disabled: saving || !prenom.trim() || !cgu,
+      type: 'submit', disabled: saving || !ready,
       style: {
         width: '100%', marginTop: 18, padding: '15px 0', borderRadius: 14, border: 'none', fontWeight: 700, fontSize: 15,
         background: T.primary, color: '#fff', cursor: 'pointer', opacity: saving ? 0.6 : 1

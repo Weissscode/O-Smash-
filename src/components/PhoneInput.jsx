@@ -20,7 +20,7 @@ export function PhoneInput({ value, onChange, inputStyle }) {
       value: country.code,
       onChange: e => onChange({ country: findCountry(e.target.value), number }),
       style: {
-        ...inputStyle, width: 110, flexShrink: 0, cursor: 'pointer'
+        ...inputStyle, width: 78, padding: '13px 4px', flexShrink: 0, cursor: 'pointer'
       }
     },
       PRIORITY_PHONE_COUNTRIES.map(c => /*#__PURE__*/React.createElement('option', { key: c.code, value: c.code }, `${c.flag} ${c.dial}`)),
