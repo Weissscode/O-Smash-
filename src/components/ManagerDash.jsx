@@ -17,6 +17,75 @@ const MANAGER_TABS = [
   { key: 'analytics', label: 'Analytics' }
 ];
 
+function ManagerInstallButton() {
+  const [installPrompt, setInstallPrompt] = React.useState(null);
+  const [showHelp, setShowHelp] = React.useState(false);
+  const [installed, setInstalled] = React.useState(
+    () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true
+  );
+
+  React.useEffect(() => {
+    const capturePrompt = event => {
+      event.preventDefault();
+      setInstallPrompt(event);
+    };
+    const markInstalled = () => {
+      setInstalled(true);
+      setShowHelp(false);
+      setInstallPrompt(null);
+    };
+    window.addEventListener('beforeinstallprompt', capturePrompt);
+    window.addEventListener('appinstalled', markInstalled);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', capturePrompt);
+      window.removeEventListener('appinstalled', markInstalled);
+    };
+  }, []);
+
+  if (installed) return null;
+
+  const install = async () => {
+    if (!installPrompt) {
+      setShowHelp(true);
+      return;
+    }
+    await installPrompt.prompt();
+    const choice = await installPrompt.userChoice;
+    if (choice.outcome === 'accepted') setInstalled(true);
+    setInstallPrompt(null);
+  };
+
+  return /*#__PURE__*/React.createElement(React.Fragment, null,
+    /*#__PURE__*/React.createElement('button', {
+      className: 'mr-install-button',
+      onClick: install,
+      type: 'button',
+      title: "Installer O'SMASH Manager"
+    },
+      /*#__PURE__*/React.createElement('span', { 'aria-hidden': true }, '↓'),
+      /*#__PURE__*/React.createElement('span', null, 'Installer')
+    ),
+    showHelp && /*#__PURE__*/React.createElement('div', {
+      className: 'mr-install-backdrop',
+      onClick: () => setShowHelp(false)
+    },
+      /*#__PURE__*/React.createElement('div', {
+        className: 'mr-install-sheet',
+        role: 'dialog',
+        'aria-modal': true,
+        'aria-labelledby': 'manager-install-title',
+        onClick: event => event.stopPropagation()
+      },
+        /*#__PURE__*/React.createElement('div', { className: 'mr-install-handle' }),
+        /*#__PURE__*/React.createElement('h2', { id: 'manager-install-title' }, "Installer O'SMASH Manager"),
+        /*#__PURE__*/React.createElement('p', null, "Sur iPhone : touchez Partager, puis « Sur l'écran d'accueil »."),
+        /*#__PURE__*/React.createElement('p', null, "Sur Android : ouvrez le menu du navigateur, puis « Installer l'application »."),
+        /*#__PURE__*/React.createElement('button', { type: 'button', onClick: () => setShowHelp(false) }, 'Compris')
+      )
+    )
+  );
+}
+
 function ManagerTabSwitch({ tab, setTab }) {
   return /*#__PURE__*/React.createElement('div', {
     className: 'osm-manager-tabs',
@@ -113,6 +182,7 @@ export function ManagerDash({ restaurantId, restaurantName }) {
         }, restaurantName || '')
       ),
       /*#__PURE__*/React.createElement('div', { className: 'osm-header-right' },
+        /*#__PURE__*/React.createElement(ManagerInstallButton, null),
         /*#__PURE__*/React.createElement('button', {
           className: 'osm-btn-premium',
           onClick: () => signOut(),

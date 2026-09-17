@@ -107,6 +107,14 @@
 .mr-page-header .mr-segments button { min-height:40px; font-size:11px; }
 .mr-page-header:has(.mr-segments) p { max-width:185px; font-size:10px; line-height:1.5; }
 .mr-manager-tab-icon { display:none; }
+.mr-install-button { min-height:40px; display:inline-flex; align-items:center; justify-content:center; gap:5px; padding:8px 11px; border:1px solid #e2dce8; border-radius:8px; background:#f4f0f7; color:#604675; font-size:11px; font-weight:600; }
+.mr-install-button > span:first-child { font-size:16px; line-height:1; }
+.mr-install-backdrop { position:fixed; inset:0; z-index:2500; display:flex; align-items:flex-end; justify-content:center; padding:16px; background:rgba(29,24,33,.34); }
+.mr-install-sheet { width:min(100%,420px); padding:8px 20px 20px; border-radius:20px 20px 14px 14px; background:#fff; box-shadow:0 18px 60px rgba(37,25,43,.22); }
+.mr-install-handle { width:38px; height:4px; margin:2px auto 18px; border-radius:4px; background:#d9d3dd; }
+.mr-install-sheet h2 { margin:0 0 12px; font-size:18px; color:#2d2633; }
+.mr-install-sheet p { margin:0 0 10px; color:#716a76; font-size:13px; line-height:1.5; }
+.mr-install-sheet > button { width:100%; min-height:44px; margin-top:8px; border:0; border-radius:10px; background:#6d557f; color:#fff; font-weight:600; }
 @media (max-width:600px) {
   .osm-manager-shell { height:100dvh !important; padding-bottom:calc(64px + env(safe-area-inset-bottom,0px)); }
   .osm-manager-header { display:flex !important; flex-direction:row; justify-content:space-between; padding:4px 16px !important; min-height:48px; gap:8px; }
@@ -114,7 +122,9 @@
   .osm-manager-header .osm-header-center { gap:8px; }
   .osm-manager-header .osm-header-center img { width:30px !important; height:30px !important; }
   .osm-manager-header .osm-header-center > div { font-size:12px !important; max-width:45vw !important; }
-  .osm-manager-header .osm-header-right button { min-height:40px; font-size:10px !important; }
+  .osm-manager-header .osm-header-right { gap:6px; }
+  .osm-manager-header .osm-header-right button { min-height:40px; padding:7px 9px !important; font-size:10px !important; }
+  .mr-install-button > span:last-child { display:none; }
   .osm-manager-tabs { position:fixed; bottom:0; left:0; right:0; margin:0 !important; z-index:80; border-radius:0 !important; border:0 !important; border-top:1px solid #e9e7eb !important; padding:4px 16px calc(4px + env(safe-area-inset-bottom,0px)) !important; min-height:64px; }
   .osm-manager-tabs button { min-height:55px; display:flex; flex-direction:column; align-items:center; gap:4px; font-size:11px !important; color:#78747d !important; background:white !important; }
   .osm-manager-tabs button[aria-current='page'] { color:#604675 !important; background:#f1ecf6 !important; border-radius:10px !important; }
@@ -126,3 +136,4 @@
   .osm-mobile-cart-bar { bottom:calc(64px + env(safe-area-inset-bottom,0px)) !important; min-height:76px; }
   .osm-mobile-cart-drawer { bottom:calc(140px + env(safe-area-inset-bottom,0px)) !important; }
 }
+

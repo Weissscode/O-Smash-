@@ -5,19 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
     <title>O'SMASH POS</title>
 
-    <link rel="manifest" href="/manifest.webmanifest" />
+    <link id="osmash-manifest" rel="manifest" href="/manifest.webmanifest" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="icon" href="/icon-192.png" />
     <meta name="theme-color" content="#F6F6F4" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-    <meta name="apple-mobile-web-app-title" content="O'Smash" />
+    <meta id="osmash-app-title" name="apple-mobile-web-app-title" content="O'Smash" />
     <meta name="mobile-web-app-capable" content="yes" />
+    <script>
+      if (window.location.pathname.startsWith('/gestion')) {
+        document.title = "O'SMASH Manager";
+        document.getElementById('osmash-manifest').href = '/manifest-manager.webmanifest';
+        document.getElementById('osmash-app-title').content = "O'SMASH Manager";
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
+
 
 

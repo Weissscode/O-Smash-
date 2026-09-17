@@ -10,8 +10,15 @@ import './index.css';
 
 const mode = window.location.pathname.startsWith('/gestion') ? 'manager' : 'pos';
 
+if (mode === 'manager' && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/manager-sw.js', { scope: '/gestion' }).catch(() => {});
+  });
+}
+
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <AuthGate mode={mode} />
   </React.StrictMode>
 );
+
