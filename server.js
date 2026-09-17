@@ -37,6 +37,25 @@ function ft(d) { return new Date(d).toLocaleTimeString('fr-FR', { hour: '2-digit
 function fd(d) { return new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }); }
 function cmd(arr) { return Buffer.from(arr); }
 
+// ── FORMAT TELEPHONE (affichage uniquement, meme regle que le front) ─────────
+var PHONE_COUNTRY_CODES = ['352', '33', '32', '41', '49', '39', '34', '44', '1'].sort(function(a, b) { return b.length - a.length; });
+function formatPhoneDisplay(raw) {
+  if (!raw) return raw;
+  var isIntl = raw.trim().indexOf('+') === 0;
+  var digits = raw.replace(/[^0-9]/g, '');
+  if (!digits) return raw;
+  if (isIntl) {
+    var code = PHONE_COUNTRY_CODES.filter(function(c) { return digits.indexOf(c) === 0; })[0];
+    var ccLen = code ? code.length : 2;
+    var cc = digits.slice(0, ccLen);
+    var rest = digits.slice(ccLen);
+    var groups = rest.match(/.{1,2}/g) || [];
+    return '+' + cc + (groups.length ? '-' + groups.join('-') : '');
+  }
+  var groups2 = digits.match(/.{1,2}/g) || [];
+  return groups2.join('-');
+}
+
 // ── NORMALISATION ACCENTS ─────────────────────────────────────────────────────
 function norm(s) {
   if (!s) return '';
@@ -305,7 +324,7 @@ function buildCuisine(order) {
     b.push(cmd(E.CT));
     b.push(cmd(E.DBL));
     if (order.client) b.push(txt(order.client.toUpperCase()));
-    if (order.phone)  b.push(txt(order.phone.toUpperCase()));
+    if (order.phone)  b.push(txt(formatPhoneDisplay(order.phone).toUpperCase()));
     b.push(cmd(E.NRM));
   }
 
