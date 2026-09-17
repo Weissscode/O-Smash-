@@ -494,7 +494,7 @@ export default function App({ restaurantId }) {
   };
   const renderGrid = () => {
     const prods = xMap[selCat] || [];
-    const pb = mob ? '10px 12px 76px' : '10px 14px 14px';
+    const pb = mob ? '8px 12px 76px' : '8px 14px 14px';
     if (selCat === 'burger') {
       return /*#__PURE__*/React.createElement("div", {
         style: {
@@ -720,8 +720,8 @@ export default function App({ restaurantId }) {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      padding: '0 20px',
-      height: 104,
+      padding: '0 18px',
+      height: 72,
       background: T.bgCard,
       flexShrink: 0,
       borderBottom: `1px solid ${T.brd}`
@@ -732,12 +732,12 @@ export default function App({ restaurantId }) {
       alignItems: 'center',
       gap: 4
     }
-  }, /*#__PURE__*/React.createElement(Logo, {size: 84}), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(Logo, {size: 52}), /*#__PURE__*/React.createElement("div", {
     style: {
       width: 1,
-      height: 48,
+      height: 36,
       background: T.brd,
-      margin: '0 16px'
+      margin: '0 14px'
     }
   }), [{
     id: 'pos',
@@ -762,7 +762,7 @@ export default function App({ restaurantId }) {
     onClick: () => t.pr ? setPinFor(t.id) : setView(t.id),
     className: 'osm-nav-tab',
     'aria-current': view === t.id ? 'page' : undefined
-  }, /*#__PURE__*/React.createElement(PosIcon, {name: t.id, size: 22}), t.l, t.badge > 0 && /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement(PosIcon, {name: t.id, size: 20}), t.l, t.badge > 0 && /*#__PURE__*/React.createElement("span", {
     style: {
       position: 'absolute',
       top: 2,
@@ -845,8 +845,8 @@ export default function App({ restaurantId }) {
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
-      gap: 8,
-      padding: '12px 18px',
+      gap: 6,
+      padding: '6px 14px',
       overflowX: 'auto',
       flexShrink: 0,
       borderBottom: `1px solid ${T.brd}`,

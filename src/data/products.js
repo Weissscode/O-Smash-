@@ -30,10 +30,6 @@ export const CATS = [{
   id: 'milkshake',
   name: 'Milkshakes',
   color: '#7C3AED'
-}, {
-  id: 'crepes',
-  name: 'Crêpes',
-  color: '#B45309'
 }];
 export const BURGERS = [{
   id: 'b-orig',
