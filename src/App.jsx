@@ -444,7 +444,7 @@ export default function App({ restaurantId }) {
         ...card(),
         background: PRODUCT_TINTS[i % PRODUCT_TINTS.length],
         borderRadius: 4,
-        padding: big ? (mob ? '32px 20px' : '36px 24px') : (mob ? '18px 13px' : '20px 14px'),
+        padding: big ? (mob ? '32px 20px' : '36px 24px') : (mob ? '16px 13px' : '18px 14px'),
         cursor: out ? 'not-allowed' : 'pointer',
         textAlign: 'center',
         display: 'flex',
@@ -452,7 +452,7 @@ export default function App({ restaurantId }) {
         alignItems: 'center',
         justifyContent: 'center',
         gap: big ? 10 : 7,
-        minHeight: big ? (mob ? 210 : 230) : (mob ? 120 : 132),
+        minHeight: big ? (mob ? 210 : 230) : (mob ? 114 : 126),
         position: 'relative',
         overflow: 'hidden',
         opacity: out ? 0.38 : 1,
@@ -720,8 +720,8 @@ export default function App({ restaurantId }) {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      padding: '0 18px',
-      height: 72,
+      padding: '0 16px',
+      height: 62,
       background: T.bgCard,
       flexShrink: 0,
       borderBottom: `1px solid ${T.brd}`
@@ -732,12 +732,12 @@ export default function App({ restaurantId }) {
       alignItems: 'center',
       gap: 4
     }
-  }, /*#__PURE__*/React.createElement(Logo, {size: 52}), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(Logo, {size: 44}), /*#__PURE__*/React.createElement("div", {
     style: {
       width: 1,
-      height: 36,
+      height: 30,
       background: T.brd,
-      margin: '0 14px'
+      margin: '0 12px'
     }
   }), [{
     id: 'pos',
@@ -762,7 +762,7 @@ export default function App({ restaurantId }) {
     onClick: () => t.pr ? setPinFor(t.id) : setView(t.id),
     className: 'osm-nav-tab',
     'aria-current': view === t.id ? 'page' : undefined
-  }, /*#__PURE__*/React.createElement(PosIcon, {name: t.id, size: 20}), t.l, t.badge > 0 && /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement(PosIcon, {name: t.id, size: 17}), t.l, t.badge > 0 && /*#__PURE__*/React.createElement("span", {
     style: {
       position: 'absolute',
       top: 2,
