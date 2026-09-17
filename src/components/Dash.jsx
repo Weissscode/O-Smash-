@@ -18,7 +18,7 @@ import {
 const PAYMENT_OPTIONS = ['Especes', 'CB'];
 const SERVICE_OPTIONS = ['Sur place', 'A emporter'];
 
-function categorySales(dayOrders) {
+export function categorySales(dayOrders) {
   const sales = {};
   CATEGORIES.forEach(c => { sales[c.key] = {}; });
   dayOrders.forEach(o => o.items.forEach(it => {
@@ -269,7 +269,7 @@ function EditField({ label, children }) {
   );
 }
 
-function OrderDetailModal({ order, onClose, onSave, onDelete }) {
+export function OrderDetailModal({ order, onClose, onSave, onDelete }) {
   const [editing, setEditing] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
   const [reprinting, setReprinting] = React.useState(false);

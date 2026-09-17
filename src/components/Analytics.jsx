@@ -1,3 +1,6 @@
+import { ManagerPeriodControl } from './ManagerPeriodControl.jsx';
+import { OrderDetailModal, categorySales } from './Dash.jsx';
+import { MobileOrders } from './MobileReports.jsx';
 import { useReportMobile, ReportHeader, DateControl, Segments, RevenueSummary, CategoryRanking, Services, Ranking, TrendChart, ReportCalendar } from './MobileReports.jsx';
 import React from 'react';
 import { T } from '../data/theme.js';
@@ -491,11 +494,12 @@ function DayNav({ selectedDate, setSelectedDate, isToday }) {
   );
 }
 
-function DayAnalysis({ filteredOrders, selectedDate, setSelectedDate, filterActive }) {
+function DayAnalysis({ filteredOrders, selectedDate, setSelectedDate, filterActive, management, service = 'all', onSelectOrder }) {
   const mobile = useReportMobile();
   const today = fd(selectedDate);
   const isToday = today === fd(new Date());
-  const dayOrders = filteredOrders.filter(o => fd(o.date) === today && o.status !== 'annulee');
+  const allDayOrders = filteredOrders.filter(o => fd(o.date) === today && o.status !== 'annulee');
+  const dayOrders = service === 'all' ? allDayOrders : allDayOrders.filter(o => (new Date(o.date).getHours() < 15) === (service === 'midi'));
 
   const rev = dayOrders.reduce((s, o) => s + o.total, 0);
   const revEsp = dayOrders.filter(o => (o.payment || '').toLowerCase().startsWith('esp')).reduce((s, o) => s + o.total, 0);
@@ -509,11 +513,12 @@ function DayAnalysis({ filteredOrders, selectedDate, setSelectedDate, filterActi
   const topProducts = topProductsFor(dayOrders, 5);
 
   if (mobile) return <>
-    <DateControl date={selectedDate} onChange={setSelectedDate} isToday={isToday}/>
-    <RevenueSummary rev={rev} count={dayOrders.length} avg={avgBasket} cash={revEsp} card={revCB} phone={telCount} tag="du jour"/>
+    {!management && <DateControl date={selectedDate} onChange={setSelectedDate} isToday={isToday}/>}
+    <RevenueSummary rev={rev} count={dayOrders.length} avg={avgBasket} cash={revEsp} card={revCB} phone={telCount} tag={service === 'all' ? 'du jour' : service === 'midi' ? 'du midi' : 'du soir'}/>
+    {!filterActive && <CategoryRanking stats={categoryStats} total={categoryTotal} products={management ? categorySales(dayOrders) : undefined}/>}
+    <Services orders={allDayOrders}/>
     <Ranking title="Produits les plus vendus" rows={topProducts.map(p=>({...p,detail:`${p.qty} vendu${p.qty !== 1 ? 's' : ''}`}))}/>
-    {!filterActive && <CategoryRanking stats={categoryStats} total={categoryTotal}/>}
-    <Services orders={dayOrders}/>
+    {management && <details className="mg-orders"><summary>Commandes du jour <span>{dayOrders.length} · Voir le détail</span></summary><MobileOrders orders={[...dayOrders].sort((a,b)=>new Date(b.date)-new Date(a.date))} tag="du jour" onSelect={onSelectOrder}/></details>}
   </>;
 
   return /*#__PURE__*/React.createElement(React.Fragment, null,
@@ -544,7 +549,7 @@ function DayAnalysis({ filteredOrders, selectedDate, setSelectedDate, filterActi
   );
 }
 
-function MonthAnalysis({ filteredOrders, month, setMonth, onSelectDay, filterActive }) {
+function MonthAnalysis({ filteredOrders, month, setMonth, onSelectDay, filterActive, management }) {
   const mobile = useReportMobile();
   const monthOrders = React.useMemo(
     () => filteredOrders.filter(o => monthKey(o.date) === monthKey(month) && o.status !== 'annulee'),
@@ -597,13 +602,13 @@ function MonthAnalysis({ filteredOrders, month, setMonth, onSelectDay, filterAct
   const winningService = midiRev === soirRev ? null : (midiRev > soirRev ? 'midi' : 'soir');
 
   if (mobile) return <>
-    <DateControl date={month} onChange={setMonth} monthly isToday={monthKey(month) === monthKey(new Date())}/>
+    {!management && <DateControl date={month} onChange={setMonth} monthly isToday={monthKey(month) === monthKey(new Date())}/>}
     <RevenueSummary rev={rev} count={count} avg={avgBasket} cash={revEsp} card={revCB} phone={telCount} tag="du mois" previous={hasPrevData}
       changes={hasPrevData ? {rev:pctChange(rev,prevRev),count:pctChange(count,prevCount),avg:pctChange(avgBasket,prevAvg)} : undefined}/>
+    {!filterActive && <CategoryRanking stats={categoryStats} total={categoryTotal}/>}
     <TrendChart key={monthKey(month)} buckets={dailyBuckets} max={maxDayRev} onSelectDay={onSelectDay}/>
     <Ranking title="Produits les plus vendus" rows={topProducts.map(p=>({...p,detail:`${p.qty} vendu${p.qty !== 1 ? 's' : ''}`}))}/>
     <Ranking title="Meilleurs jours" rows={topDays.map(b=>({name:dayOfWeekLabel(b.date),detail:`${b.count} commande${b.count !== 1 ? 's' : ''}`,revenue:b.total,date:b.date}))} onSelect={r=>onSelectDay(r.date)} empty="Les premières journées de vente apparaîtront ici."/>
-    {!filterActive && <CategoryRanking stats={categoryStats} total={categoryTotal}/>}
     <Services orders={monthOrders} comparison={[{rev:midiRev,count:midiOrders.length,avg:midiAvg},{rev:soirRev,count:soirOrders.length,avg:soirAvg}]}/>
     <ReportCalendar month={month} buckets={dailyBuckets} max={maxDayRev} onSelect={onSelectDay}/>
   </>;
@@ -667,22 +672,35 @@ function MonthAnalysis({ filteredOrders, month, setMonth, onSelectDay, filterAct
   );
 }
 
-export function Analytics({ orders }) {
+export function Analytics({ orders, management = false, onReset, onUpdateOrder, onDeleteOrder }) {
   const mobile = useReportMobile();
-  const [period, setPeriod] = React.useState('mois');
+  const [period, setPeriod] = React.useState(management ? 'jour' : 'mois');
+  const [service, setService] = React.useState('all');
+  const [selectedId, setSelectedId] = React.useState(null);
+  const pageRef = React.useRef(null);
+  const selectedOrder = orders.find(o => o.id === selectedId);
+  const selectOrder = o => setSelectedId(o.id);
   const [selectedDate, setSelectedDate] = React.useState(() => new Date());
   const [month, setMonth] = React.useState(() => new Date());
   const [filter, setFilter] = React.useState({ type: 'all' });
+  const FilterContainer = management ? 'details' : 'div';
 
   const productOptions = React.useMemo(() => distinctProducts(orders), [orders]);
   const filteredOrders = React.useMemo(() => applyFilter(orders, filter), [orders, filter]);
 
-  const goToDay = date => { setSelectedDate(date); setPeriod('jour'); };
+  const goToDay = date => { setSelectedDate(date); setPeriod('jour'); setService('all'); pageRef.current?.scrollTo({top:0}); };
+  const changePeriod = next => { if(next === 'mois') setMonth(new Date(selectedDate.getFullYear(),selectedDate.getMonth(),1)); else if(monthKey(month)!==monthKey(selectedDate)) setSelectedDate(new Date(month.getFullYear(),month.getMonth(),1)); setPeriod(next); setService('all'); };
 
-  if (mobile) return <main className="mr-page" aria-label="Analytics">
-    <ReportHeader title="Analytics" subtitle="Votre performance dans le temps">
+  if (mobile) return <main ref={pageRef} className={"mr-page" + (management ? " mg-page" : "")} aria-label={management ? "Management" : "Analytics"}>
+    {management ? <>
+      <ManagerPeriodControl period={period} date={period === 'jour' ? selectedDate : month} onChange={period === 'jour' ? setSelectedDate : setMonth} onPeriodChange={changePeriod}/>
+    </> : <ReportHeader title="Analytics" subtitle="Votre performance dans le temps">
       <Segments label="Période d’analyse" value={period} onChange={setPeriod} options={PERIODS.map(p=>[p.key,p.label])}/>
-    </ReportHeader>
+    </ReportHeader>}
+    <div className={management ? 'mg-toolbar' : undefined}>
+    {management && period === 'jour' && <Segments label="Service" value={service} onChange={setService} options={[["all","Journée"],["midi","Midi"],["soir","Soir"]]}/>}
+    <FilterContainer className={management ? "mg-filter-disclosure" : ""}>
+      {management && <summary aria-label="Filtrer les ventes">Filtres{filter.type !== 'all' && <b>1</b>}<span aria-hidden="true">⌄</span></summary>}
     <div className="mr-filters">
       <label><select aria-label="Filtrer par catégorie" value={filter.type==='category'?filter.key:''} onChange={e=>setFilter(e.target.value?{type:'category',key:e.target.value}:{type:'all'})}>
         <option value="">Toutes les catégories</option>{CATEGORIES.map(c=><option key={c.key} value={c.key}>{c.label}</option>)}
@@ -691,8 +709,13 @@ export function Analytics({ orders }) {
         <option value="">Tous les produits</option>{productOptions.map(p=><option key={p} value={p}>{p}</option>)}
       </select></label>
     </div>
-    {period==='jour' ? <DayAnalysis filteredOrders={filteredOrders} selectedDate={selectedDate} setSelectedDate={setSelectedDate} filterActive={filter.type!=='all'}/>
-      : <MonthAnalysis filteredOrders={filteredOrders} month={month} setMonth={setMonth} onSelectDay={goToDay} filterActive={filter.type!=='all'}/>}
+    </FilterContainer>
+    </div>
+    {management && filter.type !== 'all' && <button className="mg-active-filter" onClick={()=>setFilter({type:'all'})} aria-label="Effacer le filtre">{filter.type === 'product' ? filter.name : CATEGORIES.find(c=>c.key === filter.key)?.label}<span aria-hidden="true">×</span></button>}
+    {period==='jour' ? <DayAnalysis management={management} service={management ? service : 'all'} onSelectOrder={selectOrder} filteredOrders={filteredOrders} selectedDate={selectedDate} setSelectedDate={setSelectedDate} filterActive={filter.type!=='all'}/>
+      : <MonthAnalysis management={management} filteredOrders={filteredOrders} month={month} setMonth={setMonth} onSelectDay={goToDay} filterActive={filter.type!=='all'}/>}
+    {management && period === 'jour' && fd(selectedDate) === fd(new Date()) && onReset && <details className="mg-day-actions"><summary>Actions de la journée</summary><button onClick={onReset}>Réinitialiser la journée</button></details>}
+    {management && selectedOrder && <OrderDetailModal order={selectedOrder} onClose={()=>setSelectedId(null)} onSave={onUpdateOrder} onDelete={onDeleteOrder}/>}
   </main>;
 
   return /*#__PURE__*/React.createElement('div', {
