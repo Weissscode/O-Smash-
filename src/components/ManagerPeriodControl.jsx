@@ -21,11 +21,11 @@ export function ManagerPeriodControl({ period, date, onChange, onPeriodChange })
 
   return <section className="mg-period" aria-label="Période affichée">
     <div className="mg-period-top">
+      <h1>Vue d’ensemble</h1>
       <div className="mg-period-tabs" role="group" aria-label="Période d’analyse">
         <button aria-pressed={!monthly} onClick={() => onPeriodChange('jour')}>Jour</button>
         <button aria-pressed={monthly} onClick={() => onPeriodChange('mois')}>Mois</button>
       </div>
-      {!current && <button className="mg-today" onClick={() => onChange(monthly ? monthStart(today) : today)}>{monthly ? 'Ce mois-ci' : 'Aujourd’hui'}</button>}
     </div>
     <div className="mg-date-row">
       <button className="mg-date-label" aria-label={monthly ? 'Choisir un mois' : 'Choisir une date'} aria-haspopup="dialog" onClick={() => { setView(monthStart(date)); dialog.current.showModal(); }}>
@@ -36,6 +36,7 @@ export function ManagerPeriodControl({ period, date, onChange, onPeriodChange })
         <button aria-label={monthly ? 'Mois suivant' : 'Jour suivant'} disabled={monthly ? +monthStart(date) >= +monthStart(today) : date >= today} onClick={() => shift(1)}><IconChevronRight size={18}/></button>
       </div>
     </div>
+    {!current && <button className="mg-today" onClick={() => onChange(monthly ? monthStart(today) : today)}>{monthly ? 'Ce mois-ci' : 'Aujourd’hui'}</button>}
     <dialog ref={dialog} className="mg-date-sheet" aria-labelledby="mg-calendar-title" onClick={e => { if (e.target === dialog.current) dialog.current.close(); }}>
       <div className="mg-sheet-content">
         <div className="mg-sheet-title"><h2 id="mg-calendar-title"><IconCalendar size={18}/>{monthly ? 'Choisir un mois' : 'Choisir une date'}</h2><button aria-label="Fermer le calendrier" onClick={() => dialog.current.close()}><IconClose size={20}/></button></div>

@@ -693,14 +693,14 @@ export function Analytics({ orders, management = false, onReset, onUpdateOrder, 
 
   if (mobile) return <main ref={pageRef} className={"mr-page" + (management ? " mg-page" : "")} aria-label={management ? "Management" : "Analytics"}>
     {management ? <>
-      <div className="mg-page-heading"><h1>Vue d’ensemble</h1></div>
       <ManagerPeriodControl period={period} date={period === 'jour' ? selectedDate : month} onChange={period === 'jour' ? setSelectedDate : setMonth} onPeriodChange={changePeriod}/>
-      {period === 'jour' && <Segments label="Service" value={service} onChange={setService} options={[["all","Journée"],["midi","Midi"],["soir","Soir"]]}/>}
     </> : <ReportHeader title="Analytics" subtitle="Votre performance dans le temps">
       <Segments label="Période d’analyse" value={period} onChange={setPeriod} options={PERIODS.map(p=>[p.key,p.label])}/>
     </ReportHeader>}
+    <div className={management ? 'mg-toolbar' : undefined}>
+    {management && period === 'jour' && <Segments label="Service" value={service} onChange={setService} options={[["all","Journée"],["midi","Midi"],["soir","Soir"]]}/>}
     <FilterContainer className={management ? "mg-filter-disclosure" : ""}>
-      {management && <summary>Filtrer les ventes <span>{filter.type === 'all' ? 'Tous les articles' : filter.type === 'product' ? filter.name : CATEGORIES.find(c=>c.key === filter.key)?.label}<span aria-hidden="true">⌄</span></span></summary>}
+      {management && <summary aria-label="Filtrer les ventes">Filtres{filter.type !== 'all' && <b>1</b>}<span aria-hidden="true">⌄</span></summary>}
     <div className="mr-filters">
       <label><select aria-label="Filtrer par catégorie" value={filter.type==='category'?filter.key:''} onChange={e=>setFilter(e.target.value?{type:'category',key:e.target.value}:{type:'all'})}>
         <option value="">Toutes les catégories</option>{CATEGORIES.map(c=><option key={c.key} value={c.key}>{c.label}</option>)}
@@ -710,6 +710,8 @@ export function Analytics({ orders, management = false, onReset, onUpdateOrder, 
       </select></label>
     </div>
     </FilterContainer>
+    </div>
+    {management && filter.type !== 'all' && <button className="mg-active-filter" onClick={()=>setFilter({type:'all'})} aria-label="Effacer le filtre">{filter.type === 'product' ? filter.name : CATEGORIES.find(c=>c.key === filter.key)?.label}<span aria-hidden="true">×</span></button>}
     {period==='jour' ? <DayAnalysis management={management} service={management ? service : 'all'} onSelectOrder={selectOrder} filteredOrders={filteredOrders} selectedDate={selectedDate} setSelectedDate={setSelectedDate} filterActive={filter.type!=='all'}/>
       : <MonthAnalysis management={management} filteredOrders={filteredOrders} month={month} setMonth={setMonth} onSelectDay={goToDay} filterActive={filter.type!=='all'}/>}
     {management && period === 'jour' && fd(selectedDate) === fd(new Date()) && onReset && <details className="mg-day-actions"><summary>Actions de la journée</summary><button onClick={onReset}>Réinitialiser la journée</button></details>}
