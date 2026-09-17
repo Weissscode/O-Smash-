@@ -444,15 +444,15 @@ export default function App({ restaurantId }) {
         ...card(),
         background: PRODUCT_TINTS[i % PRODUCT_TINTS.length],
         borderRadius: 4,
-        padding: big ? (mob ? '46px 28px' : '52px 32px') : (mob ? '26px 16px' : '28px 18px'),
+        padding: big ? (mob ? '32px 20px' : '36px 24px') : (mob ? '16px 11px' : '18px 12px'),
         cursor: out ? 'not-allowed' : 'pointer',
         textAlign: 'center',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: big ? 14 : 10,
-        minHeight: big ? (mob ? 290 : 320) : (mob ? 172 : 186),
+        gap: big ? 10 : 6,
+        minHeight: big ? (mob ? 210 : 230) : (mob ? 108 : 118),
         position: 'relative',
         overflow: 'hidden',
         opacity: out ? 0.38 : 1,
@@ -479,14 +479,14 @@ export default function App({ restaurantId }) {
       }
     }, "Rupture")), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: big ? (mob ? 28 : 31) : (mob ? 19 : 20),
+        fontSize: big ? (mob ? 21 : 23) : (mob ? 14 : 15),
         fontWeight: 600,
         color: T.txt,
         lineHeight: 1.25
       }
     }, shortLabel), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: big ? (mob ? 30 : 33) : (mob ? 20 : 21),
+        fontSize: big ? (mob ? 22 : 24) : (mob ? 15 : 16),
         fontWeight: 700,
         color: T.txt
       }
@@ -504,7 +504,7 @@ export default function App({ restaurantId }) {
         style: {
           display: 'grid',
           gridTemplateColumns: 'repeat(3,minmax(0,1fr))',
-          gap: 8
+          gap: 6
         }
       }, prods.slice(0, 9).map((p, i) => /*#__PURE__*/React.createElement(PCard, {
         key: p.id,
@@ -515,8 +515,8 @@ export default function App({ restaurantId }) {
         style: {
           display: 'grid',
           gridTemplateColumns: 'repeat(3,minmax(0,1fr))',
-          gap: 8,
-          marginTop: 8
+          gap: 6,
+          marginTop: 6
         }
       }, prods.slice(9).map((p, i) => /*#__PURE__*/React.createElement(PCard, {
         key: p.id,
@@ -530,13 +530,13 @@ export default function App({ restaurantId }) {
     // Tres peu de produits (BAO, Riz Crousty...) = cases beaucoup plus grandes,
     // pour bien remplir l'ecran au lieu de laisser du vide.
     const big = sparse && prods.length <= 5;
-    const minW = big ? (mob ? 280 : 320) : sparse ? mob ? 150 : 190 : mob ? 125 : 150;
+    const minW = big ? (mob ? 220 : 250) : sparse ? mob ? 130 : 160 : mob ? 110 : 130;
     return /*#__PURE__*/React.createElement("div", {
       style: {
         padding: pb,
         display: 'grid',
         gridTemplateColumns: `repeat(auto-fill,minmax(${minW}px,1fr))`,
-        gap: big ? 16 : 8,
+        gap: big ? 10 : 6,
         alignContent: 'start'
       }
     }, prods.map((p, i) => /*#__PURE__*/React.createElement(PCard, {
