@@ -52,7 +52,7 @@ export function AuthGate({ mode = 'pos' }) {
   }
 
   if (!session) {
-    return /*#__PURE__*/React.createElement(AuthScreen, { onAuthed: setSession });
+    return /*#__PURE__*/React.createElement(AuthScreen, { onAuthed: setSession, loginOnly: mode === 'scan' });
   }
 
   if (profile === undefined) {
@@ -96,6 +96,12 @@ export function AuthGate({ mode = 'pos' }) {
   }
 
   if (mode === 'manager') {
+    if (profile.role !== 'gerant') {
+      window.location.replace('/gestion/scan');
+      return /*#__PURE__*/React.createElement('div', {
+        style: { minHeight: '100vh', display: 'grid', placeItems: 'center', background: T.bg, color: T.txtSub }
+      }, 'Ouverture du scanner...');
+    }
     return /*#__PURE__*/React.createElement(ManagerDash, {
       restaurantId: profile.restaurant_id,
       restaurantName: profile.restaurants ? profile.restaurants.nom : ''

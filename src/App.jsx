@@ -12,7 +12,7 @@ import { sendPrint, sendPrintCuisine } from './utils/printServer.js';
 import { printTicket } from './utils/ticketPrint.js';
 import { fetchOrders, insertOrder, insertOrders, updateOrder, deleteOrder, deleteOrdersForDate, flushQueue, hasPendingSync } from './utils/ordersApi.js';
 import { fetchStockOut, setStockStatus, resetStock, flushStockQueue, hasPendingStockSync } from './utils/stockApi.js';
-import { subscribeLoyaltyScans, recordOrderPoints } from './utils/loyaltyApi.js';
+import { subscribeLoyaltyScans, fetchScannedCustomer, recordOrderPoints } from './utils/loyaltyApi.js';
 import { Logo } from './components/Logo.jsx';
 import { Modal } from './components/Modal.jsx';
 import { PinModal } from './components/PinModal.jsx';
@@ -113,8 +113,10 @@ export default function App({ restaurantId, profile }) {
   const [loyaltyCustomer, setLoyaltyCustomer] = React.useState(null);
   React.useEffect(() => {
     if (!restaurantId) return;
-    return subscribeLoyaltyScans(restaurantId, ({ customer, card }) => {
-      setLoyaltyCustomer({ customer, cardId: card ? card.id : null });
+    return subscribeLoyaltyScans(restaurantId, ({ customerId, cardId }) => {
+      fetchScannedCustomer(restaurantId, cardId, customerId)
+        .then(setLoyaltyCustomer)
+        .catch(() => {});
     });
   }, [restaurantId]);
   React.useEffect(() => {

@@ -16,7 +16,8 @@ const REFRESH_MS = 20000;
 const MANAGER_TABS = [
   { key: 'dashboard', label: 'Dashboard' },
   { key: 'analytics', label: 'Analytics' },
-  { key: 'fidelite', label: 'Fidélité' }
+  { key: 'fidelite', label: 'Fidélité' },
+  { key: 'scan', label: 'Scan' }
 ];
 
 function ManagerInstallButton() {
@@ -104,7 +105,7 @@ function ManagerTabSwitch({ tab, setTab }) {
       key: t.key,
       'aria-current': tab === t.key ? 'page' : undefined,
       className: 'osm-btn-premium',
-      onClick: () => setTab(t.key),
+      onClick: () => t.key === 'scan' ? window.location.assign('/gestion/scan') : setTab(t.key),
       style: {
         flex: 1, padding: '10px 0', borderRadius: 6, border: 'none',
         background: tab === t.key ? T.primaryL : 'transparent',

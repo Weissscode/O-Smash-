@@ -58,8 +58,8 @@ export function LoyaltyPreview() {
       <div className="osm-header-right" />
     </header>
     <nav className="osm-manager-tabs" style={{ display: 'flex', gap: 4, margin: '12px 20px 0', padding: 4, border: '1px solid #e1dfdb', borderRadius: 6, background: '#fff' }}>
-      {['dashboard', 'analytics', 'fidelite'].map(item => <button key={item} type="button" aria-current={item === 'fidelite' ? 'page' : undefined} style={{ flex: 1, minHeight: 44, border: 0, borderRadius: 6, background: item === 'fidelite' ? '#e8ecf3' : 'transparent', color: item === 'fidelite' ? '#24292e' : '#62666b', font: '500 13px Roboto, sans-serif' }}>
-        <span className="mr-manager-tab-icon"><PosIcon name={item} /></span>{item === 'fidelite' ? 'Fidélité' : item[0].toUpperCase() + item.slice(1)}
+      {['dashboard', 'analytics', 'fidelite', 'scan'].map(item => <button key={item} type="button" aria-current={item === 'fidelite' ? 'page' : undefined} style={{ flex: 1, minHeight: 44, border: 0, borderRadius: 6, background: item === 'fidelite' ? '#e8ecf3' : 'transparent', color: item === 'fidelite' ? '#24292e' : '#62666b', font: '500 13px Roboto, sans-serif' }}>
+        <span className="mr-manager-tab-icon"><PosIcon name={item} /></span>{item === 'fidelite' ? 'Fidélité' : item === 'scan' ? 'Scan' : item[0].toUpperCase() + item.slice(1)}
       </button>)}
     </nav>
     <LoyaltyDash restaurantId="preview" dataSource={previewDataSource} />

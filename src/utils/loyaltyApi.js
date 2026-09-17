@@ -11,7 +11,7 @@ export function generateCardCode() {
 export async function lookupCardByCode(restaurantId, code) {
   const { data, error } = await supabase
     .from('loyalty_cards')
-    .select('id, statut, uid_nfc, customer_id, customers(*, loyalty_tiers(nom))')
+    .select('id, statut, uid_nfc, customer_id, customers(id, prenom, nom, points_balance, total_depense, nombre_visites, loyalty_tiers(nom))')
     .eq('restaurant_id', restaurantId)
     .eq('uid_nfc', code)
     .maybeSingle();
@@ -19,6 +19,21 @@ export async function lookupCardByCode(restaurantId, code) {
   if (!data) return { status: 'inconnue' };
   if (data.statut !== 'active') return { status: data.statut, card: data };
   return { status: 'active', card: data, customer: data.customers };
+}
+
+// La caisse ne fait pas confiance au contenu du broadcast Realtime.
+// Elle relit la carte et le client sous RLS avant de les rattacher.
+export async function fetchScannedCustomer(restaurantId, cardId, customerId) {
+  const { data, error } = await supabase
+    .from('loyalty_cards')
+    .select('id, statut, customer_id, customers(id, prenom, nom, points_balance, total_depense, nombre_visites, loyalty_tiers(nom))')
+    .eq('restaurant_id', restaurantId)
+    .eq('id', cardId)
+    .eq('customer_id', customerId)
+    .maybeSingle();
+  if (error) throw error;
+  if (!data || data.statut !== 'active' || !data.customers) throw new Error('Carte fidélité invalide');
+  return { customer: data.customers, cardId: data.id };
 }
 
 // Cree un nouveau client + sa carte active, et renvoie le code genere
@@ -233,17 +248,35 @@ export function subscribeLoyaltyScans(restaurantId, onScan) {
 
 let sendChannel = null;
 let sendChannelKey = null;
+let sendChannelReady = null;
 
 // Cote /scan : diffuse le client identifie vers la caisse abonnee.
-export function broadcastLoyaltyScan(restaurantId, payload) {
+export async function broadcastLoyaltyScan(restaurantId, payload) {
   if (sendChannel && sendChannelKey !== restaurantId) {
     supabase.removeChannel(sendChannel);
     sendChannel = null;
+    sendChannelReady = null;
   }
   if (!sendChannel) {
     sendChannel = supabase.channel(loyaltyChannelName(restaurantId));
-    sendChannel.subscribe();
     sendChannelKey = restaurantId;
+    sendChannelReady = new Promise((resolve, reject) => {
+      sendChannel.subscribe(status => {
+        if (status === 'SUBSCRIBED') resolve();
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') reject(new Error('Canal Realtime indisponible'));
+      });
+    });
   }
-  return sendChannel.send({ type: 'broadcast', event: 'scan', payload });
+  try {
+    await sendChannelReady;
+    const response = await sendChannel.send({ type: 'broadcast', event: 'scan', payload });
+    if (response !== 'ok') throw new Error('Envoi Realtime impossible');
+    return response;
+  } catch (error) {
+    if (sendChannel) supabase.removeChannel(sendChannel);
+    sendChannel = null;
+    sendChannelKey = null;
+    sendChannelReady = null;
+    throw error;
+  }
 }
