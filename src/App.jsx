@@ -444,15 +444,15 @@ export default function App({ restaurantId }) {
         ...card(),
         background: PRODUCT_TINTS[i % PRODUCT_TINTS.length],
         borderRadius: 4,
-        padding: big ? (mob ? '32px 20px' : '36px 24px') : (mob ? '16px 11px' : '18px 12px'),
+        padding: big ? (mob ? '32px 20px' : '36px 24px') : (mob ? '20px 13px' : '22px 14px'),
         cursor: out ? 'not-allowed' : 'pointer',
         textAlign: 'center',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: big ? 10 : 6,
-        minHeight: big ? (mob ? 210 : 230) : (mob ? 108 : 118),
+        gap: big ? 10 : 7,
+        minHeight: big ? (mob ? 210 : 230) : (mob ? 126 : 138),
         position: 'relative',
         overflow: 'hidden',
         opacity: out ? 0.38 : 1,
@@ -479,14 +479,14 @@ export default function App({ restaurantId }) {
       }
     }, "Rupture")), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: big ? (mob ? 21 : 23) : (mob ? 14 : 15),
+        fontSize: big ? (mob ? 21 : 23) : (mob ? 16 : 17),
         fontWeight: 600,
         color: T.txt,
         lineHeight: 1.25
       }
     }, shortLabel), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: big ? (mob ? 22 : 24) : (mob ? 15 : 16),
+        fontSize: big ? (mob ? 22 : 24) : (mob ? 17 : 18),
         fontWeight: 700,
         color: T.txt
       }
