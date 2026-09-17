@@ -1,0 +1,277 @@
+import React from 'react';
+import jsQR from 'jsqr';
+import { T } from '../data/theme.js';
+import { signOut } from '../utils/auth.js';
+import { lookupCardByCode, broadcastLoyaltyScan, fetchActiveRewards, redeemReward } from '../utils/loyaltyApi.js';
+
+const STATUT_LABELS = {
+  bloquee: 'Carte bloquée',
+  perdue: 'Carte déclarée perdue',
+  remplacee: 'Carte remplacée',
+  desactivee: 'Carte désactivée',
+  disponible: 'Carte pas encore associée'
+};
+
+function Btn({ label, onClick, kind = 'primary' }) {
+  const styles = {
+    primary: { background: T.primary, color: '#fff' },
+    ghost: { background: T.bgCard, color: T.txt, border: `1px solid ${T.brd}` }
+  };
+  return /*#__PURE__*/React.createElement('button', {
+    onClick,
+    style: {
+      padding: '14px 22px', borderRadius: 14, fontWeight: 700, fontSize: 15,
+      cursor: 'pointer', border: 'none', boxShadow: T.sh, ...styles[kind]
+    }
+  }, label);
+}
+
+function CameraScanner({ onDetected, active }) {
+  const videoRef = React.useRef(null);
+  const canvasRef = React.useRef(null);
+  const rafRef = React.useRef(null);
+  const [error, setError] = React.useState(null);
+
+  React.useEffect(() => {
+    if (!active) return;
+    let stream;
+    let cancelled = false;
+
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+      .then(s => {
+        if (cancelled) { s.getTracks().forEach(t => t.stop()); return; }
+        stream = s;
+        videoRef.current.srcObject = s;
+        videoRef.current.play();
+        tick();
+      })
+      .catch(() => setError("Impossible d'accéder à la caméra. Vérifiez les autorisations du navigateur."));
+
+    function tick() {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      if (video && canvas && video.readyState === video.HAVE_ENOUGH_DATA) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height);
+        if (code && code.data) {
+          onDetected(code.data);
+          return; // on arrete la boucle, le parent change de mode
+        }
+      }
+      rafRef.current = requestAnimationFrame(tick);
+    }
+
+    return () => {
+      cancelled = true;
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
+      if (stream) stream.getTracks().forEach(t => t.stop());
+    };
+  }, [active]);
+
+  if (error) {
+    return /*#__PURE__*/React.createElement('div', {
+      style: { padding: 24, textAlign: 'center', color: T.no, fontSize: 14 }
+    }, error);
+  }
+
+  return /*#__PURE__*/React.createElement('div', {
+    style: {
+      position: 'relative', width: '100%', maxWidth: 420, aspectRatio: '1 / 1',
+      borderRadius: 20, overflow: 'hidden', background: '#000', margin: '0 auto',
+      boxShadow: T.shSoft
+    }
+  },
+    /*#__PURE__*/React.createElement('video', {
+      ref: videoRef, muted: true, playsInline: true,
+      style: { width: '100%', height: '100%', objectFit: 'cover' }
+    }),
+    /*#__PURE__*/React.createElement('canvas', { ref: canvasRef, style: { display: 'none' } }),
+    /*#__PURE__*/React.createElement('div', {
+      style: {
+        position: 'absolute', inset: 24, border: '3px solid rgba(255,255,255,0.85)',
+        borderRadius: 16, pointerEvents: 'none'
+      }
+    })
+  );
+}
+
+function RewardCard({ reward, disabled, redeeming, onUse }) {
+  return /*#__PURE__*/React.createElement('div', {
+    style: {
+      minWidth: 140, background: disabled ? T.brdL : T.gradOrange, borderRadius: 14,
+      padding: 12, textAlign: 'center', opacity: disabled ? 0.6 : 1, flexShrink: 0
+    }
+  },
+    /*#__PURE__*/React.createElement('div', { style: { fontWeight: 700, fontSize: 13, color: T.txt } }, reward.nom),
+    /*#__PURE__*/React.createElement('div', { style: { fontSize: 12, color: T.txtSub, marginTop: 2 } }, `${reward.cout_points} pts`),
+    /*#__PURE__*/React.createElement('button', {
+      onClick: onUse,
+      disabled: disabled || redeeming,
+      style: {
+        marginTop: 8, padding: '6px 14px', borderRadius: 999, border: 'none', fontWeight: 700, fontSize: 12,
+        background: disabled ? T.brd : T.primary, color: disabled ? T.txtMuted : '#fff',
+        cursor: disabled ? 'not-allowed' : 'pointer'
+      }
+    }, redeeming ? '...' : 'Utiliser')
+  );
+}
+
+function CustomerCard({ customer: initialCustomer, cardCode, cardId, restaurantId, staffId, onReset }) {
+  const [customer, setCustomer] = React.useState(initialCustomer);
+  const [rewards, setRewards] = React.useState(null);
+  const [redeemingId, setRedeemingId] = React.useState(null);
+  const [message, setMessage] = React.useState(null);
+  const tier = customer.loyalty_tiers ? customer.loyalty_tiers.nom : null;
+
+  React.useEffect(() => {
+    fetchActiveRewards(restaurantId).then(setRewards).catch(() => setRewards([]));
+  }, [restaurantId]);
+
+  async function handleUse(reward) {
+    setRedeemingId(reward.id);
+    setMessage(null);
+    try {
+      const { newBalance } = await redeemReward(restaurantId, { customerId: customer.id, cardId, reward, staffId });
+      setCustomer(c => ({ ...c, points_balance: newBalance }));
+      setMessage(`🎁 ${reward.nom} utilisée !`);
+    } catch (e) {
+      setMessage("Impossible d'utiliser cette récompense.");
+    } finally {
+      setRedeemingId(null);
+    }
+  }
+
+  return /*#__PURE__*/React.createElement('div', {
+    style: {
+      background: T.bgCard, borderRadius: 20, padding: 28, maxWidth: 420,
+      margin: '0 auto', boxShadow: T.shSoft, textAlign: 'center'
+    }
+  },
+    /*#__PURE__*/React.createElement('div', { style: { fontSize: 22, fontWeight: 800, color: T.txt } },
+      `Salut ${customer.prenom} 👋`),
+    tier && /*#__PURE__*/React.createElement('div', {
+      style: {
+        display: 'inline-block', marginTop: 6, padding: '4px 12px', borderRadius: 999,
+        background: T.gradViolet, color: T.primaryD, fontWeight: 700, fontSize: 12
+      }
+    }, tier),
+    /*#__PURE__*/React.createElement('div', { style: { marginTop: 18, fontSize: 38, fontWeight: 800, color: T.primaryD } },
+      `⭐ ${customer.points_balance} pts`),
+    /*#__PURE__*/React.createElement('div', { style: { marginTop: 4, fontSize: 13, color: T.txtSub } },
+      `${customer.nombre_visites} visite(s) · ${customer.total_depense.toFixed(2)} € dépensés`),
+
+    rewards && rewards.length > 0 && /*#__PURE__*/React.createElement('div', { style: { marginTop: 20, textAlign: 'left' } },
+      /*#__PURE__*/React.createElement('div', { style: { fontSize: 12, fontWeight: 700, color: T.txtSub, marginBottom: 8 } }, 'Récompenses'),
+      /*#__PURE__*/React.createElement('div', { style: { display: 'flex', gap: 10, overflowX: 'auto', paddingBottom: 4 } },
+        rewards.map(r => /*#__PURE__*/React.createElement(RewardCard, {
+          key: r.id, reward: r,
+          disabled: customer.points_balance < r.cout_points,
+          redeeming: redeemingId === r.id,
+          onUse: () => handleUse(r)
+        }))
+      )
+    ),
+    message && /*#__PURE__*/React.createElement('div', { style: { marginTop: 12, fontSize: 13, fontWeight: 700, color: T.primaryD } }, message),
+
+    /*#__PURE__*/React.createElement('a', {
+      href: `/api/wallet-pass?code=${encodeURIComponent(cardCode)}`,
+      style: {
+        display: 'inline-block', marginTop: 18, padding: '10px 18px', borderRadius: 12,
+        background: '#000', color: '#fff', fontWeight: 700, fontSize: 13, textDecoration: 'none'
+      }
+    }, '  Ajouter à Apple Wallet'),
+    /*#__PURE__*/React.createElement('div', { style: { marginTop: 18 } },
+      /*#__PURE__*/React.createElement(Btn, { label: 'Nouveau scan', onClick: onReset })
+    )
+  );
+}
+
+function CardIssue({ status, onReset }) {
+  return /*#__PURE__*/React.createElement('div', {
+    style: {
+      background: T.noL, borderRadius: 20, padding: 28, maxWidth: 420,
+      margin: '0 auto', textAlign: 'center'
+    }
+  },
+    /*#__PURE__*/React.createElement('div', { style: { fontSize: 18, fontWeight: 800, color: T.no } },
+      STATUT_LABELS[status] || 'Carte non valide'),
+    /*#__PURE__*/React.createElement('div', { style: { marginTop: 6, fontSize: 13, color: T.txt } },
+      'Merci de contacter la caisse.'),
+    /*#__PURE__*/React.createElement('div', { style: { marginTop: 20 } },
+      /*#__PURE__*/React.createElement(Btn, { label: 'Nouveau scan', onClick: onReset })
+    )
+  );
+}
+
+function UnknownCode({ onReset }) {
+  return /*#__PURE__*/React.createElement('div', {
+    style: { textAlign: 'center', color: T.txtSub, fontSize: 14, maxWidth: 420, margin: '0 auto' }
+  },
+    'QR code non reconnu.',
+    /*#__PURE__*/React.createElement('div', { style: { marginTop: 16 } },
+      /*#__PURE__*/React.createElement(Btn, { label: 'Réessayer', onClick: onReset, kind: 'ghost' })
+    )
+  );
+}
+
+export function ScanFidelite({ restaurantId, profile }) {
+  const [mode, setMode] = React.useState('scan'); // scan | result
+  const [result, setResult] = React.useState(null);
+  const [busy, setBusy] = React.useState(false);
+
+  async function handleDetected(code) {
+    if (busy) return;
+    setBusy(true);
+    try {
+      const r = await lookupCardByCode(restaurantId, code);
+      setResult(r);
+      setMode('result');
+      if (r.status === 'active') {
+        broadcastLoyaltyScan(restaurantId, { customer: r.customer, card: r.card });
+      }
+    } catch (e) {
+      setResult({ status: 'erreur' });
+      setMode('result');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function reset() {
+    setResult(null);
+    setBusy(false);
+    setMode('scan');
+  }
+
+  return /*#__PURE__*/React.createElement('div', {
+    style: { minHeight: '100vh', background: T.bgGradient, padding: '24px 16px', boxSizing: 'border-box' }
+  },
+    /*#__PURE__*/React.createElement('div', {
+      style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', maxWidth: 420, margin: '0 auto 20px' }
+    },
+      /*#__PURE__*/React.createElement('div', { style: { fontWeight: 800, fontSize: 18, color: T.txt } }, "📷 Scan fidélité"),
+      /*#__PURE__*/React.createElement('button', {
+        onClick: () => signOut(),
+        style: { background: 'none', border: 'none', color: T.txtSub, fontSize: 13, cursor: 'pointer' }
+      }, 'Se déconnecter')
+    ),
+
+    mode === 'scan' && /*#__PURE__*/React.createElement(CameraScanner, { active: mode === 'scan', onDetected: handleDetected }),
+
+    mode === 'result' && result && result.status === 'active' &&
+      /*#__PURE__*/React.createElement(CustomerCard, {
+        customer: result.customer, cardCode: result.card.uid_nfc, cardId: result.card.id,
+        restaurantId, staffId: profile ? profile.id : null, onReset: reset
+      }),
+    mode === 'result' && result && result.status === 'inconnue' &&
+      /*#__PURE__*/React.createElement(UnknownCode, { onReset: reset }),
+    mode === 'result' && result && result.status === 'erreur' &&
+      /*#__PURE__*/React.createElement(UnknownCode, { onReset: reset }),
+    mode === 'result' && result && !['active', 'inconnue', 'erreur'].includes(result.status) &&
+      /*#__PURE__*/React.createElement(CardIssue, { status: result.status, onReset: reset })
+  );
+}

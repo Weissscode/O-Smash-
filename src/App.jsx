@@ -12,6 +12,7 @@ import { sendPrint, sendPrintCuisine } from './utils/printServer.js';
 import { printTicket } from './utils/ticketPrint.js';
 import { fetchOrders, insertOrder, insertOrders, updateOrder, deleteOrder, deleteOrdersForDate, flushQueue, hasPendingSync } from './utils/ordersApi.js';
 import { fetchStockOut, setStockStatus, resetStock, flushStockQueue, hasPendingStockSync } from './utils/stockApi.js';
+import { subscribeLoyaltyScans, recordOrderPoints } from './utils/loyaltyApi.js';
 import { Logo } from './components/Logo.jsx';
 import { Modal } from './components/Modal.jsx';
 import { PinModal } from './components/PinModal.jsx';
@@ -31,12 +32,13 @@ import { CItem } from './components/CItem.jsx';
 import { ConfirmModal } from './components/ConfirmModal.jsx';
 import { SplitModal } from './components/SplitModal.jsx';
 import { TelephoneView } from './components/TelephoneView.jsx';
+import { AttachedCustomer } from './components/loyalty/AttachedCustomer.jsx';
 
 // Fonds pastel tres legers, en rotation sur les cartes produits : de quoi les
 // distinguer d'un coup d'oeil sans couleur vive ni logique metier derriere.
 const PRODUCT_TINTS = ['#F8F5EF', '#F2F6FB', '#F6F3FA', '#F4F8F2', '#FBF4F1'];
 
-export default function App({ restaurantId }) {
+export default function App({ restaurantId, profile }) {
   const [view, setView] = React.useState('pos');
   const [selCat, setSelCat] = React.useState('burger');
   const [cart, setCart] = React.useState([]);
@@ -108,6 +110,13 @@ export default function App({ restaurantId }) {
   const [burgerStartM, setBurgerStartM] = React.useState(null);
   const [confirmM, setConfirmM] = React.useState(false);
   const [successM, setSuccessM] = React.useState(null);
+  const [loyaltyCustomer, setLoyaltyCustomer] = React.useState(null);
+  React.useEffect(() => {
+    if (!restaurantId) return;
+    return subscribeLoyaltyScans(restaurantId, ({ customer, card }) => {
+      setLoyaltyCustomer({ customer, cardId: card ? card.id : null });
+    });
+  }, [restaurantId]);
   React.useEffect(() => {
     const ck = () => setMob(window.innerWidth < 900);
     window.addEventListener('resize', ck);
@@ -164,6 +173,10 @@ export default function App({ restaurantId }) {
     const { num, offline: numOffline } = await getNextOrderNumRemote(restaurantId);
     if (numOffline) setSyncPending(true);
     const nomClient = clientName || null;
+    const isTel = !!(phoneVal && isPhoneNumber(phoneVal));
+    // Les points ne sont attribués qu'à l'encaissement immédiat : une
+    // commande téléphone (payée plus tard) n'est pas encore une vente.
+    const attachLoyalty = !isTel && !!loyaltyCustomer;
     const o = {
       id: uid(),
       num,
@@ -176,9 +189,11 @@ export default function App({ restaurantId }) {
       client: nomClient,
       phone: phoneVal || null,
       service,
-      payment
+      payment,
+      customerId: attachLoyalty ? loyaltyCustomer.customer.id : null,
+      cardId: attachLoyalty ? loyaltyCustomer.cardId : null,
+      pointsGagnes: attachLoyalty ? Math.floor(cartTotal) : null
     };
-    const isTel = !!(phoneVal && isPhoneNumber(phoneVal));
     if (isTel) {
       // Commande téléphone : stocker dans phoneOrders, imprimer seulement cuisine
       const phoneO = {
@@ -204,6 +219,18 @@ export default function App({ restaurantId }) {
       const { order: savedO, offline } = await insertOrder(restaurantId, { ...o, printRequest: 'full' });
       setSyncPending(offline || hasPendingSync());
       setAllOrders(p => [savedO, ...p]);
+      if (attachLoyalty && !offline) {
+        // Ne doit jamais bloquer/annuler la vente si ça échoue : la
+        // commande est déjà encaissée à ce stade.
+        recordOrderPoints(restaurantId, {
+          orderId: savedO.id,
+          customerId: loyaltyCustomer.customer.id,
+          cardId: loyaltyCustomer.cardId,
+          total: cartTotal,
+          staffId: profile ? profile.id : null
+        }).catch(() => {});
+      }
+      setLoyaltyCustomer(null);
       setCart([]);
       setClientName('');
       setConfirmM(false);
@@ -650,7 +677,12 @@ export default function App({ restaurantId }) {
       fontWeight: 600,
       color: T.primary
     }
-  }, fp(cartTotal))), phoneAddCtx ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
+  }, fp(cartTotal))), loyaltyCustomer && /*#__PURE__*/React.createElement(AttachedCustomer, {
+    customer: loyaltyCustomer.customer,
+    cartTotal,
+    restaurantId,
+    onDetach: () => setLoyaltyCustomer(null)
+  }), phoneAddCtx ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       background: '#F59E0B',
       color: '#fff',

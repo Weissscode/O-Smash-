@@ -1,0 +1,23 @@
+{
+  "formatVersion": 1,
+  "passTypeIdentifier": "pass.fr.osmash54.fidelite",
+  "teamIdentifier": "V7VW4WYV49",
+  "organizationName": "O'Smash",
+  "description": "Carte de fidélité O'Smash",
+  "backgroundColor": "rgb(148,100,214)",
+  "foregroundColor": "rgb(255,255,255)",
+  "labelColor": "rgb(255,255,255)",
+  "storeCard": {
+    "headerFields": [],
+    "primaryFields": [],
+    "secondaryFields": [],
+    "auxiliaryFields": [],
+    "backFields": [
+      {
+        "key": "infos",
+        "label": "O'Smash",
+        "value": "Présentez cette carte à chaque passage en caisse pour cumuler vos points et profiter de vos récompenses."
+      }
+    ]
+  }
+}

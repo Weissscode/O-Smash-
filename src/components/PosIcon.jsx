@@ -7,6 +7,7 @@ const paths = {
   stock: 'M3 7l9-4 9 4v10l-9 4-9-4z M3 7l9 4 9-4 M12 11v10 M7 5l9 4',
   dashboard: 'M3 3h7v7H3z M14 3h7v7h-7z M3 14h7v7H3z M14 14h7v7h-7z',
   analytics: 'M4 3v18h17 M8 16v-5 M13 16V6 M18 16V9',
+  fidelite: 'M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8z M22 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75',
   burger: 'M4 9a8 6 0 0 1 16 0z M3 13h18 M4 17h16v1a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z M9 6h.01 M14 5h.01',
   bao: 'M12 3C9 7 3 7 3 14a7 6 0 0 0 7 6h4a7 6 0 0 0 7-6c0-7-6-7-9-11z M12 3c-3 6-4 7-4 10 M12 3c3 6 4 7 4 10 M12 4v8',
   formule: 'M3 19h18 M5 16a7 7 0 0 1 14 0z M12 7V4 M10 4h4',

@@ -9,12 +9,14 @@ import { supabase } from '../supabaseClient.js';
 import { signOut } from '../utils/auth.js';
 import { Dash } from './Dash.jsx';
 import { Analytics } from './Analytics.jsx';
+import { LoyaltyDash } from './LoyaltyDash.jsx';
 
 const REFRESH_MS = 20000;
 
 const MANAGER_TABS = [
   { key: 'dashboard', label: 'Dashboard' },
-  { key: 'analytics', label: 'Analytics' }
+  { key: 'analytics', label: 'Analytics' },
+  { key: 'fidelite', label: 'Fidélité' }
 ];
 
 function ManagerInstallButton() {
@@ -174,8 +176,8 @@ export function ManagerDash({ restaurantId, restaurantName }) {
       /*#__PURE__*/React.createElement('div', { className: 'osm-header-left' }),
       /*#__PURE__*/React.createElement('div', { className: 'osm-header-center' },
         /*#__PURE__*/React.createElement('img', {
-          src: '/vice-code-logo.png', alt: 'Vice Code',
-          style: { height: 60, width: 60, objectFit: 'contain' }
+          src: '/osmash-logo.png', alt: 'O’SMASH',
+          style: { height: 52, width: 52, objectFit: 'contain' }
         }),
         /*#__PURE__*/React.createElement('div', {
           style: { color: T.txt, fontWeight: 600, fontSize: 15, maxWidth: '50vw', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }
@@ -191,7 +193,9 @@ export function ManagerDash({ restaurantId, restaurantName }) {
       )
     ),
     /*#__PURE__*/React.createElement(ManagerTabSwitch, { tab, setTab }),
-    !loaded
+    tab === 'fidelite'
+      ? /*#__PURE__*/React.createElement(LoyaltyDash, { restaurantId })
+      : !loaded
       ? /*#__PURE__*/React.createElement('div', {
           style: { textAlign: 'center', padding: 60, color: T.txtSub, fontSize: 14 }
         }, 'Chargement des commandes...')

@@ -5,6 +5,7 @@ import { AuthScreen } from './components/AuthScreen.jsx';
 import { getProfile, signOut } from './utils/auth.js';
 import App from './App.jsx';
 import { ManagerDash } from './components/ManagerDash.jsx';
+import { ScanFidelite } from './components/ScanFidelite.jsx';
 
 export function AuthGate({ mode = 'pos' }) {
   const [session, setSession] = React.useState(undefined);
@@ -98,6 +99,13 @@ export function AuthGate({ mode = 'pos' }) {
     return /*#__PURE__*/React.createElement(ManagerDash, {
       restaurantId: profile.restaurant_id,
       restaurantName: profile.restaurants ? profile.restaurants.nom : ''
+    });
+  }
+
+  if (mode === 'scan') {
+    return /*#__PURE__*/React.createElement(ScanFidelite, {
+      restaurantId: profile.restaurant_id,
+      profile
     });
   }
 
