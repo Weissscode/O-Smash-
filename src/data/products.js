@@ -30,10 +30,6 @@ export const CATS = [{
   id: 'milkshake',
   name: 'Milkshakes',
   color: '#7C3AED'
-}, {
-  id: 'crepes',
-  name: 'Crêpes',
-  color: '#B45309'
 }];
 export const BURGERS = [{
   id: 'b-orig',
@@ -103,18 +99,6 @@ export const BURGERS = [{
   price: 10.5,
   tag: 'SIGNATURE',
   desc: "Potato buns, double steak smashé, cheddar, avocat, salade, tomate, oignon, sauce avocado"
-}, {
-  id: 'b-mncc',
-  name: 'Mac n Cheese Chicken Burger',
-  price: 10.0,
-  tag: 'SIGNATURE',
-  desc: 'Potato buns, crispy chicken, cheddar, oignon, salade, tomate, sauce biggy ou spicy'
-}, {
-  id: 'b-mncb',
-  name: 'Mac n Cheese Beef Burger',
-  price: 10.0,
-  tag: 'SIGNATURE',
-  desc: 'Potato buns, double steak smashé, cheddar, oignon crispy, sauce biggy ou spicy'
 }];
 export const ETUD_CHOICES = [{
   id: 'b-orig',
@@ -203,18 +187,6 @@ export const BAO = [{
   price: 11.5,
   tag: 'BAO',
   desc: 'Bao, double steak smashé, cheddar, salade, tomate, oignon caramélisé, sauce honey barbecue'
-}, {
-  id: 'bao-mnc',
-  name: 'Mac n Chicken Cheese Burger',
-  price: 9.0,
-  tag: 'BAO',
-  desc: 'Mac n cheese, crispy chicken, sauce cheddar, oignon crispy, persil'
-}, {
-  id: 'bao-mncb',
-  name: 'Mac n Cheese Beef Burger',
-  price: 10.0,
-  tag: 'BAO',
-  desc: 'Potato buns, double steak smashé, cheddar, oignon crispy, sauce biggy ou spicy'
 }];
 export const LOADED = [{
   id: 'lo-wing',
@@ -443,8 +415,11 @@ export const CB = {
   }, {
     l: 'Supp. Steak Smashé',
     p: 2.5
+  }, {
+    l: 'Supp. Fonte Halloumi',
+    p: 2
   }],
-  sauces: ['Algérienne', 'Biggy', 'Smoke', 'Ketchup', 'Mayonnaise', 'BBQ', 'Honey', 'Spicy', 'Chicken', 'Truffe'],
+  sauces: ['Algérienne', 'Andalouse', 'Biggy', 'Smoke', 'Ketchup', 'Mayonnaise', 'BBQ', 'Honey', 'Spicy', 'Chicken', 'Truffe'],
   versions: ['Version Bœuf', 'Version Chicken']
 };
 export const CR = {
@@ -461,7 +436,7 @@ export const TOPS = [{
   l: 'Éclats pistache',
   p: 0.5
 }];
-export const FRITES_SAUCES = ['Algerienne', 'Biggy', 'Ketchup', 'Mayonnaise', 'BBQ'];
+export const FRITES_SAUCES = ['Algerienne', 'Andalouse', 'Biggy', 'Ketchup', 'Mayonnaise', 'BBQ'];
 export const TWISTER_SUPPS = [{
   l: 'Bacon',
   p: 1

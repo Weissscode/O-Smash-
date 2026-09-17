@@ -3,7 +3,7 @@ import { LS } from './storage.js';
 
 const QUEUE_KEY = 'osm7-sync-queue';
 
-function rowToOrder(row) {
+export function rowToOrder(row) {
   return {
     id: row.id,
     num: row.num,

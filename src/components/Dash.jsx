@@ -2,11 +2,13 @@ import { useReportMobile, ReportHeader, DateControl, Segments, RevenueSummary, C
 import React from 'react';
 import { T } from '../data/theme.js';
 import { fp, ft, fd } from '../utils/format.js';
+import { formatPhoneDisplay } from '../utils/phone.js';
+import { sendPrint } from '../utils/printServer.js';
 import { Modal } from './Modal.jsx';
 import {
   IconReceipt, IconBag, IconCash, IconCard, IconPhone,
   IconClock, IconClose, IconChevronLeft, IconChevronRight,
-  IconTrash, IconEdit, IconCalendar, IconCheck, IconChevronDown
+  IconTrash, IconEdit, IconPrinter, IconCalendar, IconCheck, IconChevronDown
 } from './icons.jsx';
 import {
   CATEGORIES, StatTile, HeroRevenue, PaymentHeroCard, SectionLabel, WideStat,
@@ -47,8 +49,10 @@ function custLines(cust, depth = 0) {
   if (cust.supplements) cust.supplements.forEach(s => lines.push(pad + '+ ' + s));
   if (cust.sauces) cust.sauces.forEach(s => lines.push(pad + 'Sauce : ' + s));
   if (cust.sauce) lines.push(pad + 'Sauce : ' + cust.sauce);
-  if (cust.fritesSauce) lines.push(pad + 'Sauce frites : ' + cust.fritesSauce);
+  if (cust.fritesSauces?.length) cust.fritesSauces.forEach(s => lines.push(pad + 'Sauce frites : ' + s));
+  else if (cust.fritesSauce) lines.push(pad + 'Sauce frites : ' + cust.fritesSauce);
   if (cust.fritesSupps) cust.fritesSupps.forEach(s => lines.push(pad + '+ ' + s));
+  if (cust.supps) cust.supps.forEach(s => lines.push(pad + '+ ' + s));
   if (cust.chantilly) lines.push(pad + '+ Chantilly');
   if (cust.toppings) cust.toppings.forEach(t => lines.push(pad + '+ ' + t));
   if (cust.glace) lines.push(pad + '+ Glace');
@@ -268,6 +272,8 @@ function EditField({ label, children }) {
 function OrderDetailModal({ order, onClose, onSave, onDelete }) {
   const [editing, setEditing] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
+  const [reprinting, setReprinting] = React.useState(false);
+  const [reprintMsg, setReprintMsg] = React.useState(null);
   const [form, setForm] = React.useState({
     client: order.client || '',
     phone: order.phone || '',
@@ -286,6 +292,19 @@ function OrderDetailModal({ order, onClose, onSave, onDelete }) {
     if (!window.confirm(`Supprimer la commande #${order.num} ? Cette action est définitive.`)) return;
     await onDelete(order.id);
     onClose();
+  };
+
+  const reprint = async () => {
+    setReprinting(true);
+    setReprintMsg(null);
+    const r = await sendPrint(order);
+    setReprinting(false);
+    const results = r && r.results;
+    const failed = results && Object.keys(results).some(k => results[k] !== 'ok' && results[k] !== 'skip');
+    setReprintMsg(r && r.success && !failed
+      ? { ok: true, text: 'Ticket renvoyé aux imprimantes.' }
+      : { ok: false, text: 'Échec de la réimpression (imprimante injoignable ?).' });
+    setTimeout(() => setReprintMsg(null), 4000);
   };
 
   return /*#__PURE__*/React.createElement(Modal, { onClose }, /*#__PURE__*/React.createElement('div', {
@@ -339,13 +358,22 @@ function OrderDetailModal({ order, onClose, onSave, onDelete }) {
           ]
         : [
             /*#__PURE__*/React.createElement(InfoRow, { key: 'client', label: 'Client', value: order.client || '—' }),
-            /*#__PURE__*/React.createElement(InfoRow, { key: 'phone', label: 'Téléphone', value: order.phone || '—' }),
+            /*#__PURE__*/React.createElement(InfoRow, { key: 'phone', label: 'Téléphone', value: order.phone ? formatPhoneDisplay(order.phone) : '—' }),
             /*#__PURE__*/React.createElement(InfoRow, { key: 'service', label: 'Service', value: order.service || '—' }),
             /*#__PURE__*/React.createElement(InfoRow, { key: 'payment', label: 'Paiement', value: order.payment || '—' }),
             order.printError && /*#__PURE__*/React.createElement('div', {
               key: 'print-error',
               style: { marginTop: 10, padding: '10px 12px', borderRadius: 6, background: T.noL, color: T.no, fontSize: 12.5, fontWeight: 600 }
             }, '⚠ Ticket non imprimé : ' + order.printError),
+            reprintMsg && /*#__PURE__*/React.createElement('div', {
+              key: 'reprint-msg',
+              style: {
+                marginTop: 10, padding: '10px 12px', borderRadius: 6,
+                background: reprintMsg.ok ? T.okL : T.noL,
+                color: reprintMsg.ok ? T.ok : T.no,
+                fontSize: 12.5, fontWeight: 600
+              }
+            }, reprintMsg.text),
             /*#__PURE__*/React.createElement('div', { key: 'items-title', style: { fontSize: 12.5, fontWeight: 600, color: T.txtMuted, textTransform: 'uppercase', letterSpacing: 0.6, marginTop: 16, marginBottom: 8 } }, 'Articles'),
             ...order.items.map((it, i) => /*#__PURE__*/React.createElement('div', {
               key: 'item' + i,
@@ -392,14 +420,21 @@ function OrderDetailModal({ order, onClose, onSave, onDelete }) {
               key: 'edit',
               className: 'osm-btn-premium',
               onClick: () => setEditing(true),
-              style: { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '13px', borderRadius: 6, border: `1px solid ${T.brd}`, background: T.gradViolet, color: T.txt, fontWeight: 600, fontSize: 15, cursor: 'pointer', boxShadow: 'none'}
-            }, /*#__PURE__*/React.createElement(IconEdit, { size: 17 }), 'Modifier'),
+              style: { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '13px 6px', borderRadius: 6, border: `1px solid ${T.brd}`, background: T.gradViolet, color: T.txt, fontWeight: 600, fontSize: 13.5, cursor: 'pointer', boxShadow: 'none'}
+            }, /*#__PURE__*/React.createElement(IconEdit, { size: 16 }), 'Modifier'),
+            /*#__PURE__*/React.createElement('button', {
+              key: 'reprint',
+              className: 'osm-btn-premium',
+              onClick: reprint,
+              disabled: reprinting,
+              style: { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '13px 6px', borderRadius: 6, border: `1px solid ${T.brd}`, background: T.gradViolet, color: T.txt, fontWeight: 600, fontSize: 13.5, cursor: 'pointer', opacity: reprinting ? 0.7 : 1, boxShadow: 'none'}
+            }, /*#__PURE__*/React.createElement(IconPrinter, { size: 16 }), reprinting ? 'Envoi...' : 'Réimprimer'),
             /*#__PURE__*/React.createElement('button', {
               key: 'delete',
               className: 'osm-btn-premium',
               onClick: del,
-              style: { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '13px', borderRadius: 6, border: 'none', background: T.bgCard, color: T.no, fontWeight: 600, fontSize: 15, cursor: 'pointer', boxShadow: 'none' }
-            }, /*#__PURE__*/React.createElement(IconTrash, { size: 17 }), 'Supprimer')
+              style: { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '13px 6px', borderRadius: 6, border: 'none', background: T.bgCard, color: T.no, fontWeight: 600, fontSize: 13.5, cursor: 'pointer', boxShadow: 'none' }
+            }, /*#__PURE__*/React.createElement(IconTrash, { size: 16 }), 'Supprimer')
           ]
     )
   ));
@@ -421,41 +456,67 @@ function PaymentPill({ payment }) {
   }, payment || '—');
 }
 
-function OrderCard({ order, onClick }) {
-  const displayName = order.client || order.phone || 'Commande';
-  return /*#__PURE__*/React.createElement('button', {
-    className: 'osm-tap-card',
-    onClick,
-    style: {
-      width: '100%',
-      display: 'block',
-      background: T.bgCard,
-      border: `1px solid ${T.brd}`,
-      borderRadius: 6,
-      boxShadow: 'none',
-      padding: '13px 16px',
-      textAlign: 'left',
-      cursor: 'pointer'
-    }
+function OrderCard({ order, onClick, onDelete }) {
+  const displayName = order.client || (order.phone ? formatPhoneDisplay(order.phone) : '') || 'Commande';
+  return /*#__PURE__*/React.createElement('div', {
+    style: { display: 'flex', alignItems: 'stretch', gap: 6 }
   },
-    /*#__PURE__*/React.createElement('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 } },
-      /*#__PURE__*/React.createElement('span', { style: { display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: T.txtMuted, fontWeight: 600 } },
-        '#' + order.num,
-        /*#__PURE__*/React.createElement('span', { style: { display: 'flex', alignItems: 'center', gap: 3 } }, /*#__PURE__*/React.createElement(IconClock, { size: 12 }), ft(order.date))
+    /*#__PURE__*/React.createElement('button', {
+      className: 'osm-tap-card',
+      onClick,
+      style: {
+        flex: 1,
+        minWidth: 0,
+        display: 'block',
+        background: T.bgCard,
+        border: `1px solid ${T.brd}`,
+        borderRadius: 6,
+        boxShadow: 'none',
+        padding: '13px 16px',
+        textAlign: 'left',
+        cursor: 'pointer'
+      }
+    },
+      /*#__PURE__*/React.createElement('div', { style: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 } },
+        /*#__PURE__*/React.createElement('span', { style: { display: 'flex', alignItems: 'center', gap: 6, fontSize: 12, color: T.txtMuted, fontWeight: 600 } },
+          '#' + order.num,
+          /*#__PURE__*/React.createElement('span', { style: { display: 'flex', alignItems: 'center', gap: 3 } }, /*#__PURE__*/React.createElement(IconClock, { size: 12 }), ft(order.date))
+        ),
+        /*#__PURE__*/React.createElement('span', { style: { display: 'flex', alignItems: 'center', gap: 6 } },
+          order.printError && /*#__PURE__*/React.createElement('span', {
+            title: order.printError,
+            style: { fontSize: 11, fontWeight: 600, color: T.no, background: T.noL, padding: '3px 8px', borderRadius: 6, flexShrink: 0 }
+          }, '⚠ Non imprimé'),
+          /*#__PURE__*/React.createElement(PaymentPill, { payment: order.payment })
+        )
       ),
-      /*#__PURE__*/React.createElement('span', { style: { display: 'flex', alignItems: 'center', gap: 6 } },
-        order.printError && /*#__PURE__*/React.createElement('span', {
-          title: order.printError,
-          style: { fontSize: 11, fontWeight: 600, color: T.no, background: T.noL, padding: '3px 8px', borderRadius: 6, flexShrink: 0 }
-        }, '⚠ Non imprimé'),
-        /*#__PURE__*/React.createElement(PaymentPill, { payment: order.payment })
-      )
+      /*#__PURE__*/React.createElement('div', { style: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10 } },
+        /*#__PURE__*/React.createElement('span', { style: { fontWeight: 600, fontSize: 16, color: T.txt, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, displayName),
+        /*#__PURE__*/React.createElement('span', { style: { fontWeight: 600, fontSize: 17, color: T.primaryD, flexShrink: 0 } }, fp(order.total))
+      ),
+      /*#__PURE__*/React.createElement('div', { style: { fontSize: 12.5, color: T.txtSub, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, itemsSummary(order.items))
     ),
-    /*#__PURE__*/React.createElement('div', { style: { display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10 } },
-      /*#__PURE__*/React.createElement('span', { style: { fontWeight: 600, fontSize: 16, color: T.txt, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, displayName),
-      /*#__PURE__*/React.createElement('span', { style: { fontWeight: 600, fontSize: 17, color: T.primaryD, flexShrink: 0 } }, fp(order.total))
-    ),
-    /*#__PURE__*/React.createElement('div', { style: { fontSize: 12.5, color: T.txtSub, marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }, itemsSummary(order.items))
+    /*#__PURE__*/React.createElement('button', {
+      onClick: e => {
+        e.stopPropagation();
+        if (!window.confirm(`Supprimer la commande #${order.num} ? Cette action est définitive.`)) return;
+        onDelete(order.id);
+      },
+      title: 'Supprimer la commande',
+      style: {
+        flexShrink: 0,
+        width: 42,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        border: `1px solid ${T.no}`,
+        borderRadius: 6,
+        background: T.noL,
+        color: T.no,
+        cursor: 'pointer',
+        boxShadow: 'none'
+      }
+    }, /*#__PURE__*/React.createElement(IconTrash, { size: 17 }))
   );
 }
 
@@ -618,7 +679,7 @@ export function Dash({ orders, onReset, onUpdateOrder, onDeleteOrder }) {
         ? /*#__PURE__*/React.createElement('div', {
             style: { padding: 40, textAlign: 'center', color: T.txtMuted, fontSize: 14, background: T.gradViolet, borderRadius: 6, border: `1px solid ${T.brd}`, boxShadow: 'none'}
           }, 'Aucune commande sur cette période')
-        : periodOrders.map(o => /*#__PURE__*/React.createElement(OrderCard, { key: o.id, order: o, onClick: () => setSelectedOrder(o) }))
+        : periodOrders.map(o => /*#__PURE__*/React.createElement(OrderCard, { key: o.id, order: o, onClick: () => setSelectedOrder(o), onDelete: handleDelete }))
     ),
 
     selectedOrder && /*#__PURE__*/React.createElement(OrderDetailModal, {

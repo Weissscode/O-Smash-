@@ -4,7 +4,8 @@ import { T } from '../data/theme.js';
 import { btn } from '../utils/styles.js';
 import { fd } from '../utils/format.js';
 import { LS } from '../utils/storage.js';
-import { fetchOrders, updateOrder, deleteOrder, deleteOrdersForDate } from '../utils/ordersApi.js';
+import { fetchOrders, updateOrder, deleteOrder, deleteOrdersForDate, rowToOrder } from '../utils/ordersApi.js';
+import { supabase } from '../supabaseClient.js';
 import { signOut } from '../utils/auth.js';
 import { Dash } from './Dash.jsx';
 import { Analytics } from './Analytics.jsx';
@@ -57,6 +58,33 @@ export function ManagerDash({ restaurantId, restaurantName }) {
     load();
     const t = setInterval(load, REFRESH_MS);
     return () => { cancelled = true; clearInterval(t); };
+  }, [restaurantId]);
+
+  // Mise a jour instantanee (sans refresh) quand une commande est creee,
+  // modifiee ou supprimee depuis n'importe quel appareil (tablette, PC,
+  // telephone). Le polling ci-dessus reste actif en filet de securite si
+  // un evenement Realtime est manque (ex: reconnexion reseau).
+  React.useEffect(() => {
+    if (!restaurantId) return;
+    const channel = supabase
+      .channel('dashboard-orders-' + restaurantId)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'orders',
+        filter: `restaurant_id=eq.${restaurantId}`
+      }, payload => {
+        if (payload.eventType === 'DELETE') {
+          setAllOrders(prev => prev.filter(o => o.id !== payload.old.id));
+          return;
+        }
+        const order = rowToOrder(payload.new);
+        setAllOrders(prev => prev.some(o => o.id === order.id)
+          ? prev.map(o => o.id === order.id ? order : o)
+          : [order, ...prev]);
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
   }, [restaurantId]);
 
   const orders = allOrders.filter(o => o.status !== 'en attente');

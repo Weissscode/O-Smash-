@@ -11,6 +11,10 @@ export function printTicket(order) {
       if (x.supplements?.length) c += x.supplements.map(s => `<div class="c s">+ ${s}</div>`).join('');
       if (x.sauces?.length) c += x.sauces.map(s => `<div class="c a">Sauce : ${s}</div>`).join('');
       if (x.sauce) c += `<div class="c a">Sauce : ${x.sauce}</div>`;
+      if (x.fritesSauces?.length) c += x.fritesSauces.map(s => `<div class="c a">Twister sauce : ${s}</div>`).join('');
+      else if (x.fritesSauce) c += `<div class="c a">Twister sauce : ${x.fritesSauce}</div>`;
+      if (x.fritesSupps?.length) c += x.fritesSupps.map(s => `<div class="c s">Twister + ${s}</div>`).join('');
+      if (x.supps?.length) c += x.supps.map(s => `<div class="c s">+ ${s}</div>`).join('');
       if (x.version) c += `<div class="c v">${x.version}</div>`;
       if (x.type) c += `<div class="c v">Type : ${x.type}</div>`;
       if (x.choix) c += `<div class="c v">Choix : ${x.choix}</div>`;

@@ -14,16 +14,23 @@ export function FritesSauce({
   initial
 }) {
   const def = {
-    sauce: '',
+    sauces: [],
     supps: []
   };
   const [s, setS] = React.useState(initial ? {
     ...def,
-    ...initial
+    ...initial,
+    // Retrocompatibilite : d'anciennes commandes en cours d'edition peuvent
+    // encore porter une sauce unique au lieu du tableau.
+    sauces: initial?.sauces || (initial?.sauce ? [initial.sauce] : [])
   } : def);
   const tog = l => setS(p => ({
     ...p,
     supps: p.supps.includes(l) ? p.supps.filter(x => x !== l) : [...p.supps, l]
+  }));
+  const togSauce = sa => setS(p => ({
+    ...p,
+    sauces: p.sauces.includes(sa) ? p.sauces.filter(x => x !== sa) : [...p.sauces, sa]
   }));
   const ext = s.supps.reduce((sum, l) => {
     const f = FRITES_SUPPS.find(x => x.l === l);
@@ -79,11 +86,8 @@ export function FritesSauce({
   }, FRITES_SAUCES.map(sa => /*#__PURE__*/React.createElement(Chip, {
     key: sa,
     label: sa,
-    active: s.sauce === sa,
-    onClick: () => setS(p => ({
-      ...p,
-      sauce: p.sauce === sa ? '' : sa
-    })),
+    active: s.sauces.includes(sa),
+    onClick: () => togSauce(sa),
     clr: T.primary
   }))), /*#__PURE__*/React.createElement(SL, {
     title: "SUPPL\xC9MENTS",

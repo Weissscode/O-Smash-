@@ -98,17 +98,18 @@ export function CItem({
       color: '#2563EB',
       fontSize: 10
     }
-  }, "Boisson : ", item.cust.drink), item.cust.fritesSauce && /*#__PURE__*/React.createElement("div", {
+  }, "Boisson : ", item.cust.drink), item.cust.fritesSauces?.map((s, j) => /*#__PURE__*/React.createElement("div", {
+    key: j,
     style: {
       color: '#0891B2',
       fontSize: 10
     }
-  }, "Twister sauce : ", item.cust.fritesSauce), item.cust.twisterSauce && !item.cust.fritesSauce && /*#__PURE__*/React.createElement("div", {
+  }, "Twister sauce : ", s)), !item.cust.fritesSauces?.length && item.cust.fritesSauce && /*#__PURE__*/React.createElement("div", {
     style: {
       color: '#0891B2',
       fontSize: 10
     }
-  }, "Twister sauce : ", item.cust.twisterSauce), item.cust.fritesSupps?.map((t, j) => /*#__PURE__*/React.createElement("div", {
+  }, "Twister sauce : ", item.cust.fritesSauce), item.cust.fritesSupps?.map((t, j) => /*#__PURE__*/React.createElement("div", {
     key: j,
     style: {
       color: T.ok,

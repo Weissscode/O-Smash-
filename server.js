@@ -37,6 +37,25 @@ function ft(d) { return new Date(d).toLocaleTimeString('fr-FR', { hour: '2-digit
 function fd(d) { return new Date(d).toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' }); }
 function cmd(arr) { return Buffer.from(arr); }
 
+// ── FORMAT TELEPHONE (affichage uniquement, meme regle que le front) ─────────
+var PHONE_COUNTRY_CODES = ['352', '33', '32', '41', '49', '39', '34', '44', '1'].sort(function(a, b) { return b.length - a.length; });
+function formatPhoneDisplay(raw) {
+  if (!raw) return raw;
+  var isIntl = raw.trim().indexOf('+') === 0;
+  var digits = raw.replace(/[^0-9]/g, '');
+  if (!digits) return raw;
+  if (isIntl) {
+    var code = PHONE_COUNTRY_CODES.filter(function(c) { return digits.indexOf(c) === 0; })[0];
+    var ccLen = code ? code.length : 2;
+    var cc = digits.slice(0, ccLen);
+    var rest = digits.slice(ccLen);
+    var groups = rest.match(/.{1,2}/g) || [];
+    return '+' + cc + (groups.length ? '-' + groups.join('-') : '');
+  }
+  var groups2 = digits.match(/.{1,2}/g) || [];
+  return groups2.join('-');
+}
+
 // ── NORMALISATION ACCENTS ─────────────────────────────────────────────────────
 function norm(s) {
   if (!s) return '';
@@ -95,6 +114,9 @@ function cuisineNomCourt(item) {
   var name = item.name || '';
   var cust = item.cust || {};
   var ver = '';
+
+  // Gratine Boursin : le mot "Crousti/Crousty" ne doit jamais apparaitre en cuisine.
+  if (item.pid === 'r-cgratb') return 'Gratine Boursin';
   var vSrc = (cust.version || '') + ' ' + (cust.protein || '');
   if (/chicken/i.test(vSrc)) ver = ' CHICKEN';
   else if (/boeuf|beef|steak/i.test(vSrc)) ver = ' STEAK';
@@ -179,8 +201,10 @@ function buildCaisse(order) {
       if (c.toppings)    c.toppings.forEach(function(t) { b.push(txt('  + ' + t)); });
       if (c.glace)       b.push(txt('  + Glace'));
       if (c.drink)       b.push(txt('  Boisson : ' + c.drink));
-      if (c.fritesSauce) b.push(txt('  Twister sauce : ' + c.fritesSauce));
+      if (c.fritesSauces) c.fritesSauces.forEach(function(s) { b.push(txt('  Twister sauce : ' + s)); });
+      else if (c.fritesSauce) b.push(txt('  Twister sauce : ' + c.fritesSauce));
       if (c.fritesSupps) c.fritesSupps.forEach(function(s) { b.push(txt('  Twister + ' + s)); });
+      if (c.supps) c.supps.forEach(function(s) { b.push(txt('  + ' + s)); });
       if (c.burgers) c.burgers.forEach(function(bur, i) {
         b.push(txt('  ' + (i+1) + '. ' + bur.name));
         if (bur.cust) {
@@ -300,7 +324,7 @@ function buildCuisine(order) {
     b.push(cmd(E.CT));
     b.push(cmd(E.DBL));
     if (order.client) b.push(txt(order.client.toUpperCase()));
-    if (order.phone)  b.push(txt(order.phone.toUpperCase()));
+    if (order.phone)  b.push(txt(formatPhoneDisplay(order.phone).toUpperCase()));
     b.push(cmd(E.NRM));
   }
 
@@ -343,10 +367,19 @@ function buildCuisine(order) {
         b.push(cmd(E.LT));
       }
 
-      if (c.fritesSauce) { b.push(cmd(E.BON)); b.push(txt('  TWISTER SAUCE : ' + norm(c.fritesSauce).toUpperCase())); b.push(cmd(E.BOFF)); }
+      if (c.fritesSauces && c.fritesSauces.length) {
+        b.push(cmd(E.BON));
+        c.fritesSauces.forEach(function(sa) { b.push(txt('  TWISTER SAUCE : ' + norm(sa).toUpperCase())); });
+        b.push(cmd(E.BOFF));
+      } else if (c.fritesSauce) { b.push(cmd(E.BON)); b.push(txt('  TWISTER SAUCE : ' + norm(c.fritesSauce).toUpperCase())); b.push(cmd(E.BOFF)); }
       if (c.fritesSupps && c.fritesSupps.length) {
         b.push(cmd(E.BON));
         b.push(txt('  TWISTER + ' + c.fritesSupps.map(function(x){return norm(x);}).join(' + ')));
+        b.push(cmd(E.BOFF));
+      }
+      if (c.supps && c.supps.length) {
+        b.push(cmd(E.BON));
+        b.push(txt('  + ' + c.supps.map(function(x){return norm(x);}).join(' + ')));
         b.push(cmd(E.BOFF));
       }
       // c.drink : JAMAIS affiche en cuisine (boisson incluse dans riz ou menus)
@@ -394,6 +427,20 @@ function buildCuisine(order) {
     b.push(txt(order.service.toUpperCase()));
     b.push(cmd(E.BOFF));
     b.push(cmd(E.NRM));
+  }
+
+  // ── MENTION TEST (bas a droite) ────────────────────────────
+  // Commande factice envoyee par le bouton TEST de la caisse, jamais une
+  // vraie commande client : bien visible pour qu'un employe ne la prepare pas.
+  if (order.isTest) {
+    b.push(cmd([0x0A]));
+    b.push(cmd(E.RT));
+    b.push(cmd(E.DBL));
+    b.push(cmd(E.BON));
+    b.push(txt('*** MENTION TEST ***'));
+    b.push(cmd(E.BOFF));
+    b.push(cmd(E.NRM));
+    b.push(cmd(E.LT));
   }
 
   b.push(cmd([0x0A])); b.push(cmd([0x0A])); b.push(cmd([0x0A]));
