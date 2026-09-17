@@ -1,5 +1,7 @@
 {
   "rewrites": [
+    { "source": "/gestion", "destination": "/gestion.html" },
+    { "source": "/gestion/(.*)", "destination": "/gestion.html" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
