@@ -720,8 +720,8 @@ export default function App({ restaurantId }) {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
-      padding: '0 16px',
-      height: 76,
+      padding: '0 20px',
+      height: 104,
       background: T.bgCard,
       flexShrink: 0,
       borderBottom: `1px solid ${T.brd}`
@@ -732,12 +732,12 @@ export default function App({ restaurantId }) {
       alignItems: 'center',
       gap: 4
     }
-  }, /*#__PURE__*/React.createElement(Logo, {size: 64}), /*#__PURE__*/React.createElement("div", {
+  }, /*#__PURE__*/React.createElement(Logo, {size: 84}), /*#__PURE__*/React.createElement("div", {
     style: {
       width: 1,
-      height: 36,
+      height: 48,
       background: T.brd,
-      margin: '0 12px'
+      margin: '0 16px'
     }
   }), [{
     id: 'pos',
@@ -762,7 +762,7 @@ export default function App({ restaurantId }) {
     onClick: () => t.pr ? setPinFor(t.id) : setView(t.id),
     className: 'osm-nav-tab',
     'aria-current': view === t.id ? 'page' : undefined
-  }, /*#__PURE__*/React.createElement(PosIcon, {name: t.id}), t.l, t.badge > 0 && /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement(PosIcon, {name: t.id, size: 22}), t.l, t.badge > 0 && /*#__PURE__*/React.createElement("span", {
     style: {
       position: 'absolute',
       top: 2,
@@ -845,8 +845,8 @@ export default function App({ restaurantId }) {
   }, /*#__PURE__*/React.createElement("div", {
     style: {
       display: 'flex',
-      gap: 4,
-      padding: '8px 14px',
+      gap: 8,
+      padding: '12px 18px',
       overflowX: 'auto',
       flexShrink: 0,
       borderBottom: `1px solid ${T.brd}`,
