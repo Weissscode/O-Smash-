@@ -430,7 +430,8 @@ export default function App({ restaurantId }) {
   const PCard = ({
     p,
     cat,
-    i = 0
+    i = 0,
+    big = false
   }) => {
     const out = stockOut.includes(p.id);
     // Nom court en carte : le nom complet (imprime, panier) n'est jamais touche.
@@ -443,15 +444,15 @@ export default function App({ restaurantId }) {
         ...card(),
         background: PRODUCT_TINTS[i % PRODUCT_TINTS.length],
         borderRadius: 4,
-        padding: mob ? '20px 14px' : '22px 16px',
+        padding: big ? (mob ? '32px 20px' : '36px 24px') : (mob ? '20px 14px' : '22px 16px'),
         cursor: out ? 'not-allowed' : 'pointer',
         textAlign: 'center',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        gap: 8,
-        minHeight: mob ? 138 : 150,
+        gap: big ? 10 : 8,
+        minHeight: big ? (mob ? 210 : 230) : (mob ? 138 : 150),
         position: 'relative',
         overflow: 'hidden',
         opacity: out ? 0.38 : 1,
@@ -478,14 +479,14 @@ export default function App({ restaurantId }) {
       }
     }, "Rupture")), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: mob ? 17 : 18,
+        fontSize: big ? (mob ? 21 : 23) : (mob ? 17 : 18),
         fontWeight: 600,
         color: T.txt,
         lineHeight: 1.25
       }
     }, shortLabel), /*#__PURE__*/React.createElement("div", {
       style: {
-        fontSize: mob ? 18 : 19,
+        fontSize: big ? (mob ? 22 : 24) : (mob ? 18 : 19),
         fontWeight: 700,
         color: T.txt
       }
@@ -526,20 +527,24 @@ export default function App({ restaurantId }) {
     }
     // Onglets peu remplis = cases un peu plus larges
     const sparse = ['bao', 'formule', 'riz', 'sides', 'desserts', 'boissons', 'milkshake', 'crepes'].includes(selCat);
-    const minW = sparse ? mob ? 150 : 190 : mob ? 125 : 150;
+    // Tres peu de produits (BAO, Riz Crousty...) = cases beaucoup plus grandes,
+    // pour bien remplir l'ecran au lieu de laisser du vide.
+    const big = sparse && prods.length <= 5;
+    const minW = big ? (mob ? 220 : 260) : sparse ? mob ? 150 : 190 : mob ? 125 : 150;
     return /*#__PURE__*/React.createElement("div", {
       style: {
         padding: pb,
         display: 'grid',
         gridTemplateColumns: `repeat(auto-fill,minmax(${minW}px,1fr))`,
-        gap: 8,
+        gap: big ? 12 : 8,
         alignContent: 'start'
       }
     }, prods.map((p, i) => /*#__PURE__*/React.createElement(PCard, {
       key: p.id,
       p: p,
       cat: selCat,
-      i: i
+      i: i,
+      big: big
     })));
   };
   const CartPanel = ({

@@ -191,18 +191,6 @@ export const BAO = [{
   price: 11.5,
   tag: 'BAO',
   desc: 'Bao, double steak smashé, cheddar, salade, tomate, oignon caramélisé, sauce honey barbecue'
-}, {
-  id: 'bao-mnc',
-  name: 'Mac n Chicken Cheese Burger',
-  price: 9.0,
-  tag: 'BAO',
-  desc: 'Mac n cheese, crispy chicken, sauce cheddar, oignon crispy, persil'
-}, {
-  id: 'bao-mncb',
-  name: 'Mac n Cheese Beef Burger',
-  price: 10.0,
-  tag: 'BAO',
-  desc: 'Potato buns, double steak smashé, cheddar, oignon crispy, sauce biggy ou spicy'
 }];
 export const LOADED = [{
   id: 'lo-wing',
