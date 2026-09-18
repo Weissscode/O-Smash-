@@ -1,7 +1,7 @@
 export function isPhoneNumber(str) {
   if (!str) return false;
   var d = str.replace(/[^0-9]/g, '');
-  return d.length >= 3;
+  return d.length >= 8 && d.length <= 15;
 }
 
 // Indicatifs internationaux connus, du plus long au plus court pour un

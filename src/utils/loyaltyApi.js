@@ -26,7 +26,7 @@ export async function lookupCardByCode(restaurantId, code) {
 export async function fetchScannedCustomer(restaurantId, cardId, customerId) {
   const { data, error } = await supabase
     .from('loyalty_cards')
-    .select('id, statut, customer_id, customers(id, prenom, nom, points_balance, total_depense, nombre_visites, loyalty_tiers(nom))')
+    .select('id, statut, customer_id, customers(id, prenom, nom, telephone, points_balance, total_depense, nombre_visites, loyalty_tiers(nom))')
     .eq('restaurant_id', restaurantId)
     .eq('id', cardId)
     .eq('customer_id', customerId)

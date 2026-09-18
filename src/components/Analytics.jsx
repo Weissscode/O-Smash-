@@ -501,7 +501,7 @@ function DayAnalysis({ filteredOrders, selectedDate, setSelectedDate, filterActi
   const revEsp = dayOrders.filter(o => (o.payment || '').toLowerCase().startsWith('esp')).reduce((s, o) => s + o.total, 0);
   const revCB = dayOrders.filter(o => o.payment === 'CB').reduce((s, o) => s + o.total, 0);
   const avgBasket = dayOrders.length ? rev / dayOrders.length : 0;
-  const telCount = dayOrders.filter(o => o.phone).length;
+  const telCount = dayOrders.filter(o => o.phone && !o.customerId).length;
 
   const allItems = dayOrders.flatMap(o => o.items);
   const categoryStats = categoryStatsFor(allItems);
@@ -561,7 +561,7 @@ function MonthAnalysis({ filteredOrders, month, setMonth, onSelectDay, filterAct
   const avgBasket = count ? rev / count : 0;
   const revEsp = monthOrders.filter(o => (o.payment || '').toLowerCase().startsWith('esp')).reduce((s, o) => s + o.total, 0);
   const revCB = monthOrders.filter(o => o.payment === 'CB').reduce((s, o) => s + o.total, 0);
-  const telCount = monthOrders.filter(o => o.phone).length;
+  const telCount = monthOrders.filter(o => o.phone && !o.customerId).length;
 
   const prevRev = prevMonthOrders.reduce((s, o) => s + o.total, 0);
   const prevCount = prevMonthOrders.length;

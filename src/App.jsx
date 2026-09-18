@@ -6,7 +6,6 @@ import { CATS, BURGERS, BAO, FORMULES, RIZ, SIDES, LOADED, CREP, MILKS, PMAP, CB
 import { card, btn } from './utils/styles.js';
 import { fp, ft, fd, uid } from './utils/format.js';
 import { LS } from './utils/storage.js';
-import { isPhoneNumber } from './utils/phone.js';
 import { getNextOrderNumRemote } from './utils/orderNumber.js';
 import { sendPrint, sendPrintCuisine } from './utils/printServer.js';
 import { printTicket } from './utils/ticketPrint.js';
@@ -115,7 +114,10 @@ export default function App({ restaurantId, profile }) {
     if (!restaurantId) return;
     return subscribeLoyaltyScans(restaurantId, ({ customerId, cardId }) => {
       fetchScannedCustomer(restaurantId, cardId, customerId)
-        .then(setLoyaltyCustomer)
+        .then(scannedCustomer => {
+          setLoyaltyCustomer(scannedCustomer);
+          setClientName(scannedCustomer.customer.prenom || '');
+        })
         .catch(() => {});
     });
   }, [restaurantId]);
@@ -171,11 +173,11 @@ export default function App({ restaurantId, profile }) {
     };
   }));
   const cartTotal = cart.reduce((s, i) => s + i.total, 0);
-  const placeOrder = async (service, payment, phoneVal) => {
+  const placeOrder = async (service, payment, phoneVal, isTelephoneOrder = false) => {
     const { num, offline: numOffline } = await getNextOrderNumRemote(restaurantId);
     if (numOffline) setSyncPending(true);
-    const nomClient = clientName || null;
-    const isTel = !!(phoneVal && isPhoneNumber(phoneVal));
+    const nomClient = clientName.trim() || null;
+    const isTel = isTelephoneOrder;
     // Les points ne sont attribués qu'à l'encaissement immédiat : une
     // commande téléphone (payée plus tard) n'est pas encore une vente.
     const attachLoyalty = !isTel && !!loyaltyCustomer;
@@ -208,6 +210,7 @@ export default function App({ restaurantId, profile }) {
       setAllOrders(p => [savedO, ...p]);
       setCart([]);
       setClientName('');
+      setLoyaltyCustomer(null);
       setConfirmM(false);
       setCartOpen(false);
       setSuccessM({
@@ -683,7 +686,10 @@ export default function App({ restaurantId, profile }) {
     customer: loyaltyCustomer.customer,
     cartTotal,
     restaurantId,
-    onDetach: () => setLoyaltyCustomer(null)
+    onDetach: () => {
+      setLoyaltyCustomer(null);
+      setClientName('');
+    }
   }), phoneAddCtx ? /*#__PURE__*/React.createElement("div", null, /*#__PURE__*/React.createElement("div", {
     style: {
       background: '#F59E0B',
@@ -1175,9 +1181,10 @@ export default function App({ restaurantId, profile }) {
     cartTotal: cartTotal,
     clientName: clientName,
     setClientName: setClientName,
+    loyaltyCustomer: loyaltyCustomer,
     onCancel: () => setConfirmM(false),
     onValidate: placeOrder,
-    onSplit: async (svc, pay) => {
+    onSplit: async (svc, pay, phoneVal) => {
       const { num, offline: numOffline } = await getNextOrderNumRemote(restaurantId);
       if (numOffline) setSyncPending(true);
       const o = {
@@ -1190,6 +1197,7 @@ export default function App({ restaurantId, profile }) {
         total: cartTotal,
         status: 'en cours',
         client: clientName || null,
+        phone: phoneVal || null,
         service: svc,
         payment: pay
       };
@@ -1203,6 +1211,7 @@ export default function App({ restaurantId, profile }) {
       setSplitCartM(null);
       setCart([]);
       setClientName('');
+      setLoyaltyCustomer(null);
       setCartOpen && setCartOpen(false);
       await splitCartOrder(splitCartM, tickets);
     }
