@@ -20,6 +20,26 @@ function generateCardCode() {
   return `OSM-${require('crypto').randomUUID()}`;
 }
 
+function normalizeRestaurantSlug(value) {
+  if (typeof value !== 'string') return '';
+
+  let decoded = value;
+  try {
+    decoded = decodeURIComponent(value);
+  } catch {
+    decoded = value;
+  }
+
+  return decoded
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/-{2,}/g, '-');
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     res.status(405).send('Method not allowed');
@@ -31,8 +51,13 @@ module.exports = async function handler(req, res) {
   }
 
   const { slug, prenom, nom, email, telephone, consentementCgu, consentementMarketing } = req.body || {};
+  const normalizedSlug = normalizeRestaurantSlug(slug);
 
-  if (!slug || !prenom || !String(prenom).trim()) {
+  if (!normalizedSlug) {
+    res.status(400).json({ error: 'Adresse du restaurant invalide.' });
+    return;
+  }
+  if (!prenom || !String(prenom).trim()) {
     res.status(400).json({ error: 'Prénom manquant.' });
     return;
   }
@@ -59,11 +84,20 @@ module.exports = async function handler(req, res) {
 
   const { data: restaurant, error: restaurantError } = await supabaseAdmin
     .from('restaurants')
-    .select('id, nom')
-    .eq('slug', slug)
+    .select('id, nom, slug')
+    .eq('slug', normalizedSlug)
     .maybeSingle();
 
-  if (restaurantError || !restaurant) {
+  if (restaurantError) {
+    console.error('Échec de la résolution du restaurant pour une inscription fidélité.', {
+      code: restaurantError.code,
+      message: restaurantError.message
+    });
+    res.status(500).json({ error: 'Le service fidélité est momentanément indisponible.' });
+    return;
+  }
+
+  if (!restaurant) {
     res.status(404).json({ error: 'Restaurant introuvable.' });
     return;
   }

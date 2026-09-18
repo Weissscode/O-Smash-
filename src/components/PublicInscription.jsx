@@ -113,8 +113,7 @@ function ExistingAccount() {
   return /*#__PURE__*/React.createElement('div', {
     style: { maxWidth: 380, margin: '0 auto', background: T.bgCard, borderRadius: 20, padding: 28, boxShadow: T.shSoft, textAlign: 'center' }
   },
-    /*#__PURE__*/React.createElement('div', { style: { fontSize: 32 } }, '👋'),
-    /*#__PURE__*/React.createElement('div', { style: { fontWeight: 800, fontSize: 17, marginTop: 8 } }, 'Vous avez déjà une carte !'),
+    /*#__PURE__*/React.createElement('div', { style: { fontWeight: 800, fontSize: 17 } }, 'Vous avez déjà une carte'),
     /*#__PURE__*/React.createElement('div', { style: { fontSize: 13, color: T.txtSub, marginTop: 8 } },
       'Ce numéro est déjà inscrit. Passez en caisse, on la retrouve pour vous en un instant.')
   );
@@ -131,7 +130,7 @@ function RegisteredCard({ prenom, code }) {
   return /*#__PURE__*/React.createElement('div', {
     style: { maxWidth: 380, margin: '0 auto', background: T.bgCard, borderRadius: 20, padding: 28, boxShadow: T.shSoft, textAlign: 'center' }
   },
-    /*#__PURE__*/React.createElement('div', { style: { fontWeight: 800, fontSize: 19 } }, `Bienvenue ${prenom} 🎉`),
+    /*#__PURE__*/React.createElement('div', { style: { fontWeight: 800, fontSize: 19 } }, `Bienvenue ${prenom}`),
     /*#__PURE__*/React.createElement('div', { style: { fontSize: 13, color: T.txtSub, marginTop: 6 } },
       'Votre carte est prête. Présentez-la en caisse à chaque passage.'),
     qrDataUrl && /*#__PURE__*/React.createElement('img', {
@@ -144,14 +143,93 @@ function RegisteredCard({ prenom, code }) {
             display: 'inline-block', marginTop: 18, padding: '13px 22px', borderRadius: 12,
             background: '#000', color: '#fff', fontWeight: 700, fontSize: 14, textDecoration: 'none'
           }
-        }, '  Ajouter à Apple Wallet')
+        }, 'Ajouter à Apple Wallet')
       : /*#__PURE__*/React.createElement('div', { style: { fontSize: 12, color: T.txtMuted, marginTop: 14 } },
-          "Gardez cette page ou faites une capture d'écran du QR — c'est votre carte de fidélité.")
+          "Gardez cette page ou faites une capture d'écran du QR. C'est votre carte de fidélité.")
+  );
+}
+
+function RestaurantState({ message, action }) {
+  return /*#__PURE__*/React.createElement('div', {
+    role: action ? 'alert' : 'status',
+    style: {
+      maxWidth: 380,
+      margin: '0 auto',
+      background: T.bgCard,
+      border: `1px solid ${T.brd}`,
+      borderRadius: 16,
+      padding: 24,
+      boxSizing: 'border-box',
+      textAlign: 'center',
+      color: action ? T.no : T.txtSub,
+      fontSize: 14,
+      lineHeight: 1.5
+    }
+  },
+    message,
+    action && /*#__PURE__*/React.createElement('button', {
+      type: 'button',
+      onClick: action,
+      style: {
+        display: 'block',
+        margin: '16px auto 0',
+        padding: '11px 18px',
+        border: 'none',
+        borderRadius: 10,
+        background: T.primary,
+        color: '#fff',
+        fontWeight: 700,
+        cursor: 'pointer'
+      }
+    }, 'Réessayer')
   );
 }
 
 export function PublicInscription({ restaurantSlug }) {
   const [result, setResult] = React.useState(null);
+  const [restaurant, setRestaurant] = React.useState(null);
+  const [loadingRestaurant, setLoadingRestaurant] = React.useState(true);
+  const [restaurantError, setRestaurantError] = React.useState(null);
+  const [reloadKey, setReloadKey] = React.useState(0);
+
+  React.useEffect(() => {
+    let active = true;
+
+    async function resolveRestaurant() {
+      setLoadingRestaurant(true);
+      setRestaurantError(null);
+
+      try {
+        const response = await fetch(`/api/loyalty-restaurant?slug=${encodeURIComponent(restaurantSlug)}`, {
+          headers: { Accept: 'application/json' }
+        });
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Impossible de charger ce programme de fidélité.');
+        }
+
+        if (!active) return;
+
+        setRestaurant(data);
+        document.title = `Fidélité ${data.nom} | O'SMASH`;
+
+        const canonicalPath = `/r/${encodeURIComponent(data.slug)}/fidelite`;
+        if (window.location.pathname !== canonicalPath) {
+          window.history.replaceState(null, '', canonicalPath);
+        }
+      } catch (error) {
+        if (!active) return;
+        setRestaurant(null);
+        setRestaurantError(error.message || 'Impossible de charger ce programme de fidélité.');
+      } finally {
+        if (active) setLoadingRestaurant(false);
+      }
+    }
+
+    resolveRestaurant();
+    return () => { active = false; };
+  }, [restaurantSlug, reloadKey]);
 
   return /*#__PURE__*/React.createElement('div', {
     style: { minHeight: '100vh', background: T.bgGradient, padding: '32px 16px', boxSizing: 'border-box' }
@@ -162,7 +240,15 @@ export function PublicInscription({ restaurantSlug }) {
         style: { fontWeight: 800, fontSize: 15, letterSpacing: 1, color: T.primaryD, textTransform: 'uppercase' }
       }, 'Fidélité')
     ),
-    !result && /*#__PURE__*/React.createElement(RegisterForm, { restaurantSlug, onDone: setResult }),
+    loadingRestaurant && /*#__PURE__*/React.createElement(RestaurantState, { message: 'Chargement du programme de fidélité...' }),
+    !loadingRestaurant && restaurantError && /*#__PURE__*/React.createElement(RestaurantState, {
+      message: restaurantError,
+      action: () => setReloadKey(value => value + 1)
+    }),
+    !loadingRestaurant && restaurant && !result && /*#__PURE__*/React.createElement(RegisterForm, {
+      restaurantSlug: restaurant.slug,
+      onDone: setResult
+    }),
     result && result.status === 'existing' && /*#__PURE__*/React.createElement(ExistingAccount, null),
     result && result.status === 'created' && /*#__PURE__*/React.createElement(RegisteredCard, { prenom: result.prenom, code: result.code })
   );
