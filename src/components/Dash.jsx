@@ -549,7 +549,7 @@ export function Dash({ orders, onReset, onUpdateOrder, onDeleteOrder }) {
   const revEsp = periodOrders.filter(o => (o.payment || '').toLowerCase().startsWith('esp')).reduce((s, o) => s + o.total, 0);
   const revCB = periodOrders.filter(o => o.payment === 'CB').reduce((s, o) => s + o.total, 0);
   const panierMoyen = periodOrders.length ? rev / periodOrders.length : 0;
-  const telCount = periodOrders.filter(o => o.phone).length;
+  const telCount = periodOrders.filter(o => o.phone && !o.customerId).length;
 
   const handleSave = async (id, updates) => {
     await onUpdateOrder(id, updates);

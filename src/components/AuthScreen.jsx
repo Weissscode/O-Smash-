@@ -22,7 +22,7 @@ const inputStyle = {
   fontFamily: 'inherit'
 };
 
-export function AuthScreen({ onAuthed }) {
+export function AuthScreen({ onAuthed, loginOnly = false }) {
   const [mode, setMode] = React.useState('login');
   const [nomRestaurant, setNomRestaurant] = React.useState('');
   const [email, setEmail] = React.useState('');
@@ -88,13 +88,19 @@ export function AuthScreen({ onAuthed }) {
   },
     /*#__PURE__*/React.createElement('div', {
       style: { display: 'flex', justifyContent: 'center', marginBottom: 8 }
-    }, /*#__PURE__*/React.createElement(ViceCodeLogo, { scale: 0.7 })),
+    }, loginOnly
+      ? /*#__PURE__*/React.createElement('img', {
+          src: '/osmash-logo.png',
+          alt: 'O’SMASH',
+          style: { width: 72, height: 72, objectFit: 'contain' }
+        })
+      : /*#__PURE__*/React.createElement(ViceCodeLogo, { scale: 0.7 })),
     /*#__PURE__*/React.createElement('h1', {
       style: { fontSize: 20, fontWeight: 600, textAlign: 'center', color: T.txt, marginBottom: 4 }
-    }, mode === 'login' ? 'Connexion' : 'Créer mon compte restaurant'),
+    }, loginOnly ? 'Connexion salarié' : mode === 'login' ? 'Connexion' : 'Créer mon compte restaurant'),
     /*#__PURE__*/React.createElement('p', {
       style: { fontSize: 13, color: T.txtSub, textAlign: 'center', marginBottom: 24 }
-    }, mode === 'login' ? 'Accède à ton espace de gestion' : 'Inscris ton restaurant en quelques secondes'),
+    }, loginOnly ? 'Scannez les cartes fidélité depuis votre téléphone' : mode === 'login' ? 'Accède à ton espace de gestion' : 'Inscris ton restaurant en quelques secondes'),
 
     mode === 'signup' && /*#__PURE__*/React.createElement('div', { style: { marginBottom: 14 } },
       /*#__PURE__*/React.createElement('label', {
@@ -173,7 +179,7 @@ export function AuthScreen({ onAuthed }) {
       }
     }, loading ? 'Patiente...' : mode === 'login' ? 'Se connecter' : 'Créer mon compte'),
 
-    /*#__PURE__*/React.createElement('div', {
+    !loginOnly && /*#__PURE__*/React.createElement('div', {
       style: { textAlign: 'center', marginTop: 18, fontSize: 13, color: T.txtSub }
     }, mode === 'login' ? "Pas encore de compte ? " : 'Déjà un compte ? ',
       /*#__PURE__*/React.createElement('a', {

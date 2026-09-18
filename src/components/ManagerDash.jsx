@@ -10,12 +10,15 @@ import { supabase } from '../supabaseClient.js';
 import { signOut } from '../utils/auth.js';
 import { Dash } from './Dash.jsx';
 import { Analytics } from './Analytics.jsx';
+import { LoyaltyDash } from './LoyaltyDash.jsx';
 
 const REFRESH_MS = 20000;
 
 const MANAGER_TABS = [
   { key: 'dashboard', label: 'Dashboard' },
-  { key: 'analytics', label: 'Analytics' }
+  { key: 'analytics', label: 'Analytics' },
+  { key: 'fidelite', label: 'Fidélité' },
+  { key: 'scan', label: 'Scan' }
 ];
 
 function ManagerInstallButton() {
@@ -103,7 +106,7 @@ function ManagerTabSwitch({ tab, setTab }) {
       key: t.key,
       'aria-current': tab === t.key ? 'page' : undefined,
       className: 'osm-btn-premium',
-      onClick: () => setTab(t.key),
+      onClick: () => t.key === 'scan' ? window.location.assign('/gestion/scan') : setTab(t.key),
       style: {
         flex: 1, padding: '10px 0', borderRadius: 6, border: 'none',
         background: tab === t.key ? T.primaryL : 'transparent',
@@ -173,8 +176,10 @@ export function ManagerDash({ restaurantId, restaurantName }) {
         </div></details>
       </div>
     </header>,
-    !mobile && /*#__PURE__*/React.createElement(ManagerTabSwitch, { tab, setTab }),
-    !loaded
+    /*#__PURE__*/React.createElement(ManagerTabSwitch, { tab, setTab }),
+    tab === 'fidelite'
+      ? /*#__PURE__*/React.createElement(LoyaltyDash, { restaurantId })
+      : !loaded
       ? /*#__PURE__*/React.createElement('div', {
           style: { textAlign: 'center', padding: 60, color: T.txtSub, fontSize: 14 }
         }, 'Chargement des commandes...')

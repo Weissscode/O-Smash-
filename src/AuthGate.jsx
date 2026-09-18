@@ -5,6 +5,7 @@ import { AuthScreen } from './components/AuthScreen.jsx';
 import { getProfile, signOut } from './utils/auth.js';
 import App from './App.jsx';
 import { ManagerDash } from './components/ManagerDash.jsx';
+import { ScanFidelite } from './components/ScanFidelite.jsx';
 
 export function AuthGate({ mode = 'pos' }) {
   const [session, setSession] = React.useState(undefined);
@@ -51,7 +52,7 @@ export function AuthGate({ mode = 'pos' }) {
   }
 
   if (!session) {
-    return /*#__PURE__*/React.createElement(AuthScreen, { onAuthed: setSession });
+    return /*#__PURE__*/React.createElement(AuthScreen, { onAuthed: setSession, loginOnly: mode === 'scan' });
   }
 
   if (profile === undefined) {
@@ -95,9 +96,22 @@ export function AuthGate({ mode = 'pos' }) {
   }
 
   if (mode === 'manager') {
+    if (profile.role !== 'gerant') {
+      window.location.replace('/gestion/scan');
+      return /*#__PURE__*/React.createElement('div', {
+        style: { minHeight: '100vh', display: 'grid', placeItems: 'center', background: T.bg, color: T.txtSub }
+      }, 'Ouverture du scanner...');
+    }
     return /*#__PURE__*/React.createElement(ManagerDash, {
       restaurantId: profile.restaurant_id,
       restaurantName: profile.restaurants ? profile.restaurants.nom : ''
+    });
+  }
+
+  if (mode === 'scan') {
+    return /*#__PURE__*/React.createElement(ScanFidelite, {
+      restaurantId: profile.restaurant_id,
+      profile
     });
   }
 
