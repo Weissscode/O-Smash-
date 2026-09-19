@@ -231,52 +231,60 @@ export async function redeemReward(restaurantId, { customerId, cardId, reward, s
   return { newBalance };
 }
 
-// ── Relais temps reel entre la page /scan (telephone du serveur) et la
-// caisse : canal Supabase Realtime "broadcast", sans table dediee.
-function loyaltyChannelName(restaurantId) {
-  return `fidelite-${restaurantId}`;
-}
+// ── Relais entre la page /scan (telephone du serveur) et la caisse ──
+//
+// Ecrit dans une vraie table (loyalty_scan_events) plutot qu'un simple
+// "broadcast" Realtime ephemere : un scan envoye avant que la caisse
+// ne soit ouverte/connectee n'est plus perdu, elle peut le relire au
+// demarrage (fenetre de rattrapage de 90s) en plus de le recevoir en
+// direct si elle est deja connectee.
+const SCAN_EVENT_CATCHUP_MS = 90 * 1000;
 
-// Cote caisse : ecoute les scans effectues depuis /scan et rattache le
-// client trouve a la commande en cours. Renvoie une fonction de cleanup.
+// Cote caisse : rattrape un scan recent au demarrage, puis ecoute les
+// nouveaux en direct. Renvoie une fonction de cleanup.
 export function subscribeLoyaltyScans(restaurantId, onScan) {
-  const channel = supabase.channel(loyaltyChannelName(restaurantId));
-  channel.on('broadcast', { event: 'scan' }, ({ payload }) => onScan(payload));
-  channel.subscribe();
-  return () => supabase.removeChannel(channel);
+  let cancelled = false;
+
+  function consume(row) {
+    if (cancelled || !row) return;
+    onScan({ customerId: row.customer_id, cardId: row.card_id });
+    // Best-effort : evite qu'un rechargement ulterieur ne rattache le
+    // meme client une seconde fois.
+    supabase.from('loyalty_scan_events').delete().eq('id', row.id).then(() => {});
+  }
+
+  const since = new Date(Date.now() - SCAN_EVENT_CATCHUP_MS).toISOString();
+  supabase
+    .from('loyalty_scan_events')
+    .select('id, customer_id, card_id, cree_le')
+    .eq('restaurant_id', restaurantId)
+    .gte('cree_le', since)
+    .order('cree_le', { ascending: false })
+    .limit(1)
+    .maybeSingle()
+    .then(({ data }) => consume(data));
+
+  const channel = supabase
+    .channel(`loyalty-scan-events-${restaurantId}`)
+    .on('postgres_changes', {
+      event: 'INSERT', schema: 'public', table: 'loyalty_scan_events',
+      filter: `restaurant_id=eq.${restaurantId}`
+    }, payload => consume(payload.new))
+    .subscribe();
+
+  return () => {
+    cancelled = true;
+    supabase.removeChannel(channel);
+  };
 }
 
-let sendChannel = null;
-let sendChannelKey = null;
-let sendChannelReady = null;
-
-// Cote /scan : diffuse le client identifie vers la caisse abonnee.
-export async function broadcastLoyaltyScan(restaurantId, payload) {
-  if (sendChannel && sendChannelKey !== restaurantId) {
-    supabase.removeChannel(sendChannel);
-    sendChannel = null;
-    sendChannelReady = null;
-  }
-  if (!sendChannel) {
-    sendChannel = supabase.channel(loyaltyChannelName(restaurantId));
-    sendChannelKey = restaurantId;
-    sendChannelReady = new Promise((resolve, reject) => {
-      sendChannel.subscribe(status => {
-        if (status === 'SUBSCRIBED') resolve();
-        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') reject(new Error('Canal Realtime indisponible'));
-      });
-    });
-  }
-  try {
-    await sendChannelReady;
-    const response = await sendChannel.send({ type: 'broadcast', event: 'scan', payload });
-    if (response !== 'ok') throw new Error('Envoi Realtime impossible');
-    return response;
-  } catch (error) {
-    if (sendChannel) supabase.removeChannel(sendChannel);
-    sendChannel = null;
-    sendChannelKey = null;
-    sendChannelReady = null;
-    throw error;
-  }
+// Cote /scan : enregistre le client identifie, la caisse le rattrapera
+// (immediatement si elle ecoute deja, sinon a sa prochaine ouverture).
+export async function broadcastLoyaltyScan(restaurantId, { customerId, cardId }) {
+  const { error } = await supabase.from('loyalty_scan_events').insert({
+    restaurant_id: restaurantId,
+    customer_id: customerId,
+    card_id: cardId
+  });
+  if (error) throw error;
 }
