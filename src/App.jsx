@@ -25,7 +25,7 @@ import { DrinkPick } from './components/DrinkPick.jsx';
 import { TopModal } from './components/TopModal.jsx';
 import { DuoBuild } from './components/DuoBuild.jsx';
 import { StockView } from './components/StockView.jsx';
-import { Dash } from './components/Dash.jsx';
+import { ManagementHeader } from './components/ManagerDash.jsx';
 import { Analytics } from './components/Analytics.jsx';
 import { CItem } from './components/CItem.jsx';
 import { ConfirmModal } from './components/ConfirmModal.jsx';
@@ -757,7 +757,7 @@ export default function App({ restaurantId, profile }) {
       overflow: 'hidden',
       userSelect: 'none'
     }
-  }, <MobileNavigation view={view} phoneCount={phoneOrders.length} onSelect={id => ['dashboard','analytics'].includes(id) ? setPinFor(id) : setView(id)}/>, /*#__PURE__*/React.createElement("div", {
+  }, view === 'management' && <ManagementHeader className="mg-pos-header"/>, <MobileNavigation view={view} phoneCount={phoneOrders.length} onSelect={id => id === 'management' ? setPinFor(id) : setView(id)}/>, /*#__PURE__*/React.createElement("div", {
     className: 'osm-topbar',
     style: {
       display: 'flex',
@@ -793,19 +793,15 @@ export default function App({ restaurantId, profile }) {
     id: 'stock',
     l: 'Stock'
   }, {
-    id: 'dashboard',
-    l: 'Dashboard',
-    pr: true
-  }, {
-    id: 'analytics',
-    l: 'Analytics',
+    id: 'management',
+    l: 'Management',
     pr: true
   }].map(t => /*#__PURE__*/React.createElement("button", {
     key: t.id,
     onClick: () => t.pr ? setPinFor(t.id) : setView(t.id),
     className: 'osm-nav-tab',
     'aria-current': view === t.id ? 'page' : undefined
-  }, /*#__PURE__*/React.createElement(PosIcon, {name: t.id, size: 17}), t.l, t.badge > 0 && /*#__PURE__*/React.createElement("span", {
+  }, /*#__PURE__*/React.createElement(PosIcon, {name: t.id === 'management' ? 'dashboard' : t.id, size: 17}), t.l, t.badge > 0 && /*#__PURE__*/React.createElement("span", {
     style: {
       position: 'absolute',
       top: 2,
@@ -996,7 +992,9 @@ export default function App({ restaurantId, profile }) {
     customProds: customProds,
     onSaveCP: saveCP,
     toggle: togStock
-  }), view === 'dashboard' && /*#__PURE__*/React.createElement(Dash, {
+  }), view === 'management' && /*#__PURE__*/React.createElement(Analytics, {
+    management: true,
+    reportKey: restaurantId,
     orders: orders,
     onReset: async () => {
       if (window.confirm('Reset toutes les commandes du jour ?')) {
@@ -1019,8 +1017,6 @@ export default function App({ restaurantId, profile }) {
       setAllOrders(p => p.filter(o => o.id !== id));
       setSyncPending(r.offline || hasPendingSync());
     }
-  }), view === 'analytics' && /*#__PURE__*/React.createElement(Analytics, {
-    orders: orders
   }), view === 'telephone' && /*#__PURE__*/React.createElement(TelephoneView, {
     phoneOrders: phoneOrders,
     onPaid: payPhoneOrder,
@@ -1039,7 +1035,7 @@ export default function App({ restaurantId, profile }) {
     }
   }), pinFor && /*#__PURE__*/React.createElement(PinModal, {
     onClose: () => setPinFor(null),
-    title: pinFor === 'analytics' ? 'Analytics' : 'Dashboard',
+    title: 'Management',
     onOk: () => {
       setView(pinFor);
       setPinFor(null);

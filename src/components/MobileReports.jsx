@@ -22,9 +22,9 @@ export function useReportMobile() {
 
 export function MobileNavigation({ view, onSelect, phoneCount = 0 }) {
   return <nav className="mr-bottom-nav" aria-label="Navigation principale">
-    {[['pos', 'Commandes'], ['telephone', 'Téléphone'], ['stock', 'Stock'], ['dashboard', 'Dashboard'], ['analytics', 'Analytics']].map(([id, label]) =>
+    {[['pos', 'Caisse'], ['telephone', 'Téléphone'], ['stock', 'Stock'], ['management', 'Management']].map(([id, label]) =>
       <button key={id} aria-current={view === id ? 'page' : undefined} onClick={() => onSelect(id)}>
-        <span className="mr-nav-icon"><PosIcon name={id}/>{id === 'telephone' && phoneCount > 0 && <i>{phoneCount}</i>}</span><span>{label}</span>
+        <span className="mr-nav-icon"><PosIcon name={id === 'management' ? 'dashboard' : id}/>{id === 'telephone' && phoneCount > 0 && <i>{phoneCount}</i>}</span><span>{label}</span>
       </button>)}
   </nav>;
 }
@@ -114,7 +114,7 @@ export function Services({ orders, comparison }) {
   const total = summaries.reduce((s,x)=>s+x.rev,0);
   const selected = buckets.find(b=>b.h===hour);
   return <ReportSection title="Midi & soir" aside="Comparaison des services">
-    <div className="mr-services">{summaries.map((s,i)=><button key={i} aria-pressed={service===(i?'soir':'midi')} onClick={()=>{setService(i?'soir':'midi');setHour(null);}}><span>{i?'Soir':'Midi'} <small>{total>0?Math.round(s.rev/total*100):0} %</small></span><strong>{fp(s.rev)}</strong><span>{s.count} commande{s.count!==1?'s':''}</span><span>Panier <b>{fp(s.avg)}</b></span></button>)}</div>
+    <div className="mr-services">{summaries.map((s,i)=><button key={i} aria-pressed={service===(i?'soir':'midi')} onClick={()=>{setService(i?'soir':'midi');setHour(null);}}><span className="mr-service-title">{i?'Soir':'Midi'} <small>{total>0?Math.round(s.rev/total*100):0} %</small></span><strong>{fp(s.rev)}</strong><span>{s.count} commande{s.count!==1?'s':''}</span><span>Panier <b>{fp(s.avg)}</b></span></button>)}</div>
     <div className="mr-hour-header"><span>CA par heure · {service}</span><strong aria-live="polite">{selected ? `${String(selected.h).padStart(2,'0')} h · ${fp(selected.total)}` : 'Touchez une barre'}</strong></div>
     {buckets.some(b=>b.total!==0) ? <div className="mr-hours">{buckets.map(b=><button key={b.h} aria-label={`${b.h} heures : ${fp(b.total)}`} aria-pressed={hour===b.h} onClick={()=>setHour(b.h)}><span className="mr-bar-track"><i style={{height:`${Math.max(b.total?3:0,b.total/max*100)}%`}}/></span><span>{String(b.h).padStart(2,'0')}h</span></button>)}</div> : <p className="mr-empty mr-hour-empty">Aucune vente sur ces horaires.</p>}
     <p className="mr-chart-note">Horaires affichés : {service==='midi'?'11–14 h':'18–00 h'}.</p>
