@@ -1,4 +1,12 @@
 {
+  "redirects": [
+    {
+      "source": "/",
+      "has": [{ "type": "host", "value": "fidelite.osmash54.fr" }],
+      "destination": "https://o-smash.vercel.app/r/osmash-2/fidelite",
+      "permanent": false
+    }
+  ],
   "rewrites": [
     { "source": "/gestion", "destination": "/gestion.html" },
     { "source": "/gestion/(.*)", "destination": "/gestion.html" },
