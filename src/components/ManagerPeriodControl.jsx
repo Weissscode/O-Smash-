@@ -1,5 +1,5 @@
 import React from 'react';
-import { IconCalendar, IconChevronLeft, IconChevronRight, IconChevronDown, IconClose } from './icons.jsx';
+import { IconCalendar, IconChevronLeft, IconChevronRight, IconClose } from './icons.jsx';
 
 const localKey = d => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 const monthStart = d => new Date(d.getFullYear(), d.getMonth(), 1);
@@ -12,8 +12,7 @@ export function ManagerPeriodControl({ period, date, onChange, onPeriodChange })
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const current = monthly ? +monthStart(date) === +monthStart(today) : localKey(date) === localKey(today);
-  const yesterday = new Date(today); yesterday.setDate(today.getDate() - 1);
-  const label = monthly ? monthLabel(date) : current ? 'Aujourd’hui' : localKey(date) === localKey(yesterday) ? 'Hier' : date.toLocaleDateString('fr-FR', { weekday: 'long' });
+  const label = monthly ? monthLabel(date) : date.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long', ...(date.getFullYear() !== today.getFullYear() ? {year:'numeric'} : {}) });
   const shift = n => onChange(monthly ? new Date(date.getFullYear(), date.getMonth() + n, 1) : new Date(date.getFullYear(), date.getMonth(), date.getDate() + n));
   const choose = next => { onChange(next); dialog.current.close(); };
   const blanks = (view.getDay() + 6) % 7;
@@ -28,15 +27,13 @@ export function ManagerPeriodControl({ period, date, onChange, onPeriodChange })
       </div>
     </div>
     <div className="mg-date-row">
+      <button className="mg-step-date" aria-label={monthly ? 'Mois précédent' : 'Jour précédent'} onClick={() => shift(-1)}><IconChevronLeft size={18}/></button>
       <button className="mg-date-label" aria-label={monthly ? 'Choisir un mois' : 'Choisir une date'} aria-haspopup="dialog" onClick={() => { setView(monthStart(date)); dialog.current.showModal(); }}>
-        <span><strong>{label}</strong><small>{monthly ? 'Performance du mois' : date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}</small></span><IconChevronDown size={17}/>
+        <strong>{label.charAt(0).toUpperCase() + label.slice(1)}</strong><IconCalendar size={15}/>
       </button>
-      <div className="mg-date-arrows">
-        <button aria-label={monthly ? 'Mois précédent' : 'Jour précédent'} onClick={() => shift(-1)}><IconChevronLeft size={18}/></button>
-        <button aria-label={monthly ? 'Mois suivant' : 'Jour suivant'} disabled={monthly ? +monthStart(date) >= +monthStart(today) : date >= today} onClick={() => shift(1)}><IconChevronRight size={18}/></button>
-      </div>
+      <button className="mg-step-date" aria-label={monthly ? 'Mois suivant' : 'Jour suivant'} disabled={monthly ? +monthStart(date) >= +monthStart(today) : date >= today} onClick={() => shift(1)}><IconChevronRight size={18}/></button>
     </div>
-    {!current && <button className="mg-today" onClick={() => onChange(monthly ? monthStart(today) : today)}>{monthly ? 'Ce mois-ci' : 'Aujourd’hui'}</button>}
+    {!current && <div className="mg-period-context"><button className="mg-today" onClick={() => onChange(today)}>{monthly ? 'Revenir à ce mois-ci' : 'Revenir à aujourd’hui'}</button></div>}
     <dialog ref={dialog} className="mg-date-sheet" aria-labelledby="mg-calendar-title" onClick={e => { if (e.target === dialog.current) dialog.current.close(); }}>
       <div className="mg-sheet-content">
         <div className="mg-sheet-title"><h2 id="mg-calendar-title"><IconCalendar size={18}/>{monthly ? 'Choisir un mois' : 'Choisir une date'}</h2><button aria-label="Fermer le calendrier" onClick={() => dialog.current.close()}><IconClose size={20}/></button></div>

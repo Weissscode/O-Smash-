@@ -22,9 +22,9 @@ export function useReportMobile() {
 
 export function MobileNavigation({ view, onSelect, phoneCount = 0 }) {
   return <nav className="mr-bottom-nav" aria-label="Navigation principale">
-    {[['pos', 'Commandes'], ['telephone', 'Téléphone'], ['stock', 'Stock'], ['dashboard', 'Dashboard'], ['analytics', 'Analytics']].map(([id, label]) =>
+    {[['pos', 'Caisse'], ['telephone', 'Téléphone'], ['stock', 'Stock'], ['management', 'Management']].map(([id, label]) =>
       <button key={id} aria-current={view === id ? 'page' : undefined} onClick={() => onSelect(id)}>
-        <span className="mr-nav-icon"><PosIcon name={id}/>{id === 'telephone' && phoneCount > 0 && <i>{phoneCount}</i>}</span><span>{label}</span>
+        <span className="mr-nav-icon"><PosIcon name={id === 'management' ? 'dashboard' : id}/>{id === 'telephone' && phoneCount > 0 && <i>{phoneCount}</i>}</span><span>{label}</span>
       </button>)}
   </nav>;
 }

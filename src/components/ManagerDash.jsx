@@ -1,4 +1,3 @@
-import { useReportMobile } from './MobileReports.jsx';
 import './managerReports.css';
 import { PosIcon } from './PosIcon.jsx';
 import React from 'react';
@@ -8,15 +7,13 @@ import { LS } from '../utils/storage.js';
 import { fetchOrders, updateOrder, deleteOrder, deleteOrdersForDate, rowToOrder } from '../utils/ordersApi.js';
 import { supabase } from '../supabaseClient.js';
 import { signOut } from '../utils/auth.js';
-import { Dash } from './Dash.jsx';
 import { Analytics } from './Analytics.jsx';
 import { LoyaltyDash } from './LoyaltyDash.jsx';
 
 const REFRESH_MS = 20000;
 
 const MANAGER_TABS = [
-  { key: 'dashboard', label: 'Dashboard' },
-  { key: 'analytics', label: 'Analytics' },
+  { key: 'management', label: 'Management' },
   { key: 'fidelite', label: 'Fidélité' },
   { key: 'scan', label: 'Scan' }
 ];
@@ -114,13 +111,21 @@ function ManagerTabSwitch({ tab, setTab }) {
         fontWeight: 600, fontSize: 14, cursor: 'pointer',
         boxShadow: 'none'
       }
-    }, <span className="mr-manager-tab-icon"><PosIcon name={t.key}/></span>, t.label))
+    }, <span className="mr-manager-tab-icon"><PosIcon name={t.key === 'management' ? 'dashboard' : t.key}/></span>, t.label))
   );
 }
 
+export function ManagementHeader({ children, className = '' }) {
+  return <header className={`mg-brand-header ${className}`}>
+    <img className="mg-brand-logo" src="/osmash-logo.png" alt="O’SMASH"/>
+    <div className="mg-brand-actions"><span className="mg-manager-label">Management</span>
+      {children && <details className="mg-account"><summary aria-label="Options du compte">···</summary><div className="mg-account-menu">{children}</div></details>}
+    </div>
+  </header>;
+}
+
 export function ManagerDash({ restaurantId, restaurantName }) {
-  const mobile = useReportMobile();
-  const [tab, setTab] = React.useState('dashboard');
+  const [tab, setTab] = React.useState('management');
   const [allOrders, setAllOrders] = React.useState([]);
   const [loaded, setLoaded] = React.useState(false);
 
@@ -164,18 +169,13 @@ export function ManagerDash({ restaurantId, restaurantName }) {
   const orders = allOrders.filter(o => o.status !== 'en attente');
 
   return /*#__PURE__*/React.createElement('div', {
-    className: 'osm-manager-shell' + (mobile ? ' mg-shell' : ''),
+    className: 'osm-manager-shell mg-shell',
     style: { height: '100vh', display: 'flex', flexDirection: 'column', overflow: 'hidden', background: T.bgGradient }
   },
-    <header className="mg-brand-header">
-      <div className="mg-brand"><img src="/osmash-logo.png" alt=""/><span>O’SMASH</span></div>
-      <div className="mg-brand-actions"><span className="mg-manager-label">Manager</span>
-        <details className="mg-account"><summary aria-label="Options du compte">···</summary><div className="mg-account-menu">
-          <ManagerInstallButton/>
-          <button onClick={() => signOut()}>Déconnexion</button>
-        </div></details>
-      </div>
-    </header>,
+    <ManagementHeader>
+      <ManagerInstallButton/>
+      <button onClick={() => signOut()}>Déconnexion</button>
+    </ManagementHeader>,
     /*#__PURE__*/React.createElement(ManagerTabSwitch, { tab, setTab }),
     tab === 'fidelite'
       ? /*#__PURE__*/React.createElement(LoyaltyDash, { restaurantId })
@@ -183,7 +183,7 @@ export function ManagerDash({ restaurantId, restaurantName }) {
       ? /*#__PURE__*/React.createElement('div', {
           style: { textAlign: 'center', padding: 60, color: T.txtSub, fontSize: 14 }
         }, 'Chargement des commandes...')
-      : mobile ? <Analytics management orders={orders}
+      : <Analytics management reportKey={restaurantId} orders={orders}
           onReset={async () => {
             if (window.confirm('Reset toutes les commandes du jour ?')) {
               const today = fd(new Date());
@@ -200,26 +200,6 @@ export function ManagerDash({ restaurantId, restaurantName }) {
             await deleteOrder(id);
             setAllOrders(p => p.filter(o => o.id !== id));
           }}/>
-      : tab === 'analytics' 
-        ? /*#__PURE__*/React.createElement(Analytics, { orders })
-        : /*#__PURE__*/React.createElement(Dash, {
-            orders,
-            onReset: async () => {
-              if (window.confirm('Reset toutes les commandes du jour ?')) {
-                const today = fd(new Date());
-                setAllOrders(p => p.filter(o => fd(o.date) !== today));
-                await deleteOrdersForDate(restaurantId, today);
-                LS.set('osm7-counter', { date: '', num: 0 });
-              }
-            },
-            onUpdateOrder: async (id, updates) => {
-              await updateOrder(id, updates);
-              setAllOrders(p => p.map(o => o.id === id ? { ...o, ...updates } : o));
-            },
-            onDeleteOrder: async id => {
-              await deleteOrder(id);
-              setAllOrders(p => p.filter(o => o.id !== id));
-            }
-          })
+
   );
 }
