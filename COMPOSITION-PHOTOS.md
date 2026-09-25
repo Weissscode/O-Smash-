@@ -69,11 +69,8 @@ Canadian Cheddar et Twister ont déjà leur photo. Pour les autres, confirmer si
 - [ ] Wings x5 BBQ : `public/products/lo-wing.jpg`
 - [ ] Canadian Spicy : `public/products/lo-spic.jpg`
 - [ ] O'Smash Veggy : `public/products/b-veg.jpg`
-- [ ] O'Smash Honey : `public/products/b-honey.jpg`
 - [ ] O'Smash Truffe seul : `public/products/b-truf.jpg` (photo menu déjà disponible)
 - [ ] O'Smash Avocado seul : `public/products/b-avoc.jpg` (photo menu déjà disponible)
-- [ ] Mac n Cheese Chicken Burger : `public/products/b-mncc.jpg`
-- [ ] Mac n Cheese Beef Burger : `public/products/b-mncb.jpg`
 
 ## Vérifications de cette modification
 

@@ -21,7 +21,6 @@ fur et à mesure, produit par produit.
 - `b-chik.jpg` — O'Smash Chicken
 - `b-veg.jpg` — O'Smash Veggy
 - `b-smoke.jpg` — O'Smash Smoke
-- `b-honey.jpg` — O'Smash Honey
 - `b-fren.jpg` — O'Smash Frenchy
 - `b-brit.jpg` — O'Smash British
 - `b-spicy.jpg` — O'Smash Spicy

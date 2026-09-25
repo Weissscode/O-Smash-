@@ -60,12 +60,6 @@ export const BURGERS = [{
   tag: 'SIGNATURE',
   desc: 'Double steak, cheddar, oignon, bacon, sauce smoke'
 }, {
-  id: 'b-honey',
-  name: "O'Smash Honey",
-  price: 9.5,
-  tag: 'SIGNATURE',
-  desc: 'Double steak, chèvre, oignon crispy, salade, tomate, miel'
-}, {
   id: 'b-fren',
   name: "O'Smash Frenchy",
   price: 9.9,
@@ -103,18 +97,6 @@ export const BURGERS = [{
   price: 10.5,
   tag: 'SIGNATURE',
   desc: "Potato buns, double steak smashé, cheddar, avocat, salade, tomate, oignon, sauce avocado"
-}, {
-  id: 'b-mncc',
-  name: 'Mac n Cheese Chicken Burger',
-  price: 10.0,
-  tag: 'SIGNATURE',
-  desc: 'Potato buns, crispy chicken, cheddar, oignon, salade, tomate, sauce biggy ou spicy'
-}, {
-  id: 'b-mncb',
-  name: 'Mac n Cheese Beef Burger',
-  price: 10.0,
-  tag: 'SIGNATURE',
-  desc: 'Potato buns, double steak smashé, cheddar, oignon crispy, sauce biggy ou spicy'
 }];
 export const ETUD_CHOICES = [{
   id: 'b-orig',
@@ -203,18 +185,6 @@ export const BAO = [{
   price: 11.5,
   tag: 'BAO',
   desc: 'Bao, double steak smashé, cheddar, salade, tomate, oignon caramélisé, sauce honey barbecue'
-}, {
-  id: 'bao-mnc',
-  name: 'Mac n Chicken Cheese Burger',
-  price: 9.0,
-  tag: 'BAO',
-  desc: 'Mac n cheese, crispy chicken, sauce cheddar, oignon crispy, persil'
-}, {
-  id: 'bao-mncb',
-  name: 'Mac n Cheese Beef Burger',
-  price: 10.0,
-  tag: 'BAO',
-  desc: 'Potato buns, double steak smashé, cheddar, oignon crispy, sauce biggy ou spicy'
 }];
 export const LOADED = [{
   id: 'lo-wing',
