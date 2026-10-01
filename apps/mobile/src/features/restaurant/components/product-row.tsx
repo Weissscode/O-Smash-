@@ -46,7 +46,7 @@ export function ProductRow({ product, onPress, disabled }: Props) {
       </View>
       <View style={[styles.media, { borderRadius: theme.radius.lg, backgroundColor: theme.colors.surfaceMuted }]}>
         {product.image != null ? <Image source={product.image} style={styles.image} contentFit="contain" transition={150} /> : null}
-        {!unavailable && (
+        {!unavailable && !disabled && (
           <View style={[styles.add, { backgroundColor: theme.colors.surface, ...theme.shadow.card }]}>
             <Icon name="plus" size={16} color={theme.colors.text} />
           </View>

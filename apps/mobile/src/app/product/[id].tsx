@@ -21,6 +21,7 @@ import { haptics } from '@/lib/haptics';
 import { formatPrice } from '@/lib/money';
 import { MAX_LINE_QUANTITY, useCartStore } from '@/store/cart-store';
 import { useTheme } from '@/theme/theme';
+import { inputReset } from '@/theme/typography';
 import type { Product, Restaurant, Selections } from '@/types/domain';
 
 const NOTE_MAX = 140;
@@ -177,7 +178,7 @@ function ProductEditor({ product, restaurant }: { product: Product; restaurant: 
                 multiline
                 maxLength={NOTE_MAX}
                 accessibilityLabel="Note pour le restaurant"
-                style={[styles.note, theme.text.body, { color: theme.colors.text, backgroundColor: theme.colors.surface, borderColor: theme.colors.border, borderRadius: theme.radius.md, padding: theme.space.md }]}
+                style={[styles.note, theme.text.body, inputReset, { color: theme.colors.text, backgroundColor: theme.colors.surface, borderColor: theme.colors.border, borderRadius: theme.radius.md, padding: theme.space.md }]}
               />
               <Text variant="caption" tone="subtle" align="right">
                 {note.length}/{NOTE_MAX}

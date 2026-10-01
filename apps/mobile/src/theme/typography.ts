@@ -4,7 +4,7 @@ import { Inter_500Medium } from '@expo-google-fonts/inter/500Medium';
 import { Inter_600SemiBold } from '@expo-google-fonts/inter/600SemiBold';
 import { Inter_700Bold } from '@expo-google-fonts/inter/700Bold';
 import { Inter_800ExtraBold } from '@expo-google-fonts/inter/800ExtraBold';
-import type { TextStyle } from 'react-native';
+import { Platform, type TextStyle } from 'react-native';
 
 /**
  * Anton : grands titres et accroches uniquement (toujours en capitales).
@@ -53,3 +53,6 @@ export const textVariants: Record<TextVariant, TextStyle> = {
   overline: { fontFamily: fonts.bold, fontSize: 11, lineHeight: 14, letterSpacing: 1.2, textTransform: 'uppercase' },
   price: { fontFamily: fonts.extrabold, fontSize: 16, lineHeight: 20, fontVariant: ['tabular-nums'] },
 };
+
+/** Champs de saisie : supprime le contour de focus du navigateur (prévisualisation web). */
+export const inputReset: TextStyle = Platform.OS === 'web' ? ({ outlineStyle: 'none' } as unknown as TextStyle) : {};

@@ -14,12 +14,20 @@ export function RestaurantMeta({ view, showCuisine = true }: { view: RestaurantV
   const parts: string[] = [];
   if (view.distanceKm !== null) parts.push(formatDistance(view.distanceKm));
   if (showCuisine) parts.push(view.restaurant.cuisineLabel);
+  if (!view.canOrderNow) {
+    // Pas de délai affiché quand on ne peut pas commander maintenant.
+    return (
+      <Text variant="callout" tone="muted" numberOfLines={1}>
+        {parts.join('  ·  ')}
+      </Text>
+    );
+  }
   return (
     <View style={[styles.row, { gap: space.xs }]}>
       <Icon name="clock" size={13} color={colors.textMuted} />
       <Text variant="callout" tone="muted" numberOfLines={1}>
         <Text variant="callout" style={{ color: colors.text }}>
-          {view.canOrderNow ? formatEtaRange(view.eta.range) : '—'}
+          {formatEtaRange(view.eta.range)}
         </Text>
         {parts.length ? `  ·  ${parts.join('  ·  ')}` : ''}
       </Text>

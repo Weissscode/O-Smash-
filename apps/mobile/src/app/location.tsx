@@ -12,6 +12,7 @@ import { userMessage } from '@/lib/errors';
 import { haptics } from '@/lib/haptics';
 import { RADIUS_OPTIONS_KM, useLocationStore } from '@/store/location-store';
 import { useTheme } from '@/theme/theme';
+import { inputReset } from '@/theme/typography';
 
 /** Feuille de position : position actuelle, saisie manuelle et rayon. */
 export default function LocationSheet() {
@@ -98,7 +99,7 @@ export default function LocationSheet() {
           autoCorrect={false}
           accessibilityLabel="Ville ou code postal"
           testID="location-input"
-          style={[styles.input, theme.text.body, { color: theme.colors.text }]}
+          style={[styles.input, theme.text.body, inputReset, { color: theme.colors.text }]}
         />
       </View>
       <Button label="Valider" variant="primary" disabled={query.trim().length < 2} loading={busy === 'manual'} onPress={onManual} testID="location-submit" />

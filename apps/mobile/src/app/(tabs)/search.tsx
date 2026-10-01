@@ -17,6 +17,7 @@ import { useTabBarInset } from '@/hooks/use-tab-bar-inset';
 import { formatPrice } from '@/lib/money';
 import { useRecentSearchesStore } from '@/store/recent-searches-store';
 import { useTheme } from '@/theme/theme';
+import { inputReset } from '@/theme/typography';
 
 function useDebounced<T>(value: T, delay = 220): T {
   const [debounced, setDebounced] = useState(value);
@@ -64,7 +65,7 @@ export default function SearchScreen() {
             clearButtonMode="while-editing"
             accessibilityLabel="Rechercher"
             testID="search-input"
-            style={[styles.textInput, theme.text.body, { color: theme.colors.text }]}
+            style={[styles.textInput, theme.text.body, inputReset, { color: theme.colors.text }]}
           />
           {text.length > 0 && (
             <PressableScale haptic="selection" onPress={() => setText('')} accessibilityLabel="Effacer" hitSlop={10}>
