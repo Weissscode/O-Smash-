@@ -28,19 +28,11 @@ cp .env.example .env.local
 npx eas-cli@latest login
 ```
 
-## 3. Créer le projet EAS (une seule fois)
+## 3. Projet EAS — déjà fait ✅
 
-```bash
-npx eas-cli@latest init
-```
-
-La commande affiche un **projectId** (un UUID, non secret). Comme la config est dynamique (`app.config.ts`),
-EAS ne peut pas l'écrire tout seul :
-
-- ouvre `apps/mobile/app.config.ts` ;
-- remplace la ligne `const EAS_PROJECT_ID ... = process.env.EAS_PROJECT_ID || undefined;`
-  par `const EAS_PROJECT_ID = 'TON-PROJECT-ID';` ;
-- envoie-moi le projectId (ou commite le changement) pour que je le garde dans le dépôt.
+Le projet existe sur expo.dev (compte `vicecode-team`, projet « Weiss », slug `weiss`) et il est relié au
+dépôt GitHub. Son identifiant est inscrit dans `apps/mobile/app.config.ts` : **ne lance pas `eas init`**.
+Dans expo.dev → Project settings → GitHub, le *Base directory* doit être `apps/mobile`.
 
 ## 4. Déclarer les variables d'environnement EAS (une seule fois)
 

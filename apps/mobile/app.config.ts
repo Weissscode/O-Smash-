@@ -19,10 +19,13 @@ const variant: Variant =
 const BASE_BUNDLE_ID = 'com.vicecode.vicego';
 
 /**
- * Identifiant du projet EAS (public, non secret). À renseigner une seule fois
- * après `npx eas-cli@latest init` — voir docs/vice-go/ios-dev-build.md.
+ * Projet EAS (valeurs publiques, non secrètes) : compte `vicecode-team`,
+ * projet affiché « Weiss » sur expo.dev. Le slug doit être identique à celui
+ * du projet en ligne, sinon EAS refuse de builder.
  */
-const EAS_PROJECT_ID: string | undefined = process.env.EAS_PROJECT_ID || undefined;
+const EAS_PROJECT_ID = 'ddf55865-887b-456c-b05b-1081846d3ebe';
+const EAS_OWNER = 'vicecode-team';
+const EAS_SLUG = 'weiss';
 
 const variantConfig: Record<Variant, { name: string; bundleId: string; scheme: string }> = {
   development: { name: 'Vice Go Dev', bundleId: `${BASE_BUNDLE_ID}.dev`, scheme: 'vicego-dev' },
@@ -35,7 +38,8 @@ const current = variantConfig[variant];
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
   name: current.name,
-  slug: 'vice-go',
+  owner: EAS_OWNER,
+  slug: EAS_SLUG,
   version: '0.1.0',
   orientation: 'portrait',
   icon: './assets/images/icon.png',
@@ -91,6 +95,6 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   },
   extra: {
     appVariant: variant,
-    eas: EAS_PROJECT_ID ? { projectId: EAS_PROJECT_ID } : undefined,
+    eas: { projectId: EAS_PROJECT_ID },
   },
 });

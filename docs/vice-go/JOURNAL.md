@@ -16,6 +16,15 @@ Modèle :
 
 ---
 
+## 2026-10-01 (suite) — Claude Code — branche `claude/ecstatic-hopper-qvexwj`
+- Fait : projet EAS relié dans `apps/mobile/app.config.ts` (owner `vicecode-team`, slug `weiss`,
+  projectId `ddf55865-887b-456c-b05b-1081846d3ebe`) ; guide iPhone mis à jour (plus besoin de `eas init`).
+- Propriétaire : a créé le projet Expo « Weiss » et l'a lié au dépôt GitHub ; installe Expo Go sur l'iPhone.
+- Reste : *Base directory* = `apps/mobile` dans expo.dev (à vérifier) ; premier build iOS via la CLI
+  (`device:create` puis `build --profile development`) ; si le slug en ligne n'est pas `weiss`, EAS le signalera
+  → corriger `EAS_SLUG`.
+- Fichiers sensibles touchés hors `apps/mobile` : aucun (docs seulement).
+
 ## 2026-10-01 — Claude Code — branche `claude/ecstatic-hopper-qvexwj`
 
 - Commits : `f6d4462` … `db35930` (phase 1), puis ce journal + `AGENTS.md` / `CLAUDE.md` racine.
