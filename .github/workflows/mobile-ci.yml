@@ -1,0 +1,45 @@
+name: Vice Go mobile
+
+# Ne concerne QUE l'application mobile : la caisse et le dashboard (racine,
+# déployés par Vercel) ne sont ni construits ni modifiés par ce workflow.
+on:
+  pull_request:
+    paths:
+      - 'apps/mobile/**'
+      - 'src/data/products.js'
+      - '.github/workflows/mobile-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'apps/mobile/**'
+      - '.github/workflows/mobile-ci.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mobile-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/mobile
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: apps/mobile/package-lock.json
+      - run: npm ci
+      - name: TypeScript
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Tests
+        run: npm test -- --ci
+      - name: Bundle iOS (vérifie que Metro compile l'app)
+        run: npx expo export --platform ios --output-dir /tmp/vicego-ios
