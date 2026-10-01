@@ -9,7 +9,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "server": "node server.js",
-    "test:management": "node tests/management.cjs"
+    "test:management": "node tests/management.cjs",
+    "test:environment": "node tests/environment.test.mjs",
+    "test:fiscal-sql": "bash tests/sql/run.sh"
   },
   "dependencies": {
     "@fontsource/anton": "^5.2.7",

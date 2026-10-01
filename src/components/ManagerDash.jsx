@@ -9,12 +9,15 @@ import { supabase } from '../supabaseClient.js';
 import { signOut } from '../utils/auth.js';
 import { Analytics } from './Analytics.jsx';
 import { LoyaltyDash } from './LoyaltyDash.jsx';
+import { FiscalPanel } from './FiscalPanel.jsx';
+import { EnvironmentBanner } from './EnvironmentBanner.jsx';
 
 const REFRESH_MS = 20000;
 
 const MANAGER_TABS = [
   { key: 'management', label: 'Management' },
   { key: 'fidelite', label: 'Fidélité' },
+  { key: 'fiscalite', label: 'Fiscalité' },
   { key: 'scan', label: 'Scan' }
 ];
 
@@ -124,7 +127,7 @@ export function ManagementHeader({ children, className = '' }) {
   </header>;
 }
 
-export function ManagerDash({ restaurantId, restaurantName }) {
+export function ManagerDash({ restaurantId, restaurantName, envInfo }) {
   const [tab, setTab] = React.useState('management');
   const [allOrders, setAllOrders] = React.useState([]);
   const [loaded, setLoaded] = React.useState(false);
@@ -150,7 +153,7 @@ export function ManagerDash({ restaurantId, restaurantName }) {
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
-        table: 'orders',
+        table: envInfo ? envInfo.table : 'orders',
         filter: `restaurant_id=eq.${restaurantId}`
       }, payload => {
         if (payload.eventType === 'DELETE') {
@@ -164,7 +167,7 @@ export function ManagerDash({ restaurantId, restaurantName }) {
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-  }, [restaurantId]);
+  }, [restaurantId, envInfo && envInfo.table]);
 
   const orders = allOrders.filter(o => o.status !== 'en attente');
 
@@ -176,9 +179,12 @@ export function ManagerDash({ restaurantId, restaurantName }) {
       <ManagerInstallButton/>
       <button onClick={() => signOut()}>Déconnexion</button>
     </ManagementHeader>,
+    <EnvironmentBanner envInfo={envInfo}/>,
     /*#__PURE__*/React.createElement(ManagerTabSwitch, { tab, setTab }),
     tab === 'fidelite'
       ? /*#__PURE__*/React.createElement(LoyaltyDash, { restaurantId })
+      : tab === 'fiscalite'
+      ? /*#__PURE__*/React.createElement(FiscalPanel, { restaurantId, onEnvironmentChanged: () => window.location.reload() })
       : !loaded
       ? /*#__PURE__*/React.createElement('div', {
           style: { textAlign: 'center', padding: 60, color: T.txtSub, fontSize: 14 }
@@ -187,17 +193,20 @@ export function ManagerDash({ restaurantId, restaurantName }) {
           onReset={async () => {
             if (window.confirm('Reset toutes les commandes du jour ?')) {
               const today = fd(new Date());
-              await deleteOrdersForDate(restaurantId, today);
+              const r = await deleteOrdersForDate(restaurantId, today);
+              if (r.rejected) { window.alert(r.message); return; }
               setAllOrders(p => p.filter(o => fd(o.date) !== today));
               LS.set('osm7-counter', { date: '', num: 0 });
             }
           }}
           onUpdateOrder={async (id, updates) => {
-            await updateOrder(id, updates);
+            const r = await updateOrder(id, updates);
+            if (r.rejected) { window.alert(r.message); return; }
             setAllOrders(p => p.map(o => o.id === id ? { ...o, ...updates } : o));
           }}
           onDeleteOrder={async id => {
-            await deleteOrder(id);
+            const r = await deleteOrder(id);
+            if (r.rejected) { window.alert(r.message); return; }
             setAllOrders(p => p.filter(o => o.id !== id));
           }}/>
 

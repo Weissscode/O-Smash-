@@ -6,6 +6,8 @@ import { getProfile, signOut } from './utils/auth.js';
 import App from './App.jsx';
 import { ManagerDash } from './components/ManagerDash.jsx';
 import { ScanFidelite } from './components/ScanFidelite.jsx';
+import { configureOrdersEnvironment } from './utils/ordersApi.js';
+import { describeEnvironment } from './utils/environment.js';
 
 export function AuthGate({ mode = 'pos' }) {
   const [session, setSession] = React.useState(undefined);
@@ -32,6 +34,9 @@ export function AuthGate({ mode = 'pos' }) {
         setProfileError(error.message);
         setProfile(null);
       } else {
+        // Environment Router : la table cible (orders / orders_test) est fixee
+        // AVANT le premier rendu, a partir de l'etat lu en base.
+        configureOrdersEnvironment(describeEnvironment(data && data.restaurants).environment);
         setProfile(data);
       }
     });
@@ -104,7 +109,8 @@ export function AuthGate({ mode = 'pos' }) {
     }
     return /*#__PURE__*/React.createElement(ManagerDash, {
       restaurantId: profile.restaurant_id,
-      restaurantName: profile.restaurants ? profile.restaurants.nom : ''
+      restaurantName: profile.restaurants ? profile.restaurants.nom : '',
+      envInfo: describeEnvironment(profile.restaurants)
     });
   }
 
@@ -115,5 +121,9 @@ export function AuthGate({ mode = 'pos' }) {
     });
   }
 
-  return /*#__PURE__*/React.createElement(App, { restaurantId: profile.restaurant_id, profile });
+  return /*#__PURE__*/React.createElement(App, {
+    restaurantId: profile.restaurant_id,
+    profile,
+    envInfo: describeEnvironment(profile.restaurants)
+  });
 }

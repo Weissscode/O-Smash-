@@ -639,8 +639,9 @@ const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY;
 const RESTAURANT_ID = process.env.RESTAURANT_ID;
 
-function rowToPrintOrder(row) {
+function rowToPrintOrder(row, isTest) {
   return {
+    isTest: !!isTest,
     num: row.num,
     date: row.cree_le,
     items: row.items || [],
@@ -655,9 +656,10 @@ function rowToPrintOrder(row) {
 function startRealtimePrinting() {
   var supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY);
 
-  async function handleIncomingOrderRow(row) {
+  async function handleIncomingOrderRow(row, table) {
     if (!row || !row.print_request) return;
-    var order = rowToPrintOrder(row);
+    // Commande de la table TEST : le ticket porte la mention TEST.
+    var order = rowToPrintOrder(row, table === 'orders_test');
     var kind = row.print_request;
     console.log('[REALTIME] Commande #' + order.num + ' -> impression ' + kind);
     var printError = null;
@@ -675,25 +677,28 @@ function startRealtimePrinting() {
       console.error('[REALTIME] Erreur impression #' + order.num + ':', e.message);
     }
     try {
-      await supabaseAdmin.from('orders').update({ print_request: null, print_error: printError }).eq('id', row.id);
+      await supabaseAdmin.from(table).update({ print_request: null, print_error: printError }).eq('id', row.id);
     } catch (e) {
       console.error('[REALTIME] Erreur remise a zero print_request #' + order.num + ':', e.message);
     }
   }
 
-  supabaseAdmin
-    .channel('orders-print')
-    .on('postgres_changes', {
-      event: 'INSERT', schema: 'public', table: 'orders',
-      filter: 'restaurant_id=eq.' + RESTAURANT_ID
-    }, function(payload) { handleIncomingOrderRow(payload.new); })
-    .on('postgres_changes', {
-      event: 'UPDATE', schema: 'public', table: 'orders',
-      filter: 'restaurant_id=eq.' + RESTAURANT_ID
-    }, function(payload) { handleIncomingOrderRow(payload.new); })
-    .subscribe(function(status) {
-      console.log('[REALTIME] Statut abonnement impression : ' + status);
-    });
+  // Production ET table de test (meme restaurant) : une seule logique d'impression.
+  ['orders', 'orders_test'].forEach(function(table) {
+    supabaseAdmin
+      .channel(table + '-print')
+      .on('postgres_changes', {
+        event: 'INSERT', schema: 'public', table: table,
+        filter: 'restaurant_id=eq.' + RESTAURANT_ID
+      }, function(payload) { handleIncomingOrderRow(payload.new, table); })
+      .on('postgres_changes', {
+        event: 'UPDATE', schema: 'public', table: table,
+        filter: 'restaurant_id=eq.' + RESTAURANT_ID
+      }, function(payload) { handleIncomingOrderRow(payload.new, table); })
+      .subscribe(function(status) {
+        console.log('[REALTIME] Statut abonnement impression (' + table + ') : ' + status);
+      });
+  });
 }
 
 app.listen(HTTP_PORT, '0.0.0.0', function() {

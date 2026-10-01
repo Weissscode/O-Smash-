@@ -32,16 +32,21 @@ import { ConfirmModal } from './components/ConfirmModal.jsx';
 import { SplitModal } from './components/SplitModal.jsx';
 import { TelephoneView } from './components/TelephoneView.jsx';
 import { AttachedCustomer } from './components/loyalty/AttachedCustomer.jsx';
+import { EnvironmentBanner } from './components/EnvironmentBanner.jsx';
+import { describeEnvironment } from './utils/environment.js';
 
 // Fonds pastel tres legers, en rotation sur les cartes produits : de quoi les
 // distinguer d'un coup d'oeil sans couleur vive ni logique metier derriere.
 const PRODUCT_TINTS = ['#F8F5EF', '#F2F6FB', '#F6F3FA', '#F4F8F2', '#FBF4F1'];
 
-export default function App({ restaurantId, profile }) {
+export default function App({ restaurantId, profile, envInfo: envInfoProp }) {
+  const envInfo = envInfoProp || describeEnvironment(profile && profile.restaurants);
+  // Cache hors-ligne separe TEST / PRODUCTION : jamais de melange de donnees.
+  const ordersCacheKey = envInfo.isTest ? 'osm7-orders-cache-test' : 'osm7-orders-cache';
   const [view, setView] = React.useState('pos');
   const [selCat, setSelCat] = React.useState('burger');
   const [cart, setCart] = React.useState([]);
-  const [allOrders, setAllOrders] = React.useState(() => LS.get('osm7-orders-cache', []));
+  const [allOrders, setAllOrders] = React.useState(() => LS.get(ordersCacheKey, []));
   const [ordersLoaded, setOrdersLoaded] = React.useState(false);
   const [syncPending, setSyncPending] = React.useState(hasPendingSync());
   const orders = allOrders.filter(o => o.status !== 'en attente');
@@ -53,8 +58,8 @@ export default function App({ restaurantId, profile }) {
     LS.set('osm7-custom-prods', p);
   };
   React.useEffect(() => {
-    LS.set('osm7-orders-cache', allOrders);
-  }, [allOrders]);
+    LS.set(ordersCacheKey, allOrders);
+  }, [allOrders, ordersCacheKey]);
   React.useEffect(() => {
     if (!restaurantId) return;
     fetchOrders(restaurantId, 90).then(setAllOrders).catch(() => {}).finally(() => setOrdersLoaded(true));
@@ -180,7 +185,7 @@ export default function App({ restaurantId, profile }) {
     const isTel = isTelephoneOrder;
     // Les points ne sont attribués qu'à l'encaissement immédiat : une
     // commande téléphone (payée plus tard) n'est pas encore une vente.
-    const attachLoyalty = !isTel && !!loyaltyCustomer;
+    const attachLoyalty = !isTel && !!loyaltyCustomer && !envInfo.isTest;
     const o = {
       id: uid(),
       num,
@@ -205,7 +210,8 @@ export default function App({ restaurantId, profile }) {
         status: 'en attente',
         printRequest: 'cuisine'
       };
-      const { order: savedO, offline } = await insertOrder(restaurantId, phoneO);
+      const { order: savedO, offline, rejected, message } = await insertOrder(restaurantId, phoneO);
+      if (rejected) window.alert('Commande NON enregistrée : ' + message);
       setSyncPending(offline || hasPendingSync());
       setAllOrders(p => [savedO, ...p]);
       setCart([]);
@@ -221,7 +227,8 @@ export default function App({ restaurantId, profile }) {
       setTimeout(() => setPrintSt(null), 3000);
     } else {
       // Commande normale
-      const { order: savedO, offline } = await insertOrder(restaurantId, { ...o, printRequest: 'full' });
+      const { order: savedO, offline, rejected, message } = await insertOrder(restaurantId, { ...o, printRequest: 'full' });
+      if (rejected) window.alert('Commande NON enregistrée : ' + message);
       setSyncPending(offline || hasPendingSync());
       setAllOrders(p => [savedO, ...p]);
       if (attachLoyalty && !offline) {
@@ -757,7 +764,7 @@ export default function App({ restaurantId, profile }) {
       overflow: 'hidden',
       userSelect: 'none'
     }
-  }, view === 'management' && <ManagementHeader className="mg-pos-header"/>, <MobileNavigation view={view} phoneCount={phoneOrders.length} onSelect={id => id === 'management' ? setPinFor(id) : setView(id)}/>, /*#__PURE__*/React.createElement("div", {
+  }, <EnvironmentBanner envInfo={envInfo}/>, view === 'management' && <ManagementHeader className="mg-pos-header"/>, <MobileNavigation view={view} phoneCount={phoneOrders.length} onSelect={id => id === 'management' ? setPinFor(id) : setView(id)}/>, /*#__PURE__*/React.createElement("div", {
     className: 'osm-topbar',
     style: {
       display: 'flex',
@@ -999,8 +1006,9 @@ export default function App({ restaurantId, profile }) {
     onReset: async () => {
       if (window.confirm('Reset toutes les commandes du jour ?')) {
         const today = fd(new Date());
+        const rr = await deleteOrdersForDate(restaurantId, today);
+        if (rr.rejected) { window.alert(rr.message); return; }
         setAllOrders(p => p.filter(o => fd(o.date) !== today));
-        await deleteOrdersForDate(restaurantId, today);
         LS.set('osm7-counter', {
           date: '',
           num: 0
@@ -1009,11 +1017,13 @@ export default function App({ restaurantId, profile }) {
     },
     onUpdateOrder: async (id, updates) => {
       const r = await updateOrder(id, updates);
+      if (r.rejected) { window.alert(r.message); return; }
       setAllOrders(p => p.map(o => o.id === id ? { ...o, ...updates } : o));
       setSyncPending(r.offline || hasPendingSync());
     },
     onDeleteOrder: async id => {
       const r = await deleteOrder(id);
+      if (r.rejected) { window.alert(r.message); return; }
       setAllOrders(p => p.filter(o => o.id !== id));
       setSyncPending(r.offline || hasPendingSync());
     }
@@ -1029,8 +1039,9 @@ export default function App({ restaurantId, profile }) {
       setView('pos');
     },
     onDelete: async id => {
-      setAllOrders(p => p.filter(x => x.id !== id));
       const r = await deleteOrder(id);
+      if (r.rejected) { window.alert(r.message); return; }
+      setAllOrders(p => p.filter(x => x.id !== id));
       setSyncPending(r.offline || hasPendingSync());
     }
   }), pinFor && /*#__PURE__*/React.createElement(PinModal, {

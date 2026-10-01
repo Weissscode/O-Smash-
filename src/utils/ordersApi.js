@@ -1,5 +1,6 @@
 import { supabase } from '../supabaseClient.js';
 import { LS } from './storage.js';
+import { ordersTable, isBackendRejection, backendMessage } from './environment.js';
 
 const QUEUE_KEY = 'osm7-sync-queue';
 
@@ -20,7 +21,8 @@ export function rowToOrder(row) {
     printError: row.print_error,
     customerId: row.customer_id,
     cardId: row.card_id,
-    pointsGagnes: row.points_gagnes
+    pointsGagnes: row.points_gagnes,
+    fiscalLocked: !!row.fiscal_locked_at
   };
 }
 
@@ -43,6 +45,17 @@ function orderToRow(restaurantId, order) {
   };
 }
 
+// Table cible (TEST ou PRODUCTION), fixee par AuthGate des que le profil et
+// l'etat du restaurant sont connus (Environment Router, voir environment.js).
+let currentTable = 'orders';
+export function configureOrdersEnvironment(environment) {
+  currentTable = ordersTable(environment);
+}
+
+function rejection(e) {
+  return { offline: false, rejected: true, message: backendMessage(e) };
+}
+
 function getQueue() {
   return LS.get(QUEUE_KEY, []);
 }
@@ -52,14 +65,14 @@ function setQueue(q) {
 }
 
 function enqueue(mutation) {
-  setQueue([...getQueue(), mutation]);
+  setQueue([...getQueue(), { table: currentTable, ...mutation }]);
 }
 
 export async function fetchOrders(restaurantId, daysBack = 2) {
   const since = new Date();
   since.setDate(since.getDate() - daysBack);
   const { data, error } = await supabase
-    .from('orders')
+    .from(currentTable)
     .select('*')
     .eq('restaurant_id', restaurantId)
     .gte('cree_le', since.toISOString())
@@ -73,10 +86,14 @@ export async function fetchOrders(restaurantId, daysBack = 2) {
 export async function insertOrder(restaurantId, order) {
   const row = orderToRow(restaurantId, order);
   try {
-    const { data, error } = await supabase.from('orders').insert(row).select().single();
+    const { data, error } = await supabase.from(currentTable).insert(row).select().single();
     if (error) throw error;
     return { order: rowToOrder(data), offline: false };
   } catch (e) {
+    // Refus du backend (RLS, regle fiscale) : inutile de rejouer, on le signale.
+    if (isBackendRejection(e)) {
+      return { order: { ...order, id: 'local_' + order.id }, offline: true, rejected: true, message: backendMessage(e) };
+    }
     const localId = 'local_' + order.id;
     enqueue({ type: 'insert', localId, row });
     return { order: { ...order, id: localId }, offline: true };
@@ -106,10 +123,11 @@ export async function updateOrder(id, updates) {
     return { offline: true };
   }
   try {
-    const { error } = await supabase.from('orders').update(row).eq('id', id);
+    const { error } = await supabase.from(currentTable).update(row).eq('id', id);
     if (error) throw error;
     return { offline: false };
   } catch (e) {
+    if (isBackendRejection(e)) return rejection(e);
     enqueue({ type: 'update', id, row });
     return { offline: true };
   }
@@ -121,10 +139,11 @@ export async function deleteOrder(id) {
     return { offline: true };
   }
   try {
-    const { error } = await supabase.from('orders').delete().eq('id', id);
+    const { error } = await supabase.from(currentTable).delete().eq('id', id);
     if (error) throw error;
     return { offline: false };
   } catch (e) {
+    if (isBackendRejection(e)) return rejection(e);
     enqueue({ type: 'delete', id });
     return { offline: true };
   }
@@ -133,7 +152,7 @@ export async function deleteOrder(id) {
 export async function deleteOrdersForDate(restaurantId, dateStr) {
   try {
     const { data, error } = await supabase
-      .from('orders')
+      .from(currentTable)
       .select('id, cree_le')
       .eq('restaurant_id', restaurantId);
     if (error) throw error;
@@ -141,10 +160,13 @@ export async function deleteOrdersForDate(restaurantId, dateStr) {
       .filter(r => new Date(r.cree_le).toLocaleDateString('fr-FR') === dateStr)
       .map(r => r.id);
     if (ids.length) {
-      await supabase.from('orders').delete().in('id', ids);
+      // Profil fiscal FR : le backend refuse la suppression de ventes verrouillees.
+      const { error: delError } = await supabase.from(currentTable).delete().in('id', ids);
+      if (delError) throw delError;
     }
     return { offline: false };
   } catch (e) {
+    if (isBackendRejection(e)) return rejection(e);
     return { offline: true };
   }
 }
@@ -156,13 +178,19 @@ export async function flushQueue() {
   const remaining = [];
   for (const m of queue) {
     try {
+      // Les mutations en file gardent la table visee au moment de la saisie
+      // (anciennes entrees sans table = production).
+      const table = m.table || 'orders';
+      let res = null;
       if (m.type === 'insert') {
-        await supabase.from('orders').insert(m.row);
+        res = await supabase.from(table).insert(m.row);
       } else if (m.type === 'update') {
-        await supabase.from('orders').update(m.row).eq('id', m.id);
+        res = await supabase.from(table).update(m.row).eq('id', m.id);
       } else if (m.type === 'delete') {
-        await supabase.from('orders').delete().eq('id', m.id);
+        res = await supabase.from(table).delete().eq('id', m.id);
       }
+      // Refus du backend : on ne rejoue pas indefiniment. Erreur reseau : on garde.
+      if (res && res.error && !isBackendRejection(res.error)) throw res.error;
       // update-local / delete-local on an order that never made it online
       // are dropped silently once the matching insert has synced elsewhere.
     } catch (e) {
