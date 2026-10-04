@@ -16,6 +16,19 @@ Modèle :
 
 ---
 
+## 2026-10-04 — Claude Code — branche `claude/ecstatic-hopper-qvexwj`
+- Fait : l'app tourne sur l'iPhone du propriétaire via **Expo Go** (`npx expo start --go`, connexion par
+  access token PERSONNEL `EXPO_TOKEN` — compte créé via GitHub, pas de mot de passe ; un token robot échoue
+  car Expo Go est connecté en `vicecode`). Ajout d'une requête d'inventaire unique (lecture seule) dans
+  `docs/vice-go/staging-supabase.md` §1.d.
+- Décision propriétaire : rester sur Expo Go au quotidien ; build *preview* seulement aux jalons.
+- Vu : `feature/fiscal-engine` ajoute sur `restaurants` les colonnes `environment`, `fiscal_profile`,
+  `fiscal_activated_at`, `fiscal_default_vat_rate` + table `orders_test` et ledger fiscal. **Vice Go ne doit pas
+  réutiliser ces noms** ; les commandes Vice Go (phase 5) devront s'intégrer au ledger fiscal si ce chantier est
+  fusionné. Le staging Supabase servira aux deux chantiers.
+- En attente du propriétaire : résultat de la requête §1.d (prod, lecture seule) + création du projet staging.
+- Fichiers sensibles touchés hors `apps/mobile` : aucun (docs seulement).
+
 ## 2026-10-01 (suite) — Claude Code — branche `claude/ecstatic-hopper-qvexwj`
 - Fait : projet EAS relié dans `apps/mobile/app.config.ts` (owner `vicecode-team`, slug `weiss`,
   projectId `ddf55865-887b-456c-b05b-1081846d3ebe`) ; guide iPhone mis à jour (plus besoin de `eas init`).

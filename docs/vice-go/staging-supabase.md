@@ -80,6 +80,42 @@ select relname as table_name, n_live_tup as approx_rows
 from pg_stat_user_tables where schemaname = 'public' order by relname;
 ```
 
+### 1.d — Le plus simple : tout l'inventaire en UNE requête (SELECT uniquement)
+
+Colle ceci dans Supabase → SQL Editor (projet de production), clique **Run**, puis clique sur la cellule
+`inventaire` du résultat → **Copy** et colle le texte à l'IA. Aucune donnée client n'est lue : uniquement la
+structure, les règles et le nombre approximatif de lignes par table.
+
+```sql
+select json_build_object(
+  'migrations', (select json_object_agg(m, ok) from (values
+    ('schema_base',            to_regclass('public.orders') is not null and to_regclass('public.profiles') is not null),
+    ('002_orders_num',         exists (select 1 from information_schema.columns where table_schema='public' and table_name='orders' and column_name='split_of')),
+    ('003_product_stock',      to_regclass('public.product_stock') is not null),
+    ('004_print_request',      exists (select 1 from information_schema.columns where table_schema='public' and table_name='orders' and column_name='print_request')),
+    ('004_realtime_orders',    exists (select 1 from pg_publication_tables where pubname='supabase_realtime' and tablename='orders')),
+    ('005_fidelite',           to_regclass('public.loyalty_transactions') is not null),
+    ('005_print_error',        exists (select 1 from information_schema.columns where table_schema='public' and table_name='orders' and column_name='print_error')),
+    ('006_slug_consentements', exists (select 1 from information_schema.columns where table_schema='public' and table_name='customers' and column_name='consentement_cgu')),
+    ('006_order_counter',      to_regprocedure('public.next_order_num(uuid)') is not null),
+    ('007_staff_permissions',  to_regprocedure('public.is_current_user_gerant()') is not null),
+    ('008_fiscal_engine',      exists (select 1 from information_schema.columns where table_schema='public' and table_name='restaurants' and column_name='fiscal_profile'))
+  ) as t(m, ok)),
+  'colonnes', (select json_object_agg(table_name, cols) from (
+    select table_name, json_agg(column_name || ' ' || data_type || case when is_nullable = 'NO' then ' not null' else '' end order by ordinal_position) as cols
+    from information_schema.columns where table_schema = 'public' group by table_name) c),
+  'rls_active', (select json_object_agg(c.relname, c.relrowsecurity)
+    from pg_class c join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'public' and c.relkind = 'r'),
+  'policies', (select json_agg(json_build_object('table', tablename, 'nom', policyname, 'cmd', cmd, 'using', qual, 'check', with_check))
+    from pg_policies where schemaname = 'public'),
+  'fonctions', (select json_agg(p.proname || '(' || pg_get_function_identity_arguments(p.oid) || ')' || case when p.prosecdef then ' SECURITY DEFINER' else '' end)
+    from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'public'),
+  'realtime', (select json_agg(tablename) from pg_publication_tables where pubname = 'supabase_realtime'),
+  'lignes_approx', (select json_object_agg(relname, n_live_tup) from pg_stat_user_tables where schemaname = 'public'),
+  'historique_cli', to_regclass('supabase_migrations.schema_migrations') is not null
+) as inventaire;
+```
+
 ---
 
 ## Étape 2 — Vérifier quelles migrations sont réellement appliquées **[PROD — LECTURE SEULE]**
