@@ -63,6 +63,26 @@ export async function createCustomerWithCard(restaurantId, { prenom, telephone }
   return { customer, card, code };
 }
 
+// Demande au serveur de prevenir les iPhone du client (Apple Wallet) que sa
+// carte a change. Volontairement non bloquant : une vente ne doit jamais
+// dependre d'une notification. Echec -> trace console, la carte se mettra
+// quand meme a jour a la prochaine ouverture du Wallet.
+export async function notifyWalletUpdate(customerId) {
+  try {
+    const { data } = await supabase.auth.getSession();
+    const token = data.session && data.session.access_token;
+    if (!token) return;
+    const response = await fetch('/api/wallet-notify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ customerId })
+    });
+    if (!response.ok) console.warn('Mise à jour Wallet non envoyée', response.status);
+  } catch (error) {
+    console.warn('Mise à jour Wallet non envoyée', error);
+  }
+}
+
 const POINTS_PAR_EURO = 1;
 
 // Enregistre les points gagnes pour une commande : ecrit la ligne de
@@ -105,6 +125,7 @@ export async function recordOrderPoints(restaurantId, { orderId, customerId, car
     .eq('id', customerId);
   if (custError) throw custError;
 
+  notifyWalletUpdate(customerId);
   return { points, newBalance };
 }
 
@@ -228,6 +249,7 @@ export async function redeemReward(restaurantId, { customerId, cardId, reward, s
   });
   if (rewardError) throw rewardError;
 
+  notifyWalletUpdate(customerId);
   return { newBalance };
 }
 

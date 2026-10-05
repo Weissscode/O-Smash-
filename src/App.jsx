@@ -233,7 +233,11 @@ export default function App({ restaurantId, profile }) {
           cardId: loyaltyCustomer.cardId,
           total: cartTotal,
           staffId: profile ? profile.id : null
-        }).catch(() => {});
+        }).catch(error => {
+          // La vente est deja encaissee : on ne la bloque pas, mais l'echec
+          // ne doit plus etre silencieux (points non crédités = à corriger).
+          console.error('Points fidélité NON enregistrés pour la commande', savedO.id, error);
+        });
       }
       setLoyaltyCustomer(null);
       setCart([]);
