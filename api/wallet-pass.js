@@ -13,16 +13,17 @@
 //   WALLET_WWDR_PEM                    - certificat intermediaire Apple, en base64
 //   WALLET_SIGNER_CERT_PEM             - certificat Pass Type ID, en base64
 //   WALLET_SIGNER_KEY_PEM              - cle privee correspondante, en base64
+//
+// Optionnelles (mise a jour automatique de la carte, voir
+// docs/wallet-auto-update.md ; migration 009 a appliquer d'abord) :
+//   WALLET_AUTH_SECRET                 - secret servant a deriver le jeton de chaque carte
+//   WALLET_WEB_SERVICE_URL             - ex. https://o-smash.vercel.app/api/wallet
+//
+// Sans WALLET_AUTH_SECRET, la carte est generee comme avant : statique.
 
 const { createClient } = require('@supabase/supabase-js');
-const { PKPass } = require('passkit-generator');
-const path = require('path');
-
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY;
-const WALLET_WWDR_PEM = process.env.WALLET_WWDR_PEM;
-const WALLET_SIGNER_CERT_PEM = process.env.WALLET_SIGNER_CERT_PEM;
-const WALLET_SIGNER_KEY_PEM = process.env.WALLET_SIGNER_KEY_PEM;
+const { createWalletStore } = require('./_lib/walletStore');
+const { buildPassBuffer, walletCerts, webServiceFor } = require('./_lib/walletPass');
 
 module.exports = async function handler(req, res) {
   const code = (req.query.code || '').toString().trim();
@@ -31,44 +32,31 @@ module.exports = async function handler(req, res) {
     return;
   }
 
-  if (!SUPABASE_URL || !SUPABASE_SECRET_KEY || !WALLET_WWDR_PEM || !WALLET_SIGNER_CERT_PEM || !WALLET_SIGNER_KEY_PEM) {
+  const { SUPABASE_URL, SUPABASE_SECRET_KEY } = process.env;
+  const certs = walletCerts();
+  if (!SUPABASE_URL || !SUPABASE_SECRET_KEY || !certs) {
     res.status(500).send("Configuration Wallet incomplète côté serveur (variables d'environnement manquantes).");
     return;
   }
 
-  const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY);
-  const { data: card, error } = await supabaseAdmin
-    .from('loyalty_cards')
-    .select('uid_nfc, statut, customers(prenom, points_balance)')
-    .eq('uid_nfc', code)
-    .maybeSingle();
-
-  if (error || !card || card.statut !== 'active' || !card.customers) {
-    res.status(404).send('Carte introuvable ou inactive.');
-    return;
-  }
-
   try {
-    const pass = await PKPass.from(
-      {
-        model: path.join(__dirname, '_pass-model', 'osmash-loyalty.pass'),
-        certificates: {
-          wwdr: Buffer.from(WALLET_WWDR_PEM, 'base64'),
-          signerCert: Buffer.from(WALLET_SIGNER_CERT_PEM, 'base64'),
-          signerKey: Buffer.from(WALLET_SIGNER_KEY_PEM, 'base64')
-        }
-      },
-      {
-        serialNumber: card.uid_nfc,
-        description: `Carte de fidélité O'Smash - ${card.customers.prenom}`
-      }
-    );
+    const store = createWalletStore(createClient(SUPABASE_URL, SUPABASE_SECRET_KEY));
+    const card = await store.getCardBySerial(code);
 
-    pass.primaryFields.push({ key: 'points', label: 'POINTS', value: card.customers.points_balance });
-    pass.secondaryFields.push({ key: 'prenom', label: 'CLIENT', value: card.customers.prenom });
-    pass.setBarcodes({ message: card.uid_nfc, format: 'PKBarcodeFormatQR', messageEncoding: 'iso-8859-1' });
+    if (!card || card.status !== 'active') {
+      res.status(404).send('Carte introuvable ou inactive.');
+      return;
+    }
 
-    const buffer = pass.getAsBuffer();
+    const rewards = await store.getActiveRewards(card.restaurantId);
+    const buffer = await buildPassBuffer({
+      serial: card.serial,
+      customer: card.customer,
+      rewards,
+      certs,
+      webService: webServiceFor(card.serial, { host: req.headers.host })
+    });
+
     res.setHeader('Content-Type', 'application/vnd.apple.pkpass');
     res.setHeader('Content-Disposition', 'attachment; filename="osmash-fidelite.pkpass"');
     res.status(200).send(buffer);
